@@ -785,7 +785,7 @@ function initTimelineInteraction(timeline) {
                     
                     if (isLeftEdge) {
                         // Left edge: Calculate new start time based on new left position
-                        startMinutes = positionToMinutes(parseFloat(target.style.left) + (event.rect.left - event.rect.right) / timelineRect.width * 100);
+                        startMinutes = positionToMinutes(parseFloat(target.style.left));
                         endMinutes = timeToMinutes(target.dataset.end);
                     } else {
                         // Right edge: Keep start time, calculate new end time
