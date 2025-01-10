@@ -1,9 +1,11 @@
 import { TimelineMarker } from './timeline_marker.js';
 import { Timeline } from './timeline.js';
 import { TimelineContainer } from './timeline_container.js';
-import { getCurrentTimelineData, getCurrentTimelineKey, createTimelineDataFrame } from './utils.js';
 import { updateIsMobile, getIsMobile } from './globals.js';
 import { 
+    getCurrentTimelineData,
+    getCurrentTimelineKey, 
+    createTimelineDataFrame,
     formatTimeDDMMYYYYHHMM,
     formatTimeHHMM,
     timeToMinutes,
@@ -17,7 +19,8 @@ import {
     isOverlapping,
     generateUniqueId,
     createTimeLabel,
-    updateTimeLabel
+    updateTimeLabel,
+    calculateTimeDifference
 } from './utils.js';
 
 let selectedActivity = null;
@@ -277,7 +280,7 @@ function hideDebugOverlay() {
 
 function logDebugInfo() {
     if (DEBUG_MODE) {
-        console.log('timelineData:', timelineData);
+        console.log('Timeline data:', window.timelineManager.activities);
     }
 }
 
@@ -2437,6 +2440,12 @@ async function init() {
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
         await addNextTimeline();
+        
+        // Create floating add button for mobile
+        createFloatingAddButton();
+        
+        // Scroll to first timeline
+        scrollToActiveTimeline();
         
         // Set initial data-mode on activities container
         const activitiesContainerElement = document.querySelector("#activitiesContainer");
