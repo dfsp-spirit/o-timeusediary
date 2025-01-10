@@ -781,9 +781,18 @@ function initTimelineInteraction(timeline) {
                     newSize = intervals * tenMinutesWidth;
                     newSize = Math.max(tenMinutesWidth, Math.min(newSize, 100));
                     
-                    startTime = target.dataset.start;
-                    startMinutes = timeToMinutes(startTime);
-                    endMinutes = positionToMinutes(parseFloat(target.style.left) + newSize);
+                    // Check if dragging left edge
+                    const isLeftEdge = event.edges.left;
+                    if (isLeftEdge) {
+                        // When dragging left edge, update start time based on new left position
+                        startMinutes = positionToMinutes(parseFloat(target.style.left));
+                        endMinutes = timeToMinutes(target.dataset.end);
+                    } else {
+                        // When dragging right edge, keep start time and update end
+                        startTime = target.dataset.start;
+                        startMinutes = timeToMinutes(startTime);
+                        endMinutes = positionToMinutes(parseFloat(target.style.left) + newSize);
+                    }
                 }
                 
                 if (!canPlaceActivity(startMinutes, endMinutes, target.dataset.id)) {
