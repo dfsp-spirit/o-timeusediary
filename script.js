@@ -761,6 +761,8 @@ function initTimelineInteraction(timeline) {
                 let newSize, startTime, startMinutes, endMinutes, newWidth;
                 const isMobile = getIsMobile();
                 
+                const isLeftEdge = event.edges.left;
+                
                 if (isMobile) {
                     // Mobile: Calculate height in percentage
                     let newHeight = (event.rect.height / timelineRect.height) * 100;
@@ -781,9 +783,15 @@ function initTimelineInteraction(timeline) {
                     newSize = intervals * tenMinutesWidth;
                     newSize = Math.max(tenMinutesWidth, Math.min(newSize, 100));
                     
-                    startTime = target.dataset.start;
-                    startMinutes = timeToMinutes(startTime);
-                    endMinutes = positionToMinutes(parseFloat(target.style.left) + newSize);
+                    if (isLeftEdge) {
+                        // Left edge: Calculate new start time from left position
+                        startMinutes = positionToMinutes(parseFloat(target.style.left));
+                        endMinutes = timeToMinutes(target.dataset.end);
+                    } else {
+                        // Right edge: Keep start time, calculate new end time
+                        startMinutes = timeToMinutes(target.dataset.start);
+                        endMinutes = positionToMinutes(parseFloat(target.style.left) + newSize);
+                    }
                 }
                 
                 if (!canPlaceActivity(startMinutes, endMinutes, target.dataset.id)) {
