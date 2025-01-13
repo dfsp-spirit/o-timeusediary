@@ -25,6 +25,7 @@ import {
     createTimeLabel,
     updateTimeLabel
 } from './utils.js';
+
 import { updateIsMobile, getIsMobile } from './globals.js';
 let selectedActivity = null;
 
