@@ -349,16 +349,18 @@ export function positionToMinutes(positionPercent) {
     const TIMELINE_START_HOUR = 4;
     const TIMELINE_HOURS = 24;
     const MINUTES_PER_DAY = 24 * 60;
+    const MAX_PERCENT = 116.7; // 28 hours total (4AM to 8AM next day)
     
-    if (positionPercent >= 100) {
+    if (positionPercent > MAX_PERCENT) {
         return null;
     }
     
+    // Convert position to minutes, allowing values > 100%
     const minutesSinceStart = (positionPercent / 100) * TIMELINE_HOURS * 60;
     let totalMinutes = minutesSinceStart + (TIMELINE_START_HOUR * 60);
-    totalMinutes = Math.round(totalMinutes) % MINUTES_PER_DAY;
     
-    return totalMinutes;
+    // Don't modulo - allow minutes to exceed 1440 for next day
+    return Math.round(totalMinutes);
 }
 
 export function calculateMinimumBlockWidth() {
