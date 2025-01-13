@@ -1,5 +1,5 @@
+import { getIsMobile } from './globals.js';
 import { 
-    getIsMobile,
     positionToMinutes,
     minutesToPercentage,
     formatTimeHHMM,
