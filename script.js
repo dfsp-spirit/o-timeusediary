@@ -745,7 +745,7 @@ function initTimelineInteraction(timeline) {
                         }
                         
                         // Special case for 04:00
-                        if (startMinutes >= 240) {
+                        if (startMinutes <= 245) {
                             startMinutes = 240;
                         }
                         
