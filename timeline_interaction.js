@@ -131,6 +131,20 @@ function updateActivityBlock(target, startMinutes, endMinutes) {
     if (!canPlaceActivity(startMinutes, endMinutes, target.dataset.id)) {
         target.classList.add('invalid');
         setTimeout(() => target.classList.remove('invalid'), 400);
+        
+        // Revert to original position
+        const originalStart = parseInt(target.dataset.startRaw);
+        const originalEnd = parseInt(target.dataset.endRaw);
+        const startPercent = minutesToPercentage(originalStart);
+        const endPercent = minutesToPercentage(originalEnd);
+        
+        if (getIsMobile()) {
+            target.style.top = `${startPercent}%`;
+            target.style.height = `${endPercent - startPercent}%`;
+        } else {
+            target.style.left = `${startPercent}%`;
+            target.style.width = `${endPercent - startPercent}%`;
+        }
         return;
     }
 
