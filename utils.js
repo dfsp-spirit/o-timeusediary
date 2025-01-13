@@ -1,5 +1,6 @@
 import { DEBUG_MODE } from './constants.js';
 import { getIsMobile, updateIsMobile } from './globals.js';
+import { addNextTimeline } from './script.js';
 
 const MINUTES_PER_DAY = 24 * 60;
 

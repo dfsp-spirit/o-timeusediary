@@ -63,7 +63,7 @@ if(urlParams.toString()) {
 }
 
 // Function to add next timeline
-async function addNextTimeline() {
+export async function addNextTimeline() {
     if (DEBUG_MODE) {
         console.log(`Current timeline data saved:`, window.timelineManager.activities);
     }
