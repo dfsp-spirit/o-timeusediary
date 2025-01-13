@@ -753,7 +753,6 @@ function setupDebugClickHandler(timeline) {
 
         if (!selectedActivity || e.target.closest('.activity-block')) return;
         
-        const currentKey = getCurrentTimelineKey();
         // Check if timeline is full before proceeding
         if (isTimelineFull()) {
             const block = document.createElement('div');
