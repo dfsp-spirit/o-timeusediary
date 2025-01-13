@@ -39,7 +39,7 @@ const TIMELINE_START_HOUR = 4;
 const TIMELINE_HOURS = 24;
 
 const DEBUG_MODE = true; // Enable debug mode
-
+const CLICK_DELAY = 300; // Minimum delay between clicks in milliseconds
 
 let selectedActivity = null;
 
