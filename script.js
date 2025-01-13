@@ -761,9 +761,9 @@ function setupDebugClickHandler(timeline) {
             return;
         }
         
-        // Get current timeline key and ensure we're working with current timeline data
-        const currentKey = getCurrentTimelineKey();
-        window.timelineManager.activities[currentKey] = getCurrentTimelineData();
+        // Ensure we're working with current timeline data
+        const timelineKey = getCurrentTimelineKey();
+        window.timelineManager.activities[timelineKey] = getCurrentTimelineData();
 
         const rect = targetTimeline.getBoundingClientRect();
         const isMobile = getIsMobile();
