@@ -93,11 +93,129 @@ function updateTimeLabel(label, startTime, endTime) {
     }
 }
 
+// Function to create floating add button
+export function createFloatingAddButton() {
+    const button = document.createElement('button');
+    button.className = 'floating-add-button';
+    button.innerHTML = '+';
+    button.title = 'Add Activity';
+    
+    const modal = createModal();
+    
+    button.addEventListener('click', () => {
+        // Show modal with activities
+        modal.style.display = 'block';
+        
+        // Get the current activities and render them in the modal
+        const currentKey = getCurrentTimelineKey();
+        const categories = window.timelineManager.metadata[currentKey].categories;
+        
+        // Render activities in modal
+        renderActivities(categories, document.getElementById('modalActivitiesContainer'));
+        
+        // Automatically open first category in mobile view
+        if (getIsMobile()) {
+            const firstCategory = modal.querySelector('.activity-category');
+            if (firstCategory) {
+                firstCategory.classList.add('active');
+            }
+        }
+    });
+
+    document.body.appendChild(button);
+}
+
+// Function to create modal
+export function createModal() {
+    // Create custom activity input modal
+    const customActivityModal = document.createElement('div');
+    customActivityModal.className = 'modal-overlay';
+    customActivityModal.id = 'customActivityModal';
+    customActivityModal.innerHTML = `
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Enter Custom Activity</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-content">
+                <input type="text" id="customActivityInput" maxlength="30" placeholder="Enter your activity (max 30 chars)">
+                <div class="button-container">
+                    <button id="confirmCustomActivity" class="btn save-btn">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    customActivityModal.querySelector('.modal-close').addEventListener('click', () => {
+        customActivityModal.style.display = 'none';
+    });
+
+    customActivityModal.addEventListener('click', (e) => {
+        if (e.target === customActivityModal) {
+            customActivityModal.style.display = 'none';
+        }
+    });
+
+    // Create activities modal
+    const activitiesModal = document.createElement('div');
+    activitiesModal.className = 'modal-overlay';
+    activitiesModal.id = 'activitiesModal';
+    activitiesModal.innerHTML = `
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Activity</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="modalActivitiesContainer"></div>
+        </div>
+    `;
+
+    activitiesModal.querySelector('.modal-close').addEventListener('click', () => {
+        activitiesModal.style.display = 'none';
+    });
+
+    activitiesModal.addEventListener('click', (e) => {
+        if (e.target === activitiesModal) {
+            activitiesModal.style.display = 'none';
+        }
+    });
+
+    // Create confirmation modal
+    const confirmationModal = document.createElement('div');
+    confirmationModal.className = 'modal-overlay';
+    confirmationModal.id = 'confirmationModal';
+    confirmationModal.innerHTML = `
+        <div class="modal">
+            <div class="modal-content">
+                <h3>Are you sure?</h3>
+                <p>You will not be able to change your responses.</p>
+                <div class="button-container">
+                    <button id="confirmCancel" class="btn btn-secondary">Cancel</button>
+                    <button id="confirmOk" class="btn save-btn">OK</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    confirmationModal.querySelector('#confirmCancel').addEventListener('click', () => {
+        confirmationModal.style.display = 'none';
+    });
+
+    confirmationModal.querySelector('#confirmOk').addEventListener('click', () => {
+        confirmationModal.style.display = 'none';
+        sendData();
+        document.getElementById('nextBtn').disabled = true;
+    });
+
+    document.body.appendChild(activitiesModal);
+    document.body.appendChild(confirmationModal);
+    document.body.appendChild(customActivityModal);
+    return activitiesModal;
+}
+
 export {
     createTimeLabel,
-    updateTimeLabel,
-    createFloatingAddButton,
-    createModal
+    updateTimeLabel
 };
 
 export function generateUniqueId() {
