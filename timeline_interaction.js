@@ -137,9 +137,9 @@ function updateActivityBlock(target, startMinutes, endMinutes) {
     target.dataset.endRaw = endMinutes;      // e.g. 1680 for 04:00 next day
     target.dataset.length = endMinutes - startMinutes; // could be 1440 in that example
 
-    // 3. Format times for display (see #2 or #3 below for the function)
-    const displayedStart = formatTimeHHMMExtended(startMinutes);
-    const displayedEnd   = formatTimeHHMMExtended(endMinutes);
+    // 3. Format times for display
+    const displayedStart = formatTimeHHMM(startMinutes);
+    const displayedEnd = formatTimeHHMM(endMinutes);
 
     // 4. Store those display strings in data-start / data-end if you want
     target.dataset.start = displayedStart; // or just skip storing if you prefer
