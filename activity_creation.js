@@ -49,9 +49,13 @@ export function initBlockCreationByDrag(timeline) {
 
   if (DEBUG_MODE) console.log('Adding mousedown listener to timeline:', timeline);
 
+  if (DEBUG_MODE) console.log('Adding mousedown listener to timeline element:', timeline.id || 'unnamed timeline');
+  
   timeline.addEventListener('mousedown', (e) => {
     if (DEBUG_MODE) {
       console.log('Mouse down event detected:', {
+        e: e,
+        timelineId: timeline.id,
         selectedActivity: window.selectedActivity,
         targetIsBlock: !!e.target.closest('.activity-block'),
         target: e.target,

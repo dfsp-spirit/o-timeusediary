@@ -23,6 +23,9 @@ export function initTimelineInteraction(timeline) {
     }
     const targetTimeline = timeline;
     
+    // Initialize drag creation
+    initBlockCreationByDrag(targetTimeline);
+    
     // Initialize interact.js resizable
     interact('.activity-block').resizable({
         edges: { left: !getIsMobile(), right: !getIsMobile(), bottom: getIsMobile() },
