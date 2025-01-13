@@ -1106,7 +1106,7 @@ function createActivityBlock(targetTimeline, startMinutes, endMinutes) {
     const startPositionPercent = minutesToPercentage(startMinutes);
     const blockSizePercent = (INCREMENT_MINUTES / MINUTES_PER_DAY) * 100; // 10 minutes
 
-    if (isMobile) {
+    if (getIsMobile()) {
         activityBlock.style.height = `${blockSizePercent}%`;
         activityBlock.style.top = `${startPositionPercent}%`;
         activityBlock.style.width = '75%';
