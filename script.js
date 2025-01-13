@@ -1167,38 +1167,6 @@ function deselectAllActivityButtons() {
     selectedActivity = null;
 }
 
-/**
- * Reverts the activity block to its original state in case of validation failure.
- * @param {HTMLElement} target - The activity block to revert.
- */
-function revertResize(target) {
-    target.dataset.start = target.dataset.originalStart;
-    target.dataset.end = target.dataset.originalEnd;
-    target.dataset.length = target.dataset.originalLength;
-    target.style.left = `${minutesToPercentage(timeToMinutes(target.dataset.originalStart))}%`;
-    target.style.width = `${minutesToPercentage(timeToMinutes(target.dataset.originalEnd) - timeToMinutes(target.dataset.originalStart))}%`;
-
-    // Update time label
-    const timeLabel = target.querySelector('.time-label');
-    if (timeLabel) {
-        updateTimeLabel(timeLabel, target.dataset.originalStart, target.dataset.originalEnd, target);
-    }
-
-    // Provide user feedback
-    provideUserFeedback(target, 'Resize reverted due to validation failure.');
-}
-
-/**
- * Provides user feedback by adding a temporary visual indicator.
- * @param {HTMLElement} target - The activity block to highlight.
- * @param {string} message - The feedback message.
- */
-function provideUserFeedback(target, message) {
-    target.classList.add('invalid');
-    // Optionally, display a tooltip or message to the user
-    alert(message); // Simple alert for demonstration; consider using a custom tooltip in production
-    setTimeout(() => target.classList.remove('invalid'), 400);
-}
 
 
 async function init() {
