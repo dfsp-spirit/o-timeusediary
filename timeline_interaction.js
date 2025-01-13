@@ -9,7 +9,8 @@ import {
     getCurrentTimelineKey,
     updateTimeLabel,
     getTextDivClass,
-    formatTimeDDMMYYYYHHMM
+    formatTimeDDMMYYYYHHMM,
+    formatTimeHHMMWithDayOffset 
 } from './utils.js';
 
 const INCREMENT_MINUTES = 10;
@@ -156,24 +157,28 @@ function updateActivityBlock(target, startMinutes, endMinutes) {
 }
 
 function updateActivityData(target) {
-    const activityId = target.dataset.id;
     const currentData = getCurrentTimelineData();
-    const activityIndex = currentData.findIndex(activity => activity.id === activityId);
-    
-    if (activityIndex !== -1) {
-        const startMinutes = timeToMinutes(target.dataset.start);
-        const endMinutes = timeToMinutes(target.dataset.end);
-        const times = formatTimeDDMMYYYYHHMM(formatTimeHHMM(startMinutes), formatTimeHHMM(endMinutes));
-        
-        if (!times.startTime || !times.endTime) {
-            throw new Error('Activity start time and end time must be defined');
-        }
-        
-        currentData[activityIndex].startTime = times.startTime;
-        currentData[activityIndex].endTime = times.endTime;
-        currentData[activityIndex].blockLength = parseInt(target.dataset.length);
-        
-        validateTimelineAfterUpdate(target, currentData[activityIndex]);
+    const activityId  = target.dataset.id;
+    const index       = currentData.findIndex(a => a.id === activityId);
+
+    if (index !== -1) {
+        // Read RAW numeric minutes, not the display
+        const startMinutes = parseInt(target.dataset.startRaw, 10);
+        const endMinutes   = parseInt(target.dataset.endRaw, 10);
+
+        // Now, if you want a “YYYY-MM-DD HH:MM” format or something:
+        // you can do:
+        // const times = formatTimeDDMMYYYYHHMM(
+        //    formatTimeHHMM(startMinutes),
+        //    formatTimeHHMM(endMinutes)
+        // );
+
+        // Or store them directly in your data:
+        currentData[index].startTime    = startMinutes;
+        currentData[index].endTime      = endMinutes;
+        currentData[index].blockLength  = (endMinutes - startMinutes);
+
+        validateTimelineAfterUpdate(target, currentData[index]);
     }
 }
 
