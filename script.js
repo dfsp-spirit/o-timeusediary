@@ -401,6 +401,17 @@ function renderActivities(categories, container = document.getElementById('activ
                                 }
                                 customActivityModal.style.display = 'none';
                                 document.getElementById('activitiesModal').style.display = 'none';
+                                
+                                // Set window.selectedActivity
+                                window.selectedActivity = {
+                                    name: customText,
+                                    color: activity.color,
+                                    category: category.name
+                                };
+                                
+                                if (DEBUG_MODE) {
+                                    console.log('Selected custom activity:', window.selectedActivity);
+                                }
                             }
                         };
 
@@ -443,13 +454,16 @@ function renderActivities(categories, container = document.getElementById('activ
                         }
                     } else {
                         // Single choice mode
-                        categoryButtons.forEach(b => b.classList.remove('selected'));
-                        selectedActivity = {
+                        activityButton.classList.add('selected');
+                        window.selectedActivity = {
                             name: activity.name,
                             color: activity.color,
                             category: category.name
                         };
-                        activityButton.classList.add('selected');
+                        
+                        if (DEBUG_MODE) {
+                            console.log('Selected activity:', window.selectedActivity);
+                        }
                     }
                     // Only close modal in single-choice mode
                     if (!isMultipleChoice) {
@@ -505,9 +519,23 @@ function renderActivities(categories, container = document.getElementById('activ
                 textSpan.textContent = activity.name;
                 activityButton.appendChild(textSpan);
                 activityButton.addEventListener('click', () => {
+                    // First, log the click for debugging
+                    if (DEBUG_MODE) {
+                        console.log('Activity button clicked:', {
+                            name: activity.name,
+                            color: activity.color,
+                            category: category.name
+                        });
+                    }
+
                     const activitiesContainer = document.getElementById('activitiesContainer');
                     const isMultipleChoice = activitiesContainer.getAttribute('data-mode') === 'multiple-choice';
                     const categoryButtons = activityButton.closest('.activity-category').querySelectorAll('.activity-button');
+                    
+                    // Deselect all buttons first (for single choice mode)
+                    if (!isMultipleChoice) {
+                        document.querySelectorAll('.activity-button').forEach(b => b.classList.remove('selected'));
+                    }
                     
                     // Check if this is the "other not listed" button
                     if (activity.name.includes('other not listed (enter)')) {
