@@ -226,13 +226,12 @@ function updateDebugOverlay(mouseX, timelineRect) {
     const relativeX = mouseX - timelineRect.left;
     const percentageX = (relativeX / timelineRect.width) * 100;
     const minutes = positionToMinutes(percentageX);
-    const time = formatTimeHHMM(minutes);
 
     overlay.style.display = 'block';
     overlay.innerHTML = `
         Position: ${percentageX.toFixed(2)}%<br>
         Minutes: ${minutes}<br>
-        Time: ${time}
+        Time: ${formatTimeHHMM(minutes)}
     `;
 }
 
@@ -281,17 +280,17 @@ async function fetchActivities(key) {
         }
 
         // Initialize timeline management structure if not already initialized
-        if (Object.keys(timelineManager.metadata).length === 0) {
+        if (Object.keys(window.timelineManager.metadata).length === 0) {
             // Only use timeline keys, excluding 'general'
-            timelineManager.keys = Object.keys(data.timeline);
-            timelineManager.keys.forEach(timelineKey => {
+            window.timelineManager.keys = Object.keys(data.timeline);
+            window.timelineManager.keys.forEach(timelineKey => {
                 if (data.timeline[timelineKey]) {
-                    timelineManager.metadata[timelineKey] = new Timeline(timelineKey, data.timeline[timelineKey]);
-                    timelineManager.activities[timelineKey] = [];
+                    window.timelineManager.metadata[timelineKey] = new Timeline(timelineKey, data.timeline[timelineKey]);
+                    window.timelineManager.activities[timelineKey] = [];
                 }
             });
             if (DEBUG_MODE) {
-                console.log('Initialized timeline structure:', timelineManager);
+                console.log('Initialized timeline structure:', window.timelineManager);
             }
         }
 
@@ -528,7 +527,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                     const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
                                     selectedActivity = {
                                         selections: selectedButtons.map(btn => ({
-                                            name: btn === activityButton ? customText : btn.querySelector('.activity-text').textContent,
+                                            name: btn.textContent,
                                             color: btn.style.getPropertyValue('--color')
                                         })),
                                         category: category.name
@@ -745,7 +744,7 @@ function initTimelineInteraction(timeline) {
                         startMinutes = Math.round(normalizedStart / 10) * 10;
                         
                         // Special case for 04:00
-                        if (rawStartMinutes <= 245) {
+                        if (startMinutes >= 245) {
                             startMinutes = 240;
                         }
                         
@@ -1161,10 +1160,7 @@ function initTimelineInteraction(timeline) {
     });
 }
 
-
-// Helper function to scroll to active timeline
-
-async function init() {
+function init() {
     try {
         // Load initial timeline data
         const response = await fetch('activities.json');
