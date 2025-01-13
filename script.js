@@ -927,12 +927,17 @@ function setupDebugClickHandler(timeline) {
             label.style.display = 'none';
         });
 
+        // Hide all existing time labels
+        activitiesContainer.querySelectorAll('.time-label').forEach(label => {
+            label.style.display = 'none';
+        });
+
         activitiesContainer.appendChild(currentBlock);
 
         // Create time label for both mobile and desktop modes
         const timeLabel = createTimeLabel(currentBlock);
         updateTimeLabel(timeLabel, formatTimeHHMM(startMinutes), formatTimeHHMM(endMinutes), currentBlock);
-        timeLabel.style.display = 'block'; // Ensure the new label is visible
+        timeLabel.style.display = 'block'; // Ensure only the new label is visible
 
         // Deselect the activity button after successful placement
         document.querySelectorAll('.activity-button').forEach(btn => btn.classList.remove('selected'));

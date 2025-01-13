@@ -54,6 +54,22 @@ export function handleResizeStart(event) {
     target.dataset.originalEnd = target.dataset.end;
     target.dataset.originalLength = target.dataset.length;
     target.dataset.originalHeight = target.dataset.height;
+
+    // Hide all other time labels in this timeline
+    const timeline = target.closest('.timeline');
+    if (timeline) {
+        timeline.querySelectorAll('.time-label').forEach(label => {
+            if (label.parentElement !== target) {
+                label.style.display = 'none';
+            }
+        });
+    }
+    
+    // Show this block's time label
+    const timeLabel = target.querySelector('.time-label');
+    if (timeLabel) {
+        timeLabel.style.display = 'block';
+    }
 }
 
 export function handleResizeMove(event, targetTimeline) {
