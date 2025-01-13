@@ -6,10 +6,10 @@ import {
     getCurrentTimelineKey, 
     createTimelineDataFrame,
     getTimelineCoverage,
-    validateMinCoverage,
     createModal,
     createFloatingAddButton,
-    scrollToActiveTimeline
+    scrollToActiveTimeline,
+    validateMinCoverage
 } from './utils.js';
 import { updateIsMobile, getIsMobile } from './globals.js';
 let selectedActivity = null;

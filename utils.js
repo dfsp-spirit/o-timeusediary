@@ -2,6 +2,18 @@ import { DEBUG_MODE } from './constants.js';
 
 const MINUTES_PER_DAY = 24 * 60;
 
+// Validation functions
+export function validateMinCoverage(minCoverage) {
+    const coverage = parseInt(minCoverage);
+    if (isNaN(coverage)) {
+        throw new Error('Minimum coverage must be a number');
+    }
+    if (coverage < 0 || coverage > 1440) {
+        throw new Error('Minimum coverage must be between 0 and 1440 minutes');
+    }
+    return coverage;
+}
+
 // Timeline state management functions
 export function getCurrentTimelineKey() {
     return window.timelineManager.keys[window.timelineManager.currentIndex];
