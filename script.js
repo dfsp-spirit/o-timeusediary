@@ -672,8 +672,6 @@ function initTimeline(timeline) {
 
 import { handleResizeStart, handleResizeMove, handleResizeEnd } from './timeline_interaction.js';
 
-import { initBlockCreationViaDrag } from './drag_creation.js';
-
 function initTimelineInteraction(timeline) {
     if (!timeline) {
         console.error('Timeline must be provided to initTimelineInteraction');
@@ -699,9 +697,6 @@ function initTimelineInteraction(timeline) {
             end: handleResizeEnd
         }
     });
-
-    // Initialize drag-to-create functionality
-    initBlockCreationViaDrag(timeline);
 
     // Legacy click handler for debugging only
     if (DEBUG_MODE) {
