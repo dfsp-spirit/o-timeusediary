@@ -741,7 +741,7 @@ export function initButtons() {
 
 export function updateButtonStates() {
     const undoButton = document.getElementById('undoBtn');
-    const clearButton = document.getElementById('clearBtn');
+    const cleanRowButton = document.getElementById('cleanRowBtn');
     const nextButton = document.getElementById('nextBtn');
     const backButton = document.getElementById('backBtn');
 
@@ -749,12 +749,23 @@ export function updateButtonStates() {
     const currentKey = getCurrentTimelineKey();
     const currentActivities = window.timelineManager.activities[currentKey] || [];
     
-    // Enable/disable undo and clear buttons based on whether there are activities
+    // Enable/disable undo and clean row buttons based on whether there are activities
     const hasActivities = currentActivities.length > 0;
     
     // Safely update button states with null checks
-    if (undoButton) undoButton.disabled = !hasActivities;
-    if (clearButton) clearButton.disabled = !hasActivities;
+    if (undoButton) {
+        undoButton.disabled = !hasActivities;
+        if (DEBUG_MODE) {
+            console.log(`Undo button ${hasActivities ? 'enabled' : 'disabled'}`);
+        }
+    }
+    
+    if (cleanRowButton) {
+        cleanRowButton.disabled = !hasActivities;
+        if (DEBUG_MODE) {
+            console.log(`Clean Row button ${hasActivities ? 'enabled' : 'disabled'}`);
+        }
+    }
 
     // Update next/back button states with null checks
     if (backButton) {
@@ -774,7 +785,7 @@ export function updateButtonStates() {
             activityCount: currentActivities.length,
             hasActivities,
             undoEnabled: undoButton ? !undoButton.disabled : 'button not found',
-            clearEnabled: clearButton ? !clearButton.disabled : 'button not found'
+            cleanRowEnabled: cleanRowButton ? !cleanRowButton.disabled : 'button not found'
         });
     }
 }
