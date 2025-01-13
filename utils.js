@@ -1,4 +1,5 @@
 import { DEBUG_MODE } from './constants.js';
+import { getIsMobile } from './globals.js';
 
 const MINUTES_PER_DAY = 24 * 60;
 
