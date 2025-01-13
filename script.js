@@ -676,15 +676,17 @@ function initTimelineInteraction(timeline) {
     }
     const targetTimeline = timeline;
 
-    // Initialize interact.js resizable
+    // Initialize interact.js resizable and draggable
     interact('.activity-block').resizable({
         edges: { left: !getIsMobile(), right: !getIsMobile(), bottom: getIsMobile() },
         modifiers: [
             interact.modifiers.restrictEdges({
-                outer: '.timeline'
+                outer: '.timeline',
+                endOnly: true
             }),
             interact.modifiers.restrictSize({
-                min: { width: 10, height: 10 }
+                min: { width: 10, height: 10 },
+                max: { width: '100%', height: '100%' }
             })
         ],
         inertia: false,
@@ -692,6 +694,56 @@ function initTimelineInteraction(timeline) {
             start: handleResizeStart,
             move: handleResizeMove.bind(null, targetTimeline),
             end: handleResizeEnd
+        }
+    }).draggable({
+        inertia: false,
+        modifiers: [
+            interact.modifiers.restrictRect({
+                restriction: '.timeline'
+            })
+        ],
+        listeners: {
+            start(event) {
+                event.target.classList.add('dragging');
+            },
+            move(event) {
+                const target = event.target;
+                const timelineRect = targetTimeline.getBoundingClientRect();
+                
+                // Get current position
+                let currentLeft = parseFloat(target.style.left) || 0;
+                
+                // Update position based on drag delta
+                let newLeft = currentLeft + (event.dx / timelineRect.width * 100);
+                
+                // Ensure we stay within timeline bounds
+                newLeft = Math.max(0, Math.min(newLeft, 100 - parseFloat(target.style.width)));
+                
+                // Update position
+                target.style.left = `${newLeft}%`;
+                
+                // Calculate and update times
+                const startMinutes = positionToMinutes(newLeft);
+                const endMinutes = positionToMinutes(newLeft + parseFloat(target.style.width));
+                
+                if (startMinutes !== null && endMinutes !== null) {
+                    const startTime = formatTimeHHMM(startMinutes);
+                    const endTime = formatTimeHHMM(endMinutes);
+                    
+                    // Update dataset and time label
+                    target.dataset.start = startTime;
+                    target.dataset.end = endTime;
+                    
+                    const timeLabel = target.querySelector('.time-label');
+                    if (timeLabel) {
+                        updateTimeLabel(timeLabel, startTime, endTime, target);
+                    }
+                }
+            },
+            end(event) {
+                event.target.classList.remove('dragging');
+                updateButtonStates();
+            }
         }
     });
 
