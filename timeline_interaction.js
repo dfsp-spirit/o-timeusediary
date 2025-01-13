@@ -126,33 +126,34 @@ function handleVerticalResize(event, target, timelineRect) {
 }
 
 function updateActivityBlock(target, startMinutes, endMinutes) {
-    // 1. Validate
+    // A. Validate
     if (!canPlaceActivity(startMinutes, endMinutes, target.dataset.id)) {
         target.classList.add('invalid');
         setTimeout(() => target.classList.remove('invalid'), 400);
         return;
     }
 
-    // 2. Update dataset with RAW minutes (not forced to 0..1440)
-    target.dataset.startRaw = startMinutes;  // e.g. 240 for 04:00
-    target.dataset.endRaw = endMinutes;      // e.g. 1680 for 04:00 next day
-    target.dataset.length = endMinutes - startMinutes; // could be 1440 in that example
+    // B. Store the *raw minute values* in dataset,
+    //    so your logic can read them *without* confusion.
+    target.dataset.startRaw = startMinutes;  // e.g. 10
+    target.dataset.endRaw = endMinutes;      // e.g. 1560
+    target.dataset.length = endMinutes - startMinutes;
 
-    // 3. Format times for display
-    const displayedStart = formatTimeHHMM(startMinutes);
-    const displayedEnd = formatTimeHHMM(endMinutes);
+    // C. Format your times for UI display
+    const displayedStart = formatTimeHHMMWithDayOffset(startMinutes);
+    const displayedEnd = formatTimeHHMMWithDayOffset(endMinutes);
 
-    // 4. Store those display strings in data-start / data-end if you want
-    target.dataset.start = displayedStart; // or just skip storing if you prefer
-    target.dataset.end   = displayedEnd;
+    // D. Store display strings in data-start/end for consistency
+    target.dataset.start = displayedStart;
+    target.dataset.end = displayedEnd;
 
-    // 5. Update the time label
+    // E. Update the time label
     const timeLabel = target.querySelector('.time-label');
     if (timeLabel) {
         updateTimeLabel(timeLabel, displayedStart, displayedEnd, target);
     }
 
-    // 6. Update the activity data in your central store
+    // F. Update the activity data in your central store
     updateActivityData(target);
 }
 
