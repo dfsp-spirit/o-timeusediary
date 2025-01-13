@@ -963,10 +963,22 @@ function setupDebugClickHandler(timeline) {
         // Update both the DOM and timelineManager
         currentBlock.dataset.id = activityData.id;
         const currentKey = getCurrentTimelineKey();
+        
+        // Ensure the activities array exists for this timeline
         if (!window.timelineManager.activities[currentKey]) {
             window.timelineManager.activities[currentKey] = [];
         }
+        
+        // Add the activity to the timeline manager
         window.timelineManager.activities[currentKey].push(activityData);
+        
+        if (DEBUG_MODE) {
+            console.log('Added activity to timelineManager:', {
+                timelineKey: currentKey,
+                activityData,
+                currentActivities: window.timelineManager.activities[currentKey]
+            });
+        }
 
         // Validate timeline after adding activity
         try {
