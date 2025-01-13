@@ -927,9 +927,17 @@ function setupDebugClickHandler(timeline) {
             label.style.display = 'none';
         });
 
-        // Hide all existing time labels
-        activitiesContainer.querySelectorAll('.time-label').forEach(label => {
-            label.style.display = 'none';
+        // Hide time labels for all existing blocks in current timeline
+        const currentKey = getCurrentTimelineKey();
+        const currentActivities = window.timelineManager.activities[currentKey] || [];
+        currentActivities.forEach(activity => {
+            const existingBlock = activitiesContainer.querySelector(`.activity-block[data-id="${activity.id}"]`);
+            if (existingBlock) {
+                const timeLabel = existingBlock.querySelector('.time-label');
+                if (timeLabel) {
+                    timeLabel.style.display = 'none';
+                }
+            }
         });
 
         activitiesContainer.appendChild(currentBlock);

@@ -55,12 +55,21 @@ export function handleResizeStart(event) {
     target.dataset.originalLength = target.dataset.length;
     target.dataset.originalHeight = target.dataset.height;
 
-    // Hide all other time labels in this timeline
+    // Hide time labels for all blocks in current timeline except the one being resized
+    const currentKey = getCurrentTimelineKey();
+    const currentActivities = window.timelineManager.activities[currentKey] || [];
     const timeline = target.closest('.timeline');
+    
     if (timeline) {
-        timeline.querySelectorAll('.time-label').forEach(label => {
-            if (label.parentElement !== target) {
-                label.style.display = 'none';
+        currentActivities.forEach(activity => {
+            if (activity.id !== target.dataset.id) {
+                const block = timeline.querySelector(`.activity-block[data-id="${activity.id}"]`);
+                if (block) {
+                    const timeLabel = block.querySelector('.time-label');
+                    if (timeLabel) {
+                        timeLabel.style.display = 'none';
+                    }
+                }
             }
         });
     }
