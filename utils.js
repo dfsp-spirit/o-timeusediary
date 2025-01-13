@@ -741,57 +741,41 @@ export function initButtons() {
 
 export function updateButtonStates() {
     const undoButton = document.getElementById('undoBtn');
-    const cleanRowButton = document.getElementById('cleanRowBtn');
+    const clearButton = document.getElementById('clearBtn');
     const nextButton = document.getElementById('nextBtn');
-    
-    const currentData = getCurrentTimelineData();
-    const isEmpty = currentData.length === 0;
-    const isFull = isTimelineFull();
-    
-    // Check if there's an active timeline with activities
-    const activeTimeline = window.timelineManager.activeTimeline;
-    const hasActivities = activeTimeline && activeTimeline.querySelector('.activity-block');
-    
-    if (undoButton) undoButton.disabled = isEmpty;
-    if (cleanRowButton) cleanRowButton.disabled = !hasActivities;
-    
-    // Get current timeline coverage
-    const currentKey = getCurrentTimelineKey();
-    const currentTimeline = window.timelineManager.metadata[currentKey];
-    const currentCoverage = getTimelineCoverage();
-        
-    // Get minimum coverage requirement for current timeline
-    const minCoverage = parseInt(currentTimeline.minCoverage) || 0;
-    const meetsMinCoverage = currentCoverage >= minCoverage;
+    const backButton = document.getElementById('backBtn');
 
-    // Check if we're on the last timeline
-    const isLastTimeline = window.timelineManager.currentIndex === window.timelineManager.keys.length - 1;
+    // Get current timeline key and data
+    const currentKey = getCurrentTimelineKey();
+    const currentActivities = window.timelineManager.activities[currentKey] || [];
     
-    if (nextButton) {
-        if (isLastTimeline) {
-            // On last timeline, enable Next only if coverage requirement is met
-            nextButton.disabled = !meetsMinCoverage;
-            // Change button text to "Submit" if coverage requirement is met, keeping the arrow icon
-            nextButton.innerHTML = meetsMinCoverage ? 'Submit <i class="fas fa-arrow-right"></i>' : 'Next <i class="fas fa-arrow-right"></i>';
-        } else {
-            // For other timelines, enable Next if coverage requirement is met
-            nextButton.disabled = !meetsMinCoverage;
-            nextButton.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
-        }
+    // Enable/disable undo and clear buttons based on whether there are activities
+    const hasActivities = currentActivities.length > 0;
+    
+    // Safely update button states with null checks
+    if (undoButton) undoButton.disabled = !hasActivities;
+    if (clearButton) clearButton.disabled = !hasActivities;
+
+    // Update next/back button states with null checks
+    if (backButton) {
+        backButton.disabled = window.timelineManager.currentIndex <= 0;
     }
     
+    if (nextButton && currentKey && window.timelineManager.metadata[currentKey]) {
+        const timeline = window.timelineManager.metadata[currentKey];
+        const coverage = getTimelineCoverage();
+        const meetsMinCoverage = coverage >= timeline.minCoverage;
+        nextButton.disabled = !meetsMinCoverage;
+    }
+
     if (DEBUG_MODE) {
-        console.log('Button state update:', {
+        console.log('Button states updated:', {
             currentKey,
-            currentCoverage,
-            isLastTimeline,
-            meetsMinCoverage,
-            initializedTimelines: Array.from(window.timelineManager.initialized)
+            activityCount: currentActivities.length,
+            hasActivities,
+            undoEnabled: undoButton ? !undoButton.disabled : 'button not found',
+            clearEnabled: clearButton ? !clearButton.disabled : 'button not found'
         });
-    }
-    
-    if (DEBUG_MODE && isFull) {
-        console.log('Timeline is complete');
     }
 }
 
