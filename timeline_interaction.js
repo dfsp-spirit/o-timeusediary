@@ -44,37 +44,52 @@ function handleHorizontalResize(event, target, timelineRect) {
 }
 
 function handleLeftEdgeResize(event, target, timelineRect) {
+    // Calculate the new left position in percentage
     const rawLeft = (event.rect.left / timelineRect.width) * 100;
     const rawStartMinutes = positionToMinutes(rawLeft);
     const endMinutes = timeToMinutes(target.dataset.end);
     
-    let startMinutes = Math.round(rawStartMinutes / 10) * 10;
+    // Round start minutes to the nearest INCREMENT_MINUTES
+    let startMinutes = Math.round(rawStartMinutes / INCREMENT_MINUTES) * INCREMENT_MINUTES;
     
-    // Normalize times for comparison
-    let normalizedEnd = endMinutes < 240 ? endMinutes + 1440 : endMinutes;
-    let normalizedStart = startMinutes < 240 ? startMinutes + 1440 : startMinutes;
+    // Normalize times for comparison (handle wrap-around if needed)
+    let normalizedEnd = endMinutes < 240 ? endMinutes + MINUTES_PER_DAY : endMinutes;
+    let normalizedStart = startMinutes < 240 ? startMinutes + MINUTES_PER_DAY : startMinutes;
     
-    // Validate and adjust start time
+    // Prevent dragging start past end
     if (normalizedStart > normalizedEnd) {
-        normalizedStart = normalizedEnd - 10;
-        startMinutes = normalizedStart >= 1440 ? normalizedStart - 1440 : normalizedStart;
+        normalizedStart = normalizedEnd - INCREMENT_MINUTES;
+        startMinutes = normalizedStart >= MINUTES_PER_DAY ? normalizedStart - MINUTES_PER_DAY : normalizedStart;
     }
     
+    // Enforce minimum start time
     if (startMinutes <= 245) {
         startMinutes = 240;
     }
     
+    // Ensure minimum block length
     const timeDiff = normalizedEnd - startMinutes;
-    if (timeDiff < 10) {
-        startMinutes = normalizedEnd - 10;
+    if (timeDiff < INCREMENT_MINUTES) {
+        startMinutes = normalizedEnd - INCREMENT_MINUTES;
     }
     
-    if (startMinutes >= 1440) {
-        startMinutes -= 1440;
+    // Adjust for wrap-around
+    if (startMinutes >= MINUTES_PER_DAY) {
+        startMinutes -= MINUTES_PER_DAY;
     }
     
+    // Calculate new position and size in percentage
+    const newLeftPercent = minutesToPercentage(startMinutes);
+    const newWidthPercent = minutesToPercentage(endMinutes - startMinutes);
+    
+    // Apply new styles to the activity block
+    target.style.left = `${newLeftPercent}%`;
+    target.style.width = `${newWidthPercent}%`;
+    
+    // Update the activity block's data attributes and validate
     updateActivityBlock(target, startMinutes, endMinutes);
 }
+
 
 function handleRightEdgeResize(event, target, timelineRect) {
     const newWidth = (event.rect.width / timelineRect.width) * 100;
