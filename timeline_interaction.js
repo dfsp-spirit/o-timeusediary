@@ -12,6 +12,9 @@ import {
     formatTimeDDMMYYYYHHMM
 } from './utils.js';
 
+const INCREMENT_MINUTES = 10;
+const MINUTES_PER_DAY = 24 * 60;
+
 export function handleResizeStart(event) {
     const target = event.target;
     target.classList.add('resizing');
