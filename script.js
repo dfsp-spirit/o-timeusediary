@@ -27,6 +27,16 @@ import {
 } from './utils.js';
 
 import { updateIsMobile, getIsMobile } from './globals.js';
+
+const MINUTES_PER_DAY = 24 * 60;
+const INCREMENT_MINUTES = 10;
+const DEFAULT_ACTIVITY_LENGTH = 10;
+const TIMELINE_START_HOUR = 4;
+const TIMELINE_HOURS = 24;
+
+const DEBUG_MODE = true; // Enable debug mode
+
+
 let selectedActivity = null;
 
 // Remove duplicate import since it's now included above
@@ -47,16 +57,6 @@ if(urlParams.toString()) {
         window.timelineManager.study[key] = value;
     }
 }
-
-
-const MINUTES_PER_DAY = 24 * 60;
-const INCREMENT_MINUTES = 10;
-const DEFAULT_ACTIVITY_LENGTH = 10;
-const TIMELINE_START_HOUR = 4;
-const TIMELINE_HOURS = 24;
-
-const DEBUG_MODE = true; // Enable debug mode
-
 
 // Function to add next timeline
 async function addNextTimeline() {
