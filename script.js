@@ -619,12 +619,20 @@ function renderActivities(categories, container = document.getElementById('activ
                     } else {
                         // Single choice mode
                         categoryButtons.forEach(b => b.classList.remove('selected'));
-                        selectedActivity = {
+                        activityButton.classList.add('selected');
+                        
+                        // Set both window.selectedActivity and selectedActivity
+                        const activityData = {
                             name: activity.name,
                             color: activity.color,
                             category: category.name
                         };
-                        activityButton.classList.add('selected');
+                        window.selectedActivity = activityData;
+                        selectedActivity = activityData;
+                        
+                        if (DEBUG_MODE) {
+                            console.log('Selected activity:', window.selectedActivity);
+                        }
                     }
                 });
                 activityButtonsDiv.appendChild(activityButton);
