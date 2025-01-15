@@ -13,7 +13,8 @@ import {
     getCurrentTimelineData,
     getCurrentTimelineKey,
     updateButtonStates,
-    getTextDivClass
+    getTextDivClass,
+    deselectAllActivities
 } from './utils.js';
 
 function emitActivityPlacedEvent(activityData, timeline) {
@@ -329,6 +330,9 @@ function createBlockAtClickPosition(timeline, startPercent) {
 
   // Update button states after adding activity
   updateButtonStates();
+  
+  // Deselect all activities after placement
+  deselectAllActivities();
 
   // 2) Finally deselect the activity
   window.selectedActivity = null;
@@ -452,6 +456,9 @@ function finalizeDragBlock(block, timeline) {
   
   // Update button states after adding activity
   updateButtonStates();
+  
+  // Deselect all activities after placement
+  deselectAllActivities();
   
   // Deselect the activity
   window.selectedActivity = null;
