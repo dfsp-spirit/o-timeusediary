@@ -924,8 +924,8 @@ function setupDebugClickHandler(timeline) {
             currentBlock.style.width = `${MOBILE_BLOCK_WIDTH}%`;
             currentBlock.style.left = `${MOBILE_OFFSET}%`;
         } else {
-            currentBlock.style.width = `${blockSize}%`;
-            currentBlock.style.left = `${startPositionPercent}%`;
+            currentBlock.style.width = '75%';
+            currentBlock.style.left = '12.5%';
             currentBlock.style.height = '75%';
             currentBlock.style.top = '25%';
         }
