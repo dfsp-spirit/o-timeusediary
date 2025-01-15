@@ -205,12 +205,6 @@ function createBlockAtClickPosition(timeline, startPercent) {
   let startMins = snapToInterval(positionToMinutes(startPercent));
   let endMins = startMins + MIN_DURATION_MINUTES; // 10 minutes by default
 
-  // If crossing midnight or you want to allow >24h, handle that logic here
-  // if (endMins > 1440) {
-  //   endMins = 1440; // or endMins = startMins + ...
-  // }
-
-  // If you want up to 28h (1680 minutes):
   if (endMins > 1680) {
     endMins = 1680; 
   }
@@ -218,7 +212,7 @@ function createBlockAtClickPosition(timeline, startPercent) {
   // Create the block
   const block = document.createElement('div');
   block.className = 'activity-block';
-  block.style.opacity = '1.0'; // fully visible
+  block.style.opacity = '1.0';
   block.dataset.startRaw = startMins;
   block.dataset.endRaw = endMins;
   block.dataset.length = endMins - startMins;
@@ -226,32 +220,49 @@ function createBlockAtClickPosition(timeline, startPercent) {
   // Create text div with proper class
   const textDiv = document.createElement('div');
   textDiv.className = getTextDivClass(endMins - startMins);
+  
+  // Handle multiple selections for both mobile and desktop
   if (window.selectedActivity.selections) {
+    // Create split background for multiple selections
+    const colors = window.selectedActivity.selections.map(s => s.color);
+    const numSelections = colors.length;
+    const percentage = 100 / numSelections;
+    
+    if (getIsMobile()) {
+      // Horizontal splits for mobile
+      const stops = colors.map((color, index) => 
+        `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
+      ).join(', ');
+      block.style.background = `linear-gradient(to right, ${stops})`;
+    } else {
+      // Vertical splits for desktop
+      const stops = colors.map((color, index) => 
+        `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
+      ).join(', ');
+      block.style.background = `linear-gradient(to bottom, ${stops})`;
+    }
+    
     textDiv.innerHTML = window.selectedActivity.selections.map(s => s.name).join('<br>');
   } else {
+    block.style.backgroundColor = window.selectedActivity.color;
     textDiv.textContent = window.selectedActivity.name;
   }
+  
   block.appendChild(textDiv);
   
   block.dataset.start = formatTimeHHMMWithDayOffset(startMins);
-  block.dataset.end   = formatTimeHHMMWithDayOffset(endMins);
+  block.dataset.end = formatTimeHHMMWithDayOffset(endMins);
   block.dataset.category = window.selectedActivity.category;
 
-  if (window.selectedActivity.selections) {
-    block.style.backgroundColor = window.selectedActivity.selections[0].color;
-  } else {
-    block.style.backgroundColor = window.selectedActivity.color;
-  }
-
-  // Position it
+  // Position it based on layout
   const startPercentValue = minutesToPercentage(startMins);
   const widthOrHeight = minutesToPercentage(endMins) - startPercentValue;
 
   if (getIsMobile()) {
     block.style.top = `${startPercentValue}%`;
     block.style.height = `${widthOrHeight}%`;
-    block.style.left = '25%';
-    block.style.width = '50%';
+    block.style.left = '12.5%';  // Center horizontally
+    block.style.width = '75%';   // Consistent width
   } else {
     block.style.left = `${startPercentValue}%`;
     block.style.width = `${widthOrHeight}%`;
