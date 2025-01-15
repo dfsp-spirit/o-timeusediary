@@ -321,11 +321,21 @@ export function formatTimeHHMM(minutes) {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
-export function timeToMinutes(timeStr) {
-    if (typeof timeStr === 'number') {
-        return Math.round(timeStr);
+export function timeToMinutes(time) {
+    // If already a number, just round it
+    if (typeof time === 'number') {
+        return Math.round(time);
     }
-    const [hours, minutes] = timeStr.split(':').map(Number);
+    // If undefined/null, return 0
+    if (!time) {
+        return 0;
+    }
+    // Otherwise expect HH:MM format
+    const [hours, minutes] = time.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) {
+        console.warn('Invalid time format:', time);
+        return 0;
+    }
     return hours * 60 + minutes;
 }
 
