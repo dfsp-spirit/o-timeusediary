@@ -845,7 +845,9 @@ body {
 
 /* Floating add button for mobile */
 .floating-add-button {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: fixed;
     bottom: 20px;
     right: 20px;
