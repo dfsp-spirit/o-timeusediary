@@ -368,6 +368,11 @@ function renderActivities(categories, container = document.getElementById('activ
                     const isMultipleChoice = activitiesContainer.getAttribute('data-mode') === 'multiple-choice';
                     const categoryButtons = activityButton.closest('.activity-category').querySelectorAll('.activity-button');
                     
+                    // If single-choice mode, hide container after selection
+                    if (!isMultipleChoice) {
+                        activitiesContainer.style.display = 'none';
+                    }
+                    
                     // Check if this is the "other not listed" button
                     if (activityButton.querySelector('.activity-text').textContent.includes('other not listed (enter)')) {
                         // Show custom activity modal
@@ -1104,6 +1109,19 @@ async function init() {
                 }
             });
         }
+
+        // Add click handler to hide activities container when clicking outside
+        document.addEventListener('click', (event) => {
+            const activitiesContainer = document.getElementById('activitiesContainer');
+            const floatingAddButton = document.getElementById('floatingAddButton');
+            
+            if (activitiesContainer && 
+                activitiesContainer.getAttribute('data-mode') === 'multiple-choice' &&
+                !activitiesContainer.contains(event.target) && 
+                event.target !== floatingAddButton) {
+                activitiesContainer.style.display = 'none';
+            }
+        });
 
         if (DEBUG_MODE) {
             console.log('Initialized timeline structure:', window.timelineManager);
