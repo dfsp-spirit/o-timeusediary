@@ -1089,6 +1089,22 @@ async function init() {
         // Add resize event listener
         window.addEventListener('resize', handleResize);
 
+        // Add floating add button click handler for mobile
+        const floatingAddButton = document.getElementById('floatingAddButton');
+        if (floatingAddButton) {
+            floatingAddButton.addEventListener('click', () => {
+                const activitiesContainer = document.getElementById('activitiesContainer');
+                if (activitiesContainer) {
+                    activitiesContainer.style.display = activitiesContainer.style.display === 'none' ? 'block' : 'none';
+                    // Open first category by default
+                    const firstCategory = activitiesContainer.querySelector('.activity-category');
+                    if (firstCategory) {
+                        firstCategory.classList.add('active');
+                    }
+                }
+            });
+        }
+
         if (DEBUG_MODE) {
             console.log('Initialized timeline structure:', window.timelineManager);
         }
