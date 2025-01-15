@@ -4,19 +4,22 @@ import { TimelineContainer } from './timeline_container.js';
 
 function deselectAllActivities() {
     console.log('Deselecting all activities...');
-    console.log('Before deselect - Selected buttons:', document.querySelectorAll('.activity-button.selected').length);
     
+    // Reset both global and local selectedActivity variables
     selectedActivity = null;
     window.selectedActivity = null;
     
-    const buttons = document.querySelectorAll('.activity-button');
-    console.log('Total buttons found:', buttons.length);
-    
+    // Find all selected buttons and deselect them
+    const buttons = document.querySelectorAll('.activity-button.selected');
     buttons.forEach(btn => {
-        if (btn.classList.contains('selected')) {
-            console.log('Deselecting button:', btn.querySelector('.activity-text').textContent);
-        }
+        console.log('Deselecting button:', btn.querySelector('.activity-text').textContent);
         btn.classList.remove('selected');
+    });
+    
+    // Clear any active category states in mobile view
+    const categories = document.querySelectorAll('.activity-category.active');
+    categories.forEach(category => {
+        category.classList.remove('active');
     });
     
     console.log('After deselect - Selected buttons:', document.querySelectorAll('.activity-button.selected').length);
@@ -466,13 +469,28 @@ function renderActivities(categories, container = document.getElementById('activ
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
 
                         if (selectedButtons.length > 0) {
-                            selectedActivity = {
+                            const activityData = {
                                 selections: selectedButtons.map(btn => ({
-                                    name: btn.textContent,
+                                    name: btn.querySelector('.activity-text').textContent,
                                     color: btn.style.getPropertyValue('--color')
                                 })),
                                 category: category.name
                             };
+                            window.selectedActivity = activityData;
+                            selectedActivity = activityData;
+                                
+                            // Add deselection after placement
+                            setTimeout(() => {
+                                deselectAllActivities();
+                                    
+                                // For mobile view, hide the activities container
+                                if (getIsMobile()) {
+                                    const activitiesContainer = document.getElementById('activitiesContainer');
+                                    if (activitiesContainer) {
+                                        activitiesContainer.style.display = 'none';
+                                    }
+                                }
+                            }, 100);
                         } else {
                             // Deselect when no buttons are selected
                             deselectAllActivities();
@@ -986,6 +1004,17 @@ function setupDebugClickHandler(timeline) {
         });
 
         activitiesContainer.appendChild(currentBlock);
+
+        // Deselect all activities
+        deselectAllActivities();
+
+        // For mobile view, hide the activities container
+        if (getIsMobile()) {
+            const activitiesContainer = document.getElementById('activitiesContainer');
+            if (activitiesContainer) {
+                activitiesContainer.style.display = 'none';
+            }
+        }
 
         // Create time label for both mobile and desktop modes
         const timeLabel = createTimeLabel(currentBlock);
