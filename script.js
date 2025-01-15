@@ -872,32 +872,29 @@ function setupDebugClickHandler(timeline) {
         } else {
             currentBlock.style.backgroundColor = selectedActivity.color;
         }
+        // Create text div with proper class
+        const length = parseInt(currentBlock.dataset.length);
         const textDiv = document.createElement('div');
-        let combinedActivityText;
+        textDiv.className = getIsMobile() 
+            ? (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-narrow')
+            : (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-vertical');
 
+        let combinedActivityText;
         if (selectedActivity.selections) {
             if (DEBUG_MODE) {
                 console.log('Multiple selections:', selectedActivity.selections);
             }
-            // For multiple selections, join names with line break in the text div
             textDiv.innerHTML = selectedActivity.selections.map(s => s.name).join('<br>');
-            // But join with vertical separator for storing in timelineManager 
             combinedActivityText = selectedActivity.selections.map(s => s.name).join(' | ');
         } else {
             textDiv.textContent = selectedActivity.name;
             combinedActivityText = selectedActivity.name;
         }
+
         textDiv.style.maxWidth = '90%';
         textDiv.style.overflow = 'hidden';
         textDiv.style.textOverflow = 'ellipsis';
         textDiv.style.whiteSpace = 'nowrap';
-        // Set initial class based on length and mode
-        const length = parseInt(currentBlock.dataset.length);
-
-        // Always use narrow text in mobile mode, add wide and resized only if length >= 60
-        textDiv.className = getIsMobile() 
-            ? (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-narrow')
-            : (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-vertical');
         currentBlock.appendChild(textDiv);
         
         // Convert minutes to percentage for positioning
