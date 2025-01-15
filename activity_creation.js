@@ -327,39 +327,66 @@ function finalizeDragBlock(block, timeline) {
   const isMobile = getIsMobile();
 
   let styleStart = parseFloat(isMobile ? block.style.top : block.style.left) || 0;
-  let styleSize  = parseFloat(isMobile ? block.style.height : block.style.width) || 0;
+  let styleSize = parseFloat(isMobile ? block.style.height : block.style.width) || 0;
 
   // Convert to minutes
   let startMins = snapToInterval(positionToMinutes(styleStart));
-  let endMins   = snapToInterval(positionToMinutes(styleStart + styleSize));
+  let endMins = snapToInterval(positionToMinutes(styleStart + styleSize));
 
   if (endMins < startMins) {
-    // We want a next-day block
     endMins += 1440;
   }
-  // If you want a minimum 10-min block:
   if (endMins - startMins < MIN_DURATION_MINUTES) {
     endMins = startMins + MIN_DURATION_MINUTES;
   }
-  // If you want to allow crossing midnight => if (endMins < startMins) endMins += 1440; or similar
 
   // Update the block's dataset
   block.dataset.startRaw = startMins;
-  block.dataset.endRaw   = endMins;
-  block.dataset.length   = endMins - startMins;
-  block.dataset.start    = formatTimeHHMMWithDayOffset(startMins);
-  block.dataset.end      = formatTimeHHMMWithDayOffset(endMins);
+  block.dataset.endRaw = endMins;
+  block.dataset.length = endMins - startMins;
+  block.dataset.start = formatTimeHHMMWithDayOffset(startMins);
+  block.dataset.end = formatTimeHHMMWithDayOffset(endMins);
+
+  // Create text div with proper class
+  const textDiv = document.createElement('div');
+  textDiv.className = getTextDivClass(endMins - startMins);
+  
+  // Handle multiple selections
+  if (window.selectedActivity.selections) {
+    const colors = window.selectedActivity.selections.map(s => s.color);
+    const numSelections = colors.length;
+    const percentage = 100 / numSelections;
+    
+    if (isMobile) {
+      const stops = colors.map((color, index) => 
+        `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
+      ).join(', ');
+      block.style.background = `linear-gradient(to right, ${stops})`;
+    } else {
+      const stops = colors.map((color, index) => 
+        `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
+      ).join(', ');
+      block.style.background = `linear-gradient(to bottom, ${stops})`;
+    }
+    
+    textDiv.innerHTML = window.selectedActivity.selections.map(s => s.name).join('<br>');
+  } else {
+    block.style.backgroundColor = window.selectedActivity.color;
+    textDiv.textContent = window.selectedActivity.name;
+  }
+  
+  block.appendChild(textDiv);
 
   // Reposition/resize according to snapped values
   const startPercent = minutesToPercentage(startMins);
-  const endPercent   = minutesToPercentage(endMins);
+  const endPercent = minutesToPercentage(endMins);
   const size = endPercent - startPercent;
 
   if (isMobile) {
-    block.style.top    = `${startPercent}%`;
+    block.style.top = `${startPercent}%`;
     block.style.height = `${size}%`;
   } else {
-    block.style.left  = `${startPercent}%`;
+    block.style.left = `${startPercent}%`;
     block.style.width = `${size}%`;
   }
   block.classList.remove('creating');
