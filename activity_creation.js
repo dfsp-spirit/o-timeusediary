@@ -2,6 +2,17 @@ import { getIsMobile } from './globals.js';
 import { 
     positionToMinutes,
     minutesToPercentage,
+
+function emitActivityPlacedEvent(activityData, timeline) {
+    const event = new CustomEvent('activityPlaced', {
+        detail: {
+            activity: activityData,
+            timeline: timeline
+        },
+        bubbles: true
+    });
+    timeline.dispatchEvent(event);
+}
     formatTimeHHMM,
     formatTimeHHMMWithDayOffset,
     formatTimeDDMMYYYYHHMM,
@@ -313,6 +324,8 @@ function createBlockAtClickPosition(timeline, startPercent) {
     window.timelineManager.activities[currentTimelineKey] = [];
   }
   window.timelineManager.activities[currentTimelineKey].push(activityData);
+  
+  emitActivityPlacedEvent(activityData, timeline);
 
   // Update button states after adding activity
   updateButtonStates();
@@ -434,6 +447,8 @@ function finalizeDragBlock(block, timeline) {
     window.timelineManager.activities[currentTimelineKey] = [];
   }
   window.timelineManager.activities[currentTimelineKey].push(activityData);
+  
+  emitActivityPlacedEvent(activityData, timeline);
   
   // Update button states after adding activity
   updateButtonStates();
