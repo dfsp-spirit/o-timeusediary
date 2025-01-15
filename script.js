@@ -2,29 +2,8 @@ import { TimelineMarker } from './timeline_marker.js';
 import { Timeline } from './timeline.js';
 import { TimelineContainer } from './timeline_container.js';
 
-function deselectAllActivities() {
-    console.log('Deselecting all activities...');
-    
-    // Reset both global and local selectedActivity variables
-    selectedActivity = null;
-    window.selectedActivity = null;
-    
-    // Find all selected buttons and deselect them
-    const buttons = document.querySelectorAll('.activity-button.selected');
-    buttons.forEach(btn => {
-        console.log('Deselecting button:', btn.querySelector('.activity-text').textContent);
-        btn.classList.remove('selected');
-    });
-    
-    // Clear any active category states in mobile view
-    const categories = document.querySelectorAll('.activity-category.active');
-    categories.forEach(category => {
-        category.classList.remove('active');
-    });
-    
-    console.log('After deselect - Selected buttons:', document.querySelectorAll('.activity-button.selected').length);
-}
 import { 
+    deselectAllActivities,
     getCurrentTimelineData, 
     getCurrentTimelineKey, 
     createTimelineDataFrame,

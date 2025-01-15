@@ -849,6 +849,28 @@ export function handleResize() {
     }
 }
 
+export function deselectAllActivities() {
+    console.log('Deselecting all activities...');
+    
+    // Reset both global and local selectedActivity variables
+    window.selectedActivity = null;
+    
+    // Find all selected buttons and deselect them
+    const buttons = document.querySelectorAll('.activity-button.selected');
+    buttons.forEach(btn => {
+        console.log('Deselecting button:', btn.querySelector('.activity-text').textContent);
+        btn.classList.remove('selected');
+    });
+    
+    // Clear any active category states in mobile view
+    const categories = document.querySelectorAll('.activity-category.active');
+    categories.forEach(category => {
+        category.classList.remove('active');
+    });
+    
+    console.log('After deselect - Selected buttons:', document.querySelectorAll('.activity-button.selected').length);
+}
+
 export function createTimelineDataFrame() {
     // Initialize array to hold all timeline data
     const dataFrame = [];
