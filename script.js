@@ -616,15 +616,16 @@ function renderActivities(categories, container = document.getElementById('activ
                                 color: btn.style.getPropertyValue('--color')
                             }));
                             
-                            selectedActivity = {
+                            const activityData = {
                                 name: selections.map(s => s.name).join(' | '),
-                                color: selections[0].color, // Use first color as primary
+                                color: selections[0].color,
                                 category: category.name,
-                                selections: selections // Keep full selection data
+                                selections: selections,
+                                mode: 'multiple-choice'
                             };
                             
-                            // Set window.selectedActivity to match
-                            window.selectedActivity = selectedActivity;
+                            selectedActivity = activityData;
+                            window.selectedActivity = activityData;
                         } else {
                             selectedActivity = null;
                             window.selectedActivity = null;
