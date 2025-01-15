@@ -487,12 +487,7 @@ function renderActivities(categories, container = document.getElementById('activ
                         window.selectedActivity = activityData;
                         selectedActivity = activityData;
 
-                        // Deselect after setting the activity
-                        setTimeout(() => {
-                            selectedActivity = null;
-                            window.selectedActivity = null;
-                            document.querySelectorAll('.activity-button').forEach(b => b.classList.remove('selected'));
-                        }, 100);
+                        // Don't deselect - let activity block placement handle it
                         
                         if (DEBUG_MODE) {
                             console.log('Selected activity:', window.selectedActivity);
@@ -666,12 +661,7 @@ function renderActivities(categories, container = document.getElementById('activ
                         window.selectedActivity = activityData;
                         selectedActivity = activityData;
 
-                        // Deselect after setting the activity
-                        setTimeout(() => {
-                            selectedActivity = null;
-                            window.selectedActivity = null;
-                            document.querySelectorAll('.activity-button').forEach(b => b.classList.remove('selected'));
-                        }, 100);
+                        // Don't deselect - let activity block placement handle it
                         
                         if (DEBUG_MODE) {
                             console.log('Selected activity:', window.selectedActivity);
