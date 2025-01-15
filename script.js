@@ -368,9 +368,11 @@ function renderActivities(categories, container = document.getElementById('activ
                     const isMultipleChoice = activitiesContainer.getAttribute('data-mode') === 'multiple-choice';
                     const categoryButtons = activityButton.closest('.activity-category').querySelectorAll('.activity-button');
                     
-                    // If single-choice mode AND mobile layout, hide container after selection
+                    // Only hide in mobile + single-choice mode
                     if (!isMultipleChoice && getIsMobile()) {
                         activitiesContainer.style.display = 'none';
+                    } else if (!getIsMobile()) {
+                        activitiesContainer.style.display = 'block';
                     }
                     
                     // Check if this is the "other not listed" button
@@ -1082,6 +1084,7 @@ async function init() {
         const currentKey = getCurrentTimelineKey();
         if (currentKey && window.timelineManager.metadata[currentKey]) {
             activitiesContainerElement.setAttribute('data-mode', window.timelineManager.metadata[currentKey].mode);
+            updateActivitiesContainerVisibility();
         }
         
         // Scroll to first timeline in mobile layout
@@ -1089,8 +1092,30 @@ async function init() {
         
         initButtons();
         
+        // Helper function to manage activities container visibility
+        function updateActivitiesContainerVisibility() {
+            const activitiesContainer = document.getElementById('activitiesContainer');
+            if (!activitiesContainer) return;
+
+            const isMobile = getIsMobile();
+            const isMultipleChoice = activitiesContainer.getAttribute('data-mode') === 'multiple-choice';
+
+            if (!isMobile) {
+                // Always visible in desktop
+                activitiesContainer.style.display = 'block';
+            } else {
+                // In mobile: visible for multiple-choice, hidden for single-choice after selection
+                if (isMultipleChoice) {
+                    activitiesContainer.style.display = 'block';
+                }
+            }
+        }
+
         // Add resize event listener
-        window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', () => {
+            handleResize();
+            updateActivitiesContainerVisibility();
+        });
 
         // Add floating add button click handler for mobile
         const floatingAddButton = document.getElementById('floatingAddButton');
