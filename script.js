@@ -980,9 +980,8 @@ function setupDebugClickHandler(timeline) {
         updateTimeLabel(timeLabel, formatTimeHHMM(startMinutes), formatTimeHHMM(endMinutes), currentBlock);
         timeLabel.style.display = 'block'; // Make new label visible
 
-        // Deselect the activity button after successful placement
-        document.querySelectorAll('.activity-button').forEach(btn => btn.classList.remove('selected'));
-        selectedActivity = null;
+        // Deselect all activities after successful placement
+        deselectAllActivities();
 
         const startTime = currentBlock.dataset.start;
         const endTime = currentBlock.dataset.end;
