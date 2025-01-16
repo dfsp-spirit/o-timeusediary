@@ -384,11 +384,10 @@ body {
 @media (min-width: 1440px) {
     .activities-container {
         display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: wrap; /* Allow wrapping if too many categories */
         gap: 20px;
         align-items: start;
-        visibility: visible;
-        justify-content: center;
+        justify-content: center; /* Center categories horizontally */
         margin-left: auto;
         margin-right: auto;
         width: 98vw;
@@ -397,9 +396,10 @@ body {
     }
 
     .activity-category {
-        flex: 1;
+        flex: 1 1 300px; /* Allow categories to grow/shrink with min width of 300px */
         min-width: 0;
         max-width: 300px;
+        margin: 0; /* Remove any default margins */
     }
 }
 
@@ -480,6 +480,8 @@ body {
     background: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .activity-category h3 {
