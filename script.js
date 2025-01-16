@@ -382,9 +382,8 @@ function renderActivities(categories, container = document.getElementById('activ
                     // Only hide in mobile + single-choice mode
                     if (!isMultipleChoice && getIsMobile()) {
                         activitiesContainer.style.display = 'none';
-                    } else if (!getIsMobile()) {
-                        activitiesContainer.style.display = 'block';
                     }
+                    // Desktop visibility now handled by CSS
                     
                     // Check if this is the "other not listed" button
                     if (activityButton.querySelector('.activity-text').textContent.includes('other not listed (enter)')) {
