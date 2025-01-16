@@ -1137,7 +1137,7 @@ async function init() {
 
             if (!isMobile) {
                 // Always visible in desktop
-                activitiesContainer.style.display = 'block';
+                activitiesContainer.style.display = 'flex';
             } else {
                 // In mobile: visible for multiple-choice, hidden for single-choice after selection
                 if (isMultipleChoice) {
