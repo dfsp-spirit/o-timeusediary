@@ -2,7 +2,6 @@
 
 A web-based tool for collecting and visualizing daily activities in a timeline format. Designed for research studies and time-use surveys.
 
-
 ## Features
 
 *   **Interactive Timeline Interface:**  Engage with your data through a dynamic timeline. Users can easily navigate and explore their activities with zoom and pan functionalities.
