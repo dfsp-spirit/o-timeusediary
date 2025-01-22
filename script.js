@@ -1606,8 +1606,7 @@ async function init() {
         }
         
         // Load translations with validation
-        currentTranslations = mergeTranslations(allTranslations[lang], allTranslations[fallbackLang]);
-        applyTranslations();
+        setCurrentTranslations(mergeTranslations(allTranslations[lang], allTranslations[fallbackLang]));
         
         // New instructions redirect logic
         if (data.general?.instructions && !new URLSearchParams(window.location.search).has('instructions')) {
