@@ -325,7 +325,7 @@ async function fetchActivities(key) {
                 const errorMessage = `Timeline "${key}": ${error.message}`;
                 document.getElementById('activitiesContainer').innerHTML = 
                     `<p style="color: red; padding: 10px; background: #ffebee; border: 1px solid #ef9a9a; border-radius: 4px;">
-                        ${errorMessage}
+                        ${i18n('timeline.validationError', { error: errorMessage })}
                     </p>`;
                 throw new Error(errorMessage);
             }
@@ -1651,7 +1651,7 @@ async function init() {
     } catch (error) {
         console.error('Failed to initialize application:', error);
         document.getElementById('activitiesContainer').innerHTML = 
-            '<p style="color: red;">Error loading activities. Please refresh the page to try again. Error: ' + error.message + '</p>';
+            `<p style="color: red;">${i18n('general.errors.loadError', { error: error.message })}</p>`;
     }
 }
 

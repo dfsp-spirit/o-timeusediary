@@ -1,0 +1,39 @@
+{
+  "en": {
+    "general": {
+      "appName": "O-ELIDDI",
+      "buttons": {
+        "cleanRow": "Clean Row",
+        "undo": "Undo",
+        "next": "Next",
+        "submit": "Submit",
+        "back": "Back",
+        "save": "Save Timeline"
+      },
+      "errors": {
+        "loadError": "Error loading activities: {error}",
+        "validation": {
+          "minCoverage": "min_coverage must be between 0 and 1440"
+        }
+      }
+    },
+    "timeline": {
+      "primary": "Primary Activity",
+      "coverageWarning": "Minimum coverage required: {minCoverage} minutes",
+      "validationError": "Timeline validation error: {error}"
+    },
+    "instructions": {
+      "welcome": "Welcome to the Time Use Diary",
+      "purpose": "The purpose of this exercise is to collect information on the activities you do. We are also interested in where you were and who you are with when you did each activity.",
+      "howItWorks": "How the Diary Works",
+      "diaryDescription": "A full day will be shown hourly with 10 minutes intervals from 4am - 4am. Depending on your screen size, this will appear either in horizontal (computer, laptop) or in vertical (smartphone) scrolling format.",
+      "infoRequested": "You will be asked to provide the following information:",
+      "infoItems": [
+        "Primary activity: your main activity",
+        "Secondary activity: any activity you were doing at the same time as the primary activity",
+        "Where were you at the time: at home, at work or in some other place",
+        "Who you were with: combinations of e.g. spouse, children, non-household members, their gender and age group, and your degree of contact with them"
+      ]
+    }
+  }
+}
