@@ -1,6 +1,7 @@
+import { mergeTranslations, setCurrentTranslations, fallbackLang, i18n } from '../translation.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize translations
-    import { mergeTranslations, setCurrentTranslations, fallbackLang, i18n } from '../translation.js';
     
     // Load language configuration from activities.json
     fetch('../activities.json')
