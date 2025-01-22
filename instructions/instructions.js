@@ -1,4 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize translations
+    import { mergeTranslations, setCurrentTranslations, fallbackLang, i18n } from '../translation.js';
+    
+    // Load language configuration from activities.json
+    fetch('../activities.json')
+        .then(response => response.json())
+        .then(data => {
+            const lang = data.general?.language || fallbackLang;
+            return fetch('../language.json')
+                .then(response => response.json())
+                .then(languages => {
+                    const translations = mergeTranslations(languages[lang], languages[fallbackLang]);
+                    setCurrentTranslations(translations);
+                });
+        })
+        .catch(error => console.error('Error loading translations:', error));
+
     const backBtn = document.getElementById('backBtn');
     const continueBtn = document.getElementById('continueBtn');
     
