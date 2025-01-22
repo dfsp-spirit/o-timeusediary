@@ -59,6 +59,3 @@ window.i18n = (key, params = {}) => {
     return value || key;
 };
 
-// Detect language and load translations
-const userLang = navigator.language.split('-')[0] || fallbackLang;
-loadTranslations(userLang);
