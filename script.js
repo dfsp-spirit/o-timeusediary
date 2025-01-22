@@ -1589,10 +1589,24 @@ async function init() {
     try {
         // Load initial timeline data
         const response = await fetch('activities.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
+        
+        // Validate language configuration
+        const lang = data.general?.language;
+        if (!lang) throw new Error('Language key missing in activities.json');
+        
+        // Load translations
+        const langResponse = await fetch('language.json');
+        const allTranslations = await langResponse.json();
+        
+        if (!allTranslations[lang]) {
+            throw new Error(`Language '${lang}' specified in activities.json not found in language.json`);
+        }
+        
+        // Load translations with validation
+        currentTranslations = mergeTranslations(allTranslations[lang], allTranslations[fallbackLang]);
+        applyTranslations();
         
         // New instructions redirect logic
         if (data.general?.instructions && !new URLSearchParams(window.location.search).has('instructions')) {
