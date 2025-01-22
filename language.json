@@ -13,6 +13,9 @@
         "continue": "Continue",
         "start": "Start"
       },
+      "modals": {
+        "addActivity": "Add Activity"
+      },
       "errors": {
         "loadError": "Error loading activities: {error}",
         "validation": {

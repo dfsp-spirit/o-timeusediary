@@ -1458,7 +1458,7 @@ function createModal() {
     activitiesModal.innerHTML = `
         <div class="modal">
             <div class="modal-header">
-                <h3>Add Activity</h3>
+                <h3 data-i18n="general.modals.addActivity"></h3>
                 <button class="modal-close">&times;</button>
             </div>
             <div id="modalActivitiesContainer"></div>
