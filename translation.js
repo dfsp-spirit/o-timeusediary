@@ -12,7 +12,7 @@ async function loadTranslations(lang = fallbackLang) {
     }
 }
 
-function mergeTranslations(primary, fallback) {
+export function mergeTranslations(primary, fallback) {
     const deepMerge = (target, source) => {
         for (const key in source) {
             if (source[key] instanceof Object && key in target) {
@@ -47,7 +47,8 @@ function applyTranslations() {
     });
 }
 
-window.i18n = (key, params = {}) => {
+export const i18n = (key, params = {}) => {
+window.i18n = i18n; // Also maintain global access for HTML attributes
     const keys = key.split('.');
     let value = currentTranslations;
     keys.forEach(k => value = value?.[k]);
