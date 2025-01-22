@@ -3,7 +3,7 @@ const fallbackLang = 'en';
 
 async function loadTranslations(lang = fallbackLang) {
     try {
-        const response = await fetch('language.json');
+        const response = await fetch('/language.json');
         const allTranslations = await response.json();
         currentTranslations = mergeTranslations(allTranslations[lang], allTranslations[fallbackLang]);
         applyTranslations();
