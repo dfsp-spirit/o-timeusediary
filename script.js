@@ -83,11 +83,13 @@ window.getTimelineCoverage = () => {
     return coveredMinutes;
 };
 
-const MINUTES_PER_DAY = 24 * 60;
-const INCREMENT_MINUTES = 10;
-const DEFAULT_ACTIVITY_LENGTH = 10;
-const TIMELINE_START_HOUR = 4;
-const TIMELINE_HOURS = 24;
+import {
+    MINUTES_PER_DAY,
+    INCREMENT_MINUTES,
+    DEFAULT_ACTIVITY_LENGTH,
+    TIMELINE_START_HOUR,
+    TIMELINE_HOURS
+} from './constants.js';
 
 const DEBUG_MODE = true; // Enable debug mode
 import { 
