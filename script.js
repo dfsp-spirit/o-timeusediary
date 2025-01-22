@@ -6,6 +6,33 @@ import { getCurrentTimelineData, getCurrentTimelineKey, createTimelineDataFrame 
 import { updateIsMobile, getIsMobile } from './globals.js';
 let selectedActivity = null;
 
+import {
+    MINUTES_PER_DAY,
+    INCREMENT_MINUTES,
+    DEFAULT_ACTIVITY_LENGTH,
+    TIMELINE_START_HOUR,
+    TIMELINE_HOURS
+} from './constants.js';
+
+import { 
+    formatTimeDDMMYYYYHHMM,
+    formatTimeHHMM,
+    timeToMinutes,
+    findNearestMarkers,
+    minutesToPercentage,
+    positionToMinutes,
+    calculateMinimumBlockWidth,
+    hasOverlap,
+    canPlaceActivity,
+    isTimelineFull,
+    isOverlapping,
+    generateUniqueId,
+    createTimeLabel,
+    updateTimeLabel
+} from './utils.js';
+
+const DEBUG_MODE = true; // Enable debug mode
+
 // Single timeline management object
 window.timelineManager = {
     metadata: {}, // Timeline metadata (former timelines object)
@@ -82,33 +109,6 @@ window.getTimelineCoverage = () => {
     console.log(`Timeline coverage: ${coveredMinutes} minutes covered`);
     return coveredMinutes;
 };
-
-import {
-    MINUTES_PER_DAY,
-    INCREMENT_MINUTES,
-    DEFAULT_ACTIVITY_LENGTH,
-    TIMELINE_START_HOUR,
-    TIMELINE_HOURS
-} from './constants.js';
-
-const DEBUG_MODE = true; // Enable debug mode
-import { 
-    formatTimeDDMMYYYYHHMM,
-    formatTimeHHMM,
-    timeToMinutes,
-    findNearestMarkers,
-    minutesToPercentage,
-    positionToMinutes,
-    calculateMinimumBlockWidth,
-    hasOverlap,
-    canPlaceActivity,
-    isTimelineFull,
-    isOverlapping,
-    generateUniqueId,
-    createTimeLabel,
-    updateTimeLabel
-} from './utils.js';
-
 
 // Function to add next timeline
 async function addNextTimeline() {
