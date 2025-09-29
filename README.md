@@ -2,10 +2,12 @@
 
 A web-based tool for collecting and visualizing daily activities in a timeline format. Designed for research studies and time-use surveys.
 
+**NOTE** This fork investigates options to adapt this tool to our own use cases at MPIAE.
+
 ## 🚀 Quick Start
 
-- **[Live Demo](https://andreifoldes.github.io/o-timeusediary/index.html)** - Try the application
-- **[Documentation](https://andreifoldes.github.io/o-timeusediary/docs/index.html)** - Complete setup and configuration guides
+- **[Live Demo](https://dfsp-spirit.github.io/o-timeusediary/index.html)** - Try the application
+- **[Documentation](https://dfsp-spirit.github.io/o-timeusediary/docs/index.html)** - Complete setup and configuration guides
 
 
 ## Features
@@ -64,9 +66,9 @@ We welcome contributions to O-TUD!
 ## Browser Compatibility
 
 ### Minimum Browser Requirements (2020+)
-- **Chrome:** Version 80 or later (early 2020) 
-- **Firefox:** Version 75 or later (early 2020) 
-- **Safari:** Version 13 or later (late 2019) 
+- **Chrome:** Version 80 or later (early 2020)
+- **Firefox:** Version 75 or later (early 2020)
+- **Safari:** Version 13 or later (late 2019)
 - **Edge:** Version 80 or later (early 2020)
 - **Brave:** Version 1.34 or later
 - **Opera:** Version 67 or later (early 2020)
