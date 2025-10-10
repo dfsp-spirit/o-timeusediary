@@ -2,7 +2,9 @@
 
 A web-based tool for collecting and visualizing daily activities in a timeline format. Designed for research studies and time-use surveys.
 
-**NOTE** This fork investigates options to adapt this tool to our own use cases at MPIAE.
+## Note on this forked version
+
+This fork is an adaptation of the tool to our needs at MPIAE.
 
 ## 🚀 Quick Start
 
