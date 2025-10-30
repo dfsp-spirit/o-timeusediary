@@ -1,6 +1,6 @@
-import { 
-    getCurrentTimelineData, 
-    getCurrentTimelineKey, 
+import {
+    getCurrentTimelineData,
+    getCurrentTimelineKey,
     sendData,
     formatTimeHHMM,
     timeToMinutes,
@@ -18,16 +18,16 @@ function showToast(message, type = 'info', duration = 3000) {
     // Remove any existing toasts
     const existingToasts = document.querySelectorAll('.toast');
     existingToasts.forEach(toast => toast.remove());
-    
+
     // Create new toast
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    
+
     // Trigger show animation
     setTimeout(() => toast.classList.add('show'), 10);
-    
+
     // Remove after duration
     setTimeout(() => {
         toast.classList.remove('show');
@@ -42,13 +42,13 @@ window.showToast = showToast;
 function createDisabledButtonOverlay(buttonId) {
     const button = document.getElementById(buttonId);
     if (!button) return;
-    
+
     // Remove existing overlay if any
     const existingOverlay = document.getElementById(`${buttonId}-overlay`);
     if (existingOverlay) {
         existingOverlay.remove();
     }
-    
+
     const overlay = document.createElement('div');
     overlay.id = `${buttonId}-overlay`;
     overlay.style.cssText = `
@@ -62,33 +62,33 @@ function createDisabledButtonOverlay(buttonId) {
         z-index: 10;
         display: none;
     `;
-    
+
     // Add click handler to overlay
     overlay.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         console.log('Disabled button overlay clicked:', buttonId);
-        
-        const message = window.i18n ? 
-            window.i18n.t('messages.timelineMissing') : 
+
+        const message = window.i18n ?
+            window.i18n.t('messages.timelineMissing') :
             'There is information missing from this timeline. Would you like to add anything?';
         showToast(message, 'warning', 4000);
     });
-    
+
     // Add touch handler for mobile
     overlay.addEventListener('touchend', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         console.log('Disabled button overlay touched:', buttonId);
-        
-        const message = window.i18n ? 
-            window.i18n.t('messages.timelineMissing') : 
+
+        const message = window.i18n ?
+            window.i18n.t('messages.timelineMissing') :
             'There is information missing from this timeline. Would you like to add anything?';
         showToast(message, 'warning', 4000);
     });
-    
+
     // Position overlay directly over the button
     button.style.position = 'relative';
     button.appendChild(overlay);
@@ -99,7 +99,7 @@ function createDisabledButtonOverlay(buttonId) {
 function updateDisabledButtonOverlays() {
     const nextBtn = document.getElementById('nextBtn');
     const navBtn = document.getElementById('navSubmitBtn');
-    
+
     [nextBtn, navBtn].forEach(button => {
         if (button) {
             const overlay = document.getElementById(`${button.id}-overlay`);
@@ -118,14 +118,14 @@ function initializeOverlays() {
     if (overlaysInitialized) return;
     overlaysInitialized = true;
     console.log('Initializing overlays...');
-    
+
     // Create overlays for disabled buttons
     createDisabledButtonOverlay('nextBtn');
     createDisabledButtonOverlay('navSubmitBtn');
-    
+
     // Update overlay visibility initially
     updateDisabledButtonOverlays();
-    
+
     // Watch for button state changes using MutationObserver
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
@@ -134,11 +134,11 @@ function initializeOverlays() {
             }
         });
     });
-    
+
     // Observe both buttons for disabled attribute changes
     const nextBtn = document.getElementById('nextBtn');
     const navBtn = document.getElementById('navSubmitBtn');
-    
+
     if (nextBtn) {
         observer.observe(nextBtn, { attributes: true, attributeFilter: ['disabled'] });
     }
@@ -160,7 +160,7 @@ if (document.readyState === 'loading') {
 // Also update overlays periodically as a fallback
 setInterval(() => {
     updateDisabledButtonOverlays();
-    
+
     // Re-create overlays if they don't exist
     if (!document.getElementById('nextBtn-overlay')) {
         createDisabledButtonOverlay('nextBtn');
@@ -180,7 +180,7 @@ function createModal() {
     if (existingActivitiesModal) {
         return existingActivitiesModal;
     }
-    
+
     // Create custom activity input modal
     const customActivityModal = document.createElement('div');
     customActivityModal.className = 'modal-overlay';
@@ -237,12 +237,14 @@ function createModal() {
     // NEW: Add event delegation for handling "Other not listed (enter)" clicks
     const modalActivitiesContainer = activitiesModal.querySelector('#modalActivitiesContainer');
     modalActivitiesContainer.addEventListener('click', (e) => {
+        console.log('Activities modal clicked:', e.target);
         if (
-            e.target.classList.contains('activity-name') && 
-            (e.target.textContent.trim() === 'Other not listed (enter)' || 
+            e.target.classList.contains('activity-name') &&
+            (e.target.textContent.trim() === 'Other not listed (enter)' ||
              e.target.textContent.trim().includes('Other activities not listed') ||
              e.target.textContent.trim().includes('other time use (please specify)'))
         ) {
+            console.log('Activities modal triggered by textContent:', e.target);
             // Hide the activities modal
             activitiesModal.style.cssText = 'display: none !important';
             // Show the custom activity input modal
@@ -305,12 +307,12 @@ function createModal() {
     document.body.appendChild(confirmationModal);
     document.body.appendChild(loadingModal);
     document.body.appendChild(customActivityModal);
-    
+
     // Apply translations to the newly created modal elements
     if (window.i18n && window.i18n.isReady()) {
         window.i18n.applyTranslations();
     }
-    
+
     return activitiesModal;
 }
 
@@ -321,20 +323,20 @@ function createFloatingAddButton() {
     if (existingButton) {
         return existingButton;
     }
-    
+
     const button = document.createElement('button');
     button.className = 'floating-add-button';
     button.innerHTML = '+';
     button.title = 'Add Activity';
-    
+
     const modal = createModal();
-    
+
     button.addEventListener('click', () => {
         modal.style.display = 'block';
         const currentKey = getCurrentTimelineKey();
         const categories = window.timelineManager.metadata[currentKey].categories;
         renderActivities(categories, document.getElementById('modalActivitiesContainer'));
-        
+
         if (getIsMobile()) {
             const firstCategory = modal.querySelector('.activity-category');
             if (firstCategory) {
@@ -344,11 +346,11 @@ function createFloatingAddButton() {
     });
 
     document.body.appendChild(button);
-    
+
     // Initialize the footer and header heights
     updateFooterHeight();
     updateHeaderHeight();
-    
+
     // Add resize observer to update footer height when it changes
     const footer = document.getElementById('instructionsFooter');
     if (footer) {
@@ -357,7 +359,7 @@ function createFloatingAddButton() {
         });
         resizeObserver.observe(footer);
     }
-    
+
     // Add resize observer to update header height when it changes
     const header = document.querySelector('.header-section');
     if (header) {
@@ -375,7 +377,7 @@ function updateFloatingButtonPosition() {
 
     const floatingButton = document.querySelector('.floating-add-button');
     const lastTimelineWrapper = document.querySelector('.last-initialized-timeline-wrapper');
-    
+
     if (!floatingButton || !lastTimelineWrapper) return;
 
     // Get the active timeline container within the wrapper
@@ -384,14 +386,14 @@ function updateFloatingButtonPosition() {
 
     const containerRect = activeTimelineContainer.getBoundingClientRect();
     const buttonWidth = floatingButton.offsetWidth;
-    
+
     // Position the button 15px to the right of the active timeline container
     const leftPosition = containerRect.right + 15;
-    
+
     // Ensure button doesn't go off screen (leave 10px margin from screen edge)
     const maxLeft = window.innerWidth - buttonWidth - 10;
     const finalLeft = Math.min(leftPosition, maxLeft);
-    
+
     // Only update if the calculated position is valid (not negative)
     if (finalLeft >= 0) {
         floatingButton.style.left = `${finalLeft}px`;
@@ -404,41 +406,41 @@ function updateButtonStates() {
     const nextButton = document.getElementById('nextBtn');
     const backButton = document.getElementById('backBtn');
     const navSubmitBtn = document.getElementById('navSubmitBtn');
-    
+
     const currentData = getCurrentTimelineData();
     const isEmpty = currentData.length === 0;
-    
+
     // Check if there's an active timeline with activities
     const activeTimeline = window.timelineManager.activeTimeline;
     const hasActivities = activeTimeline && activeTimeline.querySelector('.activity-block');
-    
+
     if (undoButton) undoButton.disabled = isEmpty;
     if (cleanRowButton) cleanRowButton.disabled = !hasActivities;
-    
+
     // Update Back button state - enable if not on first timeline
     if (backButton) {
         backButton.disabled = window.timelineManager.currentIndex <= 0;
     }
-    
+
     // Get current timeline coverage
     const currentKey = getCurrentTimelineKey();
     const currentTimeline = window.timelineManager.metadata[currentKey];
     const currentCoverage = window.getTimelineCoverage();
-        
+
     // Get minimum coverage requirement for current timeline
     const minCoverage = parseInt(currentTimeline.minCoverage) || 0;
     const meetsMinCoverage = currentCoverage >= minCoverage;
 
     // Check if we're on the last timeline
     const isLastTimeline = window.timelineManager.currentIndex === window.timelineManager.keys.length - 1;
-    
+
     // Get text values for buttons
     const nextText = window.i18n ? window.i18n.t('buttons.next') : 'Next';
     const submitText = window.i18n ? window.i18n.t('buttons.submit') : 'Submit';
-    
+
     if (nextButton) {
         nextButton.disabled = !meetsMinCoverage;
-        
+
         if (isLastTimeline) {
             // On last timeline, show Submit
             nextButton.innerHTML = `<i class="fas fa-check"></i> ${submitText}`;
@@ -447,14 +449,14 @@ function updateButtonStates() {
             nextButton.innerHTML = `${nextText} <i class="fas fa-arrow-right"></i>`;
         }
     }
-    
+
     // Update navSubmitBtn to mirror nextButton exactly
     if (navSubmitBtn) {
         navSubmitBtn.disabled = !meetsMinCoverage;
-        
+
         // Find the span element inside navSubmitBtn
         const navSubmitSpan = navSubmitBtn.querySelector('span');
-        
+
         if (isLastTimeline) {
             // On last timeline, show Submit with green color
             if (navSubmitSpan) {
@@ -493,7 +495,7 @@ const handleNextButtonAction = () => {
     nextButtonLastClick = currentTime;
 
     const isLastTimeline = window.timelineManager.currentIndex === window.timelineManager.keys.length - 1;
-    
+
     if (isLastTimeline) {
         // On last timeline, show confirmation modal
         document.getElementById('confirmationModal').style.display = 'block';
@@ -536,7 +538,7 @@ const handleUndoButtonAction = () => {
         // Work with a copy to avoid modifying the original array until validation passes
         const currentDataCopy = [...currentData];
         const lastActivity = currentDataCopy.pop();
-        
+
         // Update timeline manager activities and validate
         window.timelineManager.activities[currentKey] = currentDataCopy;
         try {
@@ -553,14 +555,14 @@ const handleUndoButtonAction = () => {
             }
             return;
         }
-        
+
         if (DEBUG_MODE) {
             console.log('Removing activity:', lastActivity);
         }
 
         const timeline = window.timelineManager.activeTimeline;
         const blocks = timeline.querySelectorAll('.activity-block');
-        
+
         if (DEBUG_MODE) {
             blocks.forEach(block => {
                 console.log('Block id:', block.dataset.id, 'Last activity id:', lastActivity.id);
@@ -576,7 +578,7 @@ const handleUndoButtonAction = () => {
         });
 
         updateButtonStates();
-        
+
         if (DEBUG_MODE) {
             console.log('Final timelineData:', window.timelineManager.activities);
         }
@@ -587,7 +589,7 @@ let buttonsInitialized = false;
 function initButtons() {
     if (buttonsInitialized) return;
     buttonsInitialized = true;
-    
+
     const cleanRowBtn = document.getElementById('cleanRowBtn');
     const navSubmitBtn = document.getElementById('navSubmitBtn');
 
@@ -595,20 +597,20 @@ function initButtons() {
     if (navSubmitBtn) {
         // Allow pointer events on disabled button to show toast
         navSubmitBtn.style.pointerEvents = 'auto';
-        
+
         navSubmitBtn.addEventListener('click', () => {
             const nextBtn = document.getElementById('nextBtn');
-            
+
             // Check if the Next button is disabled
             if (nextBtn && nextBtn.disabled) {
                 // Show toast message when trying to click disabled nav button
-                const message = window.i18n ? 
-                    window.i18n.t('messages.timelineMissing') : 
+                const message = window.i18n ?
+                    window.i18n.t('messages.timelineMissing') :
                     'There is information missing from this timeline. Would you like to add anything?';
                 showToast(message, 'warning', 4000);
                 return;
             }
-            
+
             if (nextBtn && !nextBtn.disabled) {
                 // Use the shared debounced function instead of programmatic click
                 handleNextButtonAction();
@@ -623,7 +625,7 @@ function initButtons() {
             // Get the activities container of the active timeline
             const activeTimeline = window.timelineManager.activeTimeline;
             const activitiesContainer = activeTimeline.querySelector('.activities');
-            
+
             if (activitiesContainer) {
                 // Remove all activity blocks from the DOM
                 while (activitiesContainer.firstChild) {
@@ -633,7 +635,7 @@ function initButtons() {
 
             // Clear the activities data for current timeline
             window.timelineManager.activities[currentKey] = [];
-            
+
             try {
                 window.timelineManager.metadata[currentKey].validate();
             } catch (error) {
@@ -641,7 +643,7 @@ function initButtons() {
                 alert('Timeline validation error: ' + error.message);
                 return;
             }
-                
+
             updateButtonStates();
 
             if (DEBUG_MODE) {
@@ -656,23 +658,23 @@ function initButtons() {
 
     // Add click handler for Next button
     const nextBtn = document.getElementById('nextBtn');
-    
+
     // Allow pointer events on disabled button to show toast
     nextBtn.style.pointerEvents = 'auto';
-    
+
     nextBtn.addEventListener('click', function(e) {
         // Check if button is disabled
         if (nextBtn.disabled) {
             e.preventDefault();
             e.stopPropagation();
             // Show toast message when disabled button is clicked
-            const message = window.i18n ? 
-                window.i18n.t('messages.timelineMissing') : 
+            const message = window.i18n ?
+                window.i18n.t('messages.timelineMissing') :
                 'There is information missing from this timeline. Would you like to add anything?';
             showToast(message, 'warning', 4000);
             return;
         }
-        
+
         // Otherwise proceed with normal action
         handleNextButtonAction();
     });
@@ -693,21 +695,21 @@ function updateDebugOverlay(mouseX, mouseY, timelineRect) {
     if (!debugOverlay) return;
 
     const isMobile = getIsMobile();
-    
+
     // In mobile mode, if no timelineRect is provided, get it from active timeline
     if (isMobile && !timelineRect) {
         const activeTimeline = window.timelineManager.activeTimeline;
         if (!activeTimeline) return;
         timelineRect = activeTimeline.getBoundingClientRect();
     }
-    
+
     let positionPercent, axisPosition, axisSize;
 
     // Get viewport and header dimensions
     const viewportHeight = window.innerHeight;
     const headerSection = document.querySelector('.header-section');
     const headerBottom = headerSection ? headerSection.getBoundingClientRect().bottom : 0;
-    
+
     // Calculate available height (space between header bottom and viewport bottom)
     const availableHeight = viewportHeight - headerBottom;
 
@@ -789,7 +791,7 @@ function updateGradientBarLayout() {
 // Helper function to scroll to active timeline
 function scrollToActiveTimeline() {
     if (!window.timelineManager.activeTimeline) return;
-    
+
     const activeTimeline = window.timelineManager.activeTimeline.closest('.timeline-container');
     if (!activeTimeline) return;
 
@@ -799,17 +801,17 @@ function scrollToActiveTimeline() {
         if (timelinesWrapper) {
             // Check if wrapper has scrollable overflow
             const hasScrollableOverflow = timelinesWrapper.scrollWidth > timelinesWrapper.clientWidth;
-            
+
             if (hasScrollableOverflow) {
                 // Calculate if timeline is partially or fully hidden
                 const timelineRect = activeTimeline.getBoundingClientRect();
                 const wrapperRect = timelinesWrapper.getBoundingClientRect();
-                
+
                 // Check if timeline is not fully visible
-                const isPartiallyHidden = 
+                const isPartiallyHidden =
                     timelineRect.left < wrapperRect.left ||
                     timelineRect.right > wrapperRect.right;
-                
+
                 if (isPartiallyHidden) {
                     // Scroll to make timeline fully visible
                     timelinesWrapper.scrollTo({
@@ -824,7 +826,7 @@ function scrollToActiveTimeline() {
         const windowHeight = window.innerHeight;
         const timelineRect = activeTimeline.getBoundingClientRect();
         const scrollTarget = window.pageYOffset + timelineRect.top - (windowHeight / 2) + (timelineRect.height / 2);
-        
+
         window.scrollTo({
             top: scrollTarget,
             behavior: 'smooth'
@@ -835,7 +837,7 @@ function scrollToActiveTimeline() {
 function updateTimelineCountVariable() {
     const pastTimelinesWrapper = document.querySelector('.past-initialized-timelines-wrapper');
     if (!pastTimelinesWrapper) return;
-    
+
     const timelineCount = pastTimelinesWrapper.querySelectorAll('.timeline-container').length;
     pastTimelinesWrapper.style.setProperty('--timeline-count', timelineCount);
 }
@@ -844,7 +846,7 @@ function updateTimelineCountVariable() {
 function preventPullToRefresh() {
     // Only prevent overscroll on iOS Safari and Chrome
     document.body.style.overscrollBehavior = 'none';
-    
+
     // For iOS Safari - only prevent default when at the top of the page and pulling down
     document.addEventListener('touchstart', function(e) {
         // Store the initial touch position
@@ -854,7 +856,7 @@ function preventPullToRefresh() {
     document.addEventListener('touchmove', function(e) {
         const touchY = e.touches[0].clientY;
         const touchYDelta = touchY - window.touchStartY;
-        
+
         // Only prevent default if we're at the top and trying to pull down
         if (window.pageYOffset === 0 && touchYDelta > 0) {
             e.preventDefault();
@@ -903,12 +905,12 @@ function hideLoadingModal() {
 }
 
 // Initialize UI components
-export { 
+export {
     showToast,
-    createModal, 
-    createFloatingAddButton, 
-    updateFloatingButtonPosition, 
-    updateButtonStates, 
+    createModal,
+    createFloatingAddButton,
+    updateFloatingButtonPosition,
+    updateButtonStates,
     initButtons,
     updateDebugOverlay,
     hideDebugOverlay,
