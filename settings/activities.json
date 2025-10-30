@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "author": "John",
     "language": "en",
-    "instructions": true,
+    "instructions": false,
     "primary_redirect_url": "pages/thank-you.html",
     "fallbackToCSV": true
   },
