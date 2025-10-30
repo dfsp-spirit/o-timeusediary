@@ -1,14 +1,14 @@
 {
   "general": {
-    "experimentID": "irrelevant",
+    "experimentID": "eR8ENvJPgQth",
     "app_name": "O-ELIDDI",
     "version": "1.0.0",
-    "author": "John",
+    "author": "John Doe",
     "language": "en",
     "instructions": true,
     "primary_redirect_url": "pages/thank-you.html",
     "fallbackToCSV": true
-  },
+  }, 
   "timeline": {
     "primary": {
         "name": "Primary activity",
@@ -2380,6 +2380,177 @@
           }
         ]
       },
+    "location": {
+      "name": "Location",
+      "description": "Where were you?",
+      "mode": "single-choice",
+      "min_coverage": "0",
+      "categories": [
+        {
+          "name": " ",
+          "activities": [
+            {
+              "name": "Home",
+              "examples": "",
+              "color": "#a8f0de",
+              "childItems": [
+                {
+                  "name": "Indoor",
+                  "color": "#88e0ce"
+                },
+                {
+                  "name": "Outdoor",
+                  "color": "#c8ffee"
+                }
+              ]
+            },
+            {
+              "name": "Work",
+              "examples": "",
+              "color": "#f0a8ac",
+              "childItems": [
+                {
+                  "name": "Indoor",
+                  "color": "#e098a0"
+                },
+                {
+                  "name": "Outdoor",
+                  "color": "#ffb8bc"
+                }
+              ]
+            },
+            {
+              "name": "School/College",
+              "examples": "",
+              "color": "#c1f0a8",
+              "childItems": [
+                {
+                  "name": "Indoor",
+                  "color": "#b1e098"
+                },
+                {
+                  "name": "Outdoor",
+                  "color": "#d1ffb8"
+                }
+              ]
+            },
+            {
+              "name": "Other people's home",
+              "examples": "",
+              "color": "#a8f0ba",
+              "childItems": [
+                {
+                  "name": "Indoor",
+                  "color": "#98e0aa"
+                },
+                {
+                  "name": "Outdoor",
+                  "color": "#b8ffca"
+                }
+              ]
+            },
+            {
+              "name": "Restaurant, cafe or pub",
+              "examples": "",
+              "color": "#a8b5f0",
+              "childItems": [
+                {
+                  "name": "Indoor",
+                  "color": "#98a5e0"
+                },
+                {
+                  "name": "Outdoor",
+                  "color": "#b8c5ff"
+                }
+              ]
+            },
+            {
+              "name": "Shops, shopping centres, malls, markets",
+              "examples": "",
+              "color": "#f0c6a8",
+              "childItems": [
+                {
+                  "name": "Indoor",
+                  "color": "#e0b698"
+                },
+                {
+                  "name": "Outdoor",
+                  "color": "#ffd6b8"
+                }
+              ]
+            },
+            {
+              "name": "Other",
+              "examples": "",
+              "color": "#a8f0b1",
+              "childItems": [
+                {
+                  "name": "Indoor",
+                  "color": "#98e0a1"
+                },
+                {
+                  "name": "Outdoor",
+                  "color": "#b8ffc1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "who": {
+      "name": "Who",
+      "description": "Who were you with?",
+      "mode": "multiple-choice",
+      "min_coverage": "0",
+      "categories": [
+        {
+          "name": " ",
+          "activities": [
+            {
+              "name": "Alone",
+              "examples": "",
+              "color": "#cdf0a8"
+            }
+          ]
+        },
+        {
+          "name": " ",
+          "activities": [
+            {
+              "name": "Spouse / partner",
+              "examples": "",
+              "color": "#f0a8d1"
+            },
+            {
+              "name": "Child under 12 from your household",
+              "examples": "",
+              "color": "#a8bff0"
+            },
+            {
+              "name": "Young Person 12-16 from your household",
+              "examples": "",
+              "color": "#caa8f0"
+            },
+            {
+              "name": "Other household member",
+              "examples": "",
+              "color": "#b5a8f0"
+            },
+            {
+              "name": "Non-household children",
+              "examples": "",
+              "color": "#a8e6f0"
+            },
+            {
+              "name": "Other non-household",
+              "examples": "",
+              "color": "#a8f0dd"
+            }
+          ]
+        }
+      ]
+    },
     "device": {
       "name": "Device",
       "description": "Were you using a computer/tablet/smartphone?",
@@ -2403,6 +2574,54 @@
               "name": "Smartphone",
               "examples": "",
               "color": "#a8f0ef"
+            }
+          ]
+        }
+      ]
+    },
+    "enjoyment": {
+      "name": "Enjoyment",
+      "description": "How much did you enjoy yourself doing this activity?",
+      "mode": "single-choice",
+      "min_coverage": "0",
+      "categories": [
+        {
+          "name": " ",
+          "activities": [
+            {
+              "name": "7 - Enjoyed very much",
+              "examples": "",
+              "color": "#FF9EC0"
+            },
+            {
+              "name": "6",
+              "examples": "",
+              "color": "#FFACC9"
+            },
+            {
+              "name": "5",
+              "examples": "",
+              "color": "#FFBAD2"
+            },
+            {
+              "name": "4",
+              "examples": "",
+              "color": "#FFC8DB"
+            },
+            {
+              "name": "3",
+              "examples": "",
+              "color": "#FFD6E4"
+            },
+            {
+              "name": "2",
+              "examples": "",
+              "color": "#FFE4ED"
+            },
+            {
+              "name": "1 - Didn't enjoy at all",
+              "examples": "",
+              "color": "#FFF2F6"
             }
           ]
         }
