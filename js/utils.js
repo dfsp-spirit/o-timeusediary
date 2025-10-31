@@ -431,42 +431,83 @@ export function isOverlapping(elem1, elem2) {
     );
 }
 
+
 export function createTimelineDataFrame() {
-    // Initialize array to hold all timeline data
-    const dataFrame = [];
+    const data = [];
 
-    // Get all timeline keys
-    const timelineKeys = window.timelineManager.keys;
+    Object.keys(window.timelineManager.activities).forEach(timelineKey => {
+        const activities = window.timelineManager.activities[timelineKey];
 
-    // Get study parameters if they exist
-    const studyParams = (window.timelineManager.study && Object.keys(window.timelineManager.study).length > 0)
-        ? window.timelineManager.study
-        : {};
-
-    // Iterate through each timeline
-    timelineKeys.forEach(timelineKey => {
-        const activities = window.timelineManager.activities[timelineKey] || [];
-
-        // Add each activity to the dataframe with its timeline key
         activities.forEach(activity => {
             const row = {
+                // Basic fields
                 timelineKey: timelineKey,
                 activity: activity.activity,
                 category: activity.category,
                 startTime: activity.startTime,
-                endTime: activity.endTime
+                endTime: activity.endTime,
+                blockLength: activity.blockLength,
+                color: activity.color,
+
+                // Enhanced context for recreation
+                parentActivity: activity.parentName || activity.activity,
+                selected: activity.selected || activity.activity,
+                isCustomInput: activity.isCustomInput || false,
+                originalSelection: activity.originalSelection || null,
+
+                // For proper ordering and positioning
+                startMinutes: activity.startMinutes,
+                endMinutes: activity.endMinutes,
+
+                // Unique identifier
+                id: activity.id
             };
-
-            // Only add study params if they exist
-            if(Object.keys(studyParams).length > 0) {
-                Object.assign(row, studyParams);
-            }
-
-            dataFrame.push(row);
+            data.push(row);
         });
     });
 
-    return dataFrame;
+    return data;
+}
+
+export function createTimelineJSON(stringify = false) {
+    const data = [];
+
+    Object.keys(window.timelineManager.activities).forEach(timelineKey => {
+        const activities = window.timelineManager.activities[timelineKey];
+
+        activities.forEach(activity => {
+            const row = {
+                // Basic fields
+                timelineKey: timelineKey,
+                activity: activity.activity,
+                category: activity.category,
+                startTime: activity.startTime,
+                endTime: activity.endTime,
+                blockLength: activity.blockLength,
+                color: activity.color,
+
+                // Enhanced context for recreation
+                parentActivity: activity.parentName || activity.activity,
+                selected: activity.selected || activity.activity,
+                isCustomInput: activity.isCustomInput || false,
+                originalSelection: activity.originalSelection || null,
+
+                // For proper ordering and positioning
+                startMinutes: activity.startMinutes,
+                endMinutes: activity.endMinutes,
+
+                // Unique identifier
+                id: activity.id
+            };
+            data.push(row);
+        });
+    });
+
+    if (!stringify) {
+        return data;
+    }
+
+    return JSON.stringify(data, null, 2);
 }
 
 /**
@@ -883,7 +924,7 @@ function downloadCSV(csvString, filename) {
  *   or { mode: 'csv' } to trigger a CSV file download.
  *   During development, the default is 'datapipe' mode.
  */
-export async function sendData(options = { mode: 'csv' }) {  // TODO: change default back to 'datapipe'
+export async function sendData(options = { mode: 'json' }) {  // TODO: change default back to 'datapipe'. options: 'datapipe', 'csv', 'json'
     // Sync URL parameters before sending data
     syncURLParamsToStudy();
 
@@ -906,6 +947,15 @@ export async function sendData(options = { mode: 'csv' }) {  // TODO: change def
 
         // Hide loading modal after CSV download
         hideLoadingModal();
+    } else if (options.mode === 'json') {
+        // Create timeline data frame and convert to JSON for download
+        const dataJSON = createTimelineJSON(false);
+        const jsonString = JSON.stringify(dataJSON, null, 2);
+        console.log('=== DATA FRAME FOR JSON ===');
+        console.log('Full data structure:', jsonString);
+        console.log('Number of records:', dataJSON.length);
+        hideLoadingModal();
+
     } else {
         throw new Error(`Unsupported send mode: ${options.mode}`);
     }

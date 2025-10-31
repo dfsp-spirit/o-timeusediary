@@ -82,6 +82,193 @@ import {
     updateTimeLabel
 } from './utils.js';
 
+
+// Add this after the imports and before other functions
+function createActivityBlock(activityData, isFromTemplate = false) {
+    const currentBlock = document.createElement('div');
+    currentBlock.className = 'activity-block';
+    currentBlock.dataset.timelineKey = getCurrentTimelineKey();
+
+    // Use existing ID or generate new one
+    currentBlock.dataset.id = activityData.id || generateUniqueId();
+
+    // Set all data attributes
+    currentBlock.dataset.start = activityData.startTime;
+    currentBlock.dataset.end = activityData.endTime;
+    currentBlock.dataset.length = activityData.blockLength;
+    currentBlock.dataset.category = activityData.category;
+    currentBlock.dataset.mode = activityData.mode || 'single-choice';
+    currentBlock.dataset.count = activityData.count || 1;
+    currentBlock.dataset.startMinutes = activityData.startMinutes;
+    currentBlock.dataset.endMinutes = activityData.endMinutes;
+
+    // Store parent name if this is a child activity
+    if (activityData.parentName && activityData.parentName !== activityData.activity) {
+        currentBlock.dataset.parentName = activityData.parentName;
+    }
+
+    // Handle multiple selections (gradient backgrounds)
+    if (activityData.selections) {
+        const colors = activityData.selections.map(s => s.color);
+        const isMobile = getIsMobile();
+        const numSelections = colors.length;
+        const percentage = 100 / numSelections;
+
+        if (isMobile) {
+            // Horizontal splits for mobile
+            const stops = colors.map((color, index) =>
+                `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
+            ).join(', ');
+            currentBlock.style.background = `linear-gradient(to right, ${stops})`;
+        } else {
+            // Vertical splits for desktop
+            const stops = colors.map((color, index) =>
+                `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
+            ).join(', ');
+            currentBlock.style.background = `linear-gradient(to bottom, ${stops})`;
+        }
+    } else {
+        currentBlock.style.backgroundColor = activityData.color;
+    }
+
+    // Create text content
+    const textDiv = document.createElement('div');
+    let combinedActivityText;
+
+    if (activityData.selections) {
+        // For multiple selections, join names with line break in the text div
+        textDiv.innerHTML = activityData.selections.map(s => s.name).join('<br>');
+        // But join with vertical separator for storing in timelineManager
+        combinedActivityText = activityData.selections.map(s => s.name).join(' | ');
+    } else {
+        // If this is a child item, display the parent name instead, but store both
+        if (activityData.parentName && activityData.parentName !== activityData.activity) {
+            textDiv.textContent = activityData.parentName;
+            combinedActivityText = activityData.activity;
+        } else {
+            textDiv.textContent = activityData.activity;
+            combinedActivityText = activityData.activity;
+        }
+    }
+
+    textDiv.style.maxWidth = '90%';
+    textDiv.style.overflow = 'hidden';
+    textDiv.style.textOverflow = 'ellipsis';
+    textDiv.style.whiteSpace = 'nowrap';
+
+    // Set initial class based on length and mode
+    const length = parseInt(activityData.blockLength);
+    textDiv.className = getIsMobile()
+        ? (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-narrow')
+        : (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-vertical');
+
+    currentBlock.appendChild(textDiv);
+
+    // Add tooltip to show the selected child item when hovering
+    if (activityData.parentName && activityData.parentName !== activityData.activity) {
+        currentBlock.setAttribute('title', `${activityData.parentName}: ${activityData.activity}`);
+    }
+
+    // Positioning logic (SAME AS EXISTING)
+    const startPositionPercent = minutesToPercentage(activityData.startMinutes);
+    const blockSize = ((activityData.endMinutes - activityData.startMinutes) / MINUTES_PER_DAY) * 100;
+
+    // Fixed dimensions for consistency
+    const MOBILE_BLOCK_WIDTH = 75;
+    const DESKTOP_BLOCK_HEIGHT = 90;
+    const MOBILE_OFFSET = 25;
+    const DESKTOP_OFFSET = 5;
+
+    if (getIsMobile()) {
+        currentBlock.style.height = `${blockSize}%`;
+        currentBlock.style.top = `${startPositionPercent}%`;
+        currentBlock.style.width = `${MOBILE_BLOCK_WIDTH}%`;
+        currentBlock.style.left = `${MOBILE_OFFSET}%`;
+    } else {
+        currentBlock.style.width = `${blockSize}%`;
+        currentBlock.style.left = `${startPositionPercent}%`;
+        currentBlock.style.height = '75%';
+        currentBlock.style.top = '25%';
+    }
+
+    // Return both the block and the standardized activity data
+    return {
+        block: currentBlock,
+        activityData: {
+            id: currentBlock.dataset.id,
+            activity: combinedActivityText,
+            category: activityData.category,
+            startTime: activityData.startTime,
+            endTime: activityData.endTime,
+            blockLength: activityData.blockLength,
+            color: activityData.color,
+            parentName: activityData.parentName || combinedActivityText,
+            selected: activityData.selected || combinedActivityText,
+            isCustomInput: activityData.isCustomInput || false,
+            originalSelection: activityData.originalSelection || null,
+            startMinutes: activityData.startMinutes,
+            endMinutes: activityData.endMinutes,
+            mode: activityData.mode || 'single-choice',
+            count: activityData.count || 1
+        }
+    };
+}
+
+// Recreate a single activity block from template (JSON data, typically loaded from storage)
+function recreateActivityBlockFromTemplate(activityData) {
+    const result = createActivityBlock(activityData, true);
+    const currentBlock = result.block;
+
+    // Add to DOM
+    const activitiesContainer = window.timelineManager.activeTimeline.querySelector('.activities') || (() => {
+        const container = document.createElement('div');
+        container.className = 'activities';
+        window.timelineManager.activeTimeline.appendChild(container);
+        return container;
+    })();
+
+    activitiesContainer.appendChild(currentBlock);
+
+    // Create time label
+    const timeLabel = createTimeLabel(currentBlock);
+    updateTimeLabel(timeLabel, activityData.startTime, activityData.endTime, currentBlock);
+
+    // Store in timeline manager
+    getCurrentTimelineData().push(result.activityData);
+
+    // Re-initialize interact.js for the new block
+    initTimelineInteraction(window.timelineManager.activeTimeline);
+
+    return result;
+}
+
+// Load entire timeline from JSON data (array of activity objects)
+export function loadTimelineFromJSON(jsonData) {
+    // Clear existing timeline data
+    const currentKey = getCurrentTimelineKey();
+    window.timelineManager.activities[currentKey] = [];
+
+    // Clear visual timeline
+    const activitiesContainer = window.timelineManager.activeTimeline.querySelector('.activities');
+    if (activitiesContainer) {
+        activitiesContainer.innerHTML = '';
+    }
+
+    // Sort by start time to maintain order
+    const sortedData = jsonData.sort((a, b) => a.startMinutes - b.startMinutes);
+
+    // Recreate each activity
+    sortedData.forEach(activityData => {
+        recreateActivityBlockFromTemplate(activityData);
+    });
+
+    updateButtonStates();
+
+    console.log(`Loaded ${jsonData.length} activities from template`);
+}
+
+
+
 // NEW: Helper functions to format timeline times based on our 04:00 (240 minutes) rule
 function formatTimelineStart(minutes) {
     // Normalize to current day (0-1440)
@@ -2004,141 +2191,31 @@ function initTimelineInteraction(timeline) {
             return;
         }
 
-        const currentBlock = document.createElement('div');
-        currentBlock.className = 'activity-block';
-        currentBlock.dataset.timelineKey = getCurrentTimelineKey();
-
-        // Replace this section with proper time formatting that handles (+1) notation
-        const isNextDayStart = startMinutes >= 1440 || startMinutes < 240; // Time is after midnight (1440) or before 04:00 next day
+        // Use the reusable createActivityBlock function instead of manual creation
         const formattedStartTime = formatTimeHHMM(startMinutes, false);
         const formattedEndTime = formatTimeHHMM(endMinutes, true);
 
-        currentBlock.dataset.start = formattedStartTime;
-        currentBlock.dataset.end = formattedEndTime;
-        currentBlock.dataset.length = endMinutes - startMinutes;
-        currentBlock.dataset.category = window.selectedActivity.category;
-        currentBlock.dataset.mode = window.selectedActivity.selections ? 'multiple-choice' : 'single-choice';
-        currentBlock.dataset.count = window.selectedActivity.selections ? window.selectedActivity.selections.length : 1;
-        currentBlock.dataset.startMinutes = startMinutes;
-        currentBlock.dataset.endMinutes = endMinutes;
+        const activityData = {
+            activity: window.selectedActivity.selections ?
+                window.selectedActivity.selections.map(s => s.name).join(' | ') :
+                window.selectedActivity.name,
+            category: window.selectedActivity.category,
+            startTime: formattedStartTime,
+            endTime: formattedEndTime,
+            blockLength: endMinutes - startMinutes,
+            color: window.selectedActivity.color,
+            parentName: window.selectedActivity.parentName,
+            selected: window.selectedActivity.selected,
+            isCustomInput: window.selectedActivity.isCustomInput,
+            originalSelection: window.selectedActivity.originalSelection,
+            startMinutes: startMinutes,
+            endMinutes: endMinutes,
+            mode: window.selectedActivity.selections ? 'multiple-choice' : 'single-choice',
+            count: window.selectedActivity.selections ? window.selectedActivity.selections.length : 1
+        };
 
-        // Store parent name if this is a child activity
-        if (window.selectedActivity.parentName) {
-            currentBlock.dataset.parentName = window.selectedActivity.parentName;
-        }
-
-        // Add raw minutes data attributes
-        currentBlock.dataset.startMinutes = startMinutes;
-        currentBlock.dataset.endMinutes = endMinutes;
-        if (window.selectedActivity.selections) {
-            // Multiple selections - create split background
-            const colors = window.selectedActivity.selections.map(s => s.color);
-            const isMobile = getIsMobile();
-            const numSelections = colors.length;
-            const percentage = 100 / numSelections;
-
-            if (isMobile) {
-                // Horizontal splits for mobile
-                const stops = colors.map((color, index) =>
-                    `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
-                ).join(', ');
-                currentBlock.style.background = `linear-gradient(to right, ${stops})`;
-            } else {
-                // Vertical splits for desktop
-                const stops = colors.map((color, index) =>
-                    `${color} ${index * percentage}%, ${color} ${(index + 1) * percentage}%`
-                ).join(', ');
-                currentBlock.style.background = `linear-gradient(to bottom, ${stops})`;
-            }
-        } else {
-            currentBlock.style.backgroundColor = window.selectedActivity.color;
-        }
-        const textDiv = document.createElement('div');
-        let combinedActivityText;
-
-        if (window.selectedActivity.selections) {
-            if (DEBUG_MODE) {
-                console.log('Multiple selections:', window.selectedActivity.selections);
-            }
-            // For multiple selections, join names with line break in the text div
-            textDiv.innerHTML = window.selectedActivity.selections.map(s => s.name).join('<br>');
-            // But join with vertical separator for storing in timelineManager
-            combinedActivityText = window.selectedActivity.selections.map(s => s.name).join(' | ');
-        } else {
-            // If this is a child item, display the parent name instead, but store both
-            if (window.selectedActivity.parentName) {
-                textDiv.textContent = window.selectedActivity.parentName;
-                combinedActivityText = window.selectedActivity.name;
-            } else {
-                textDiv.textContent = window.selectedActivity.name;
-                combinedActivityText = window.selectedActivity.name;
-            }
-        }
-        textDiv.style.maxWidth = '90%';
-        textDiv.style.overflow = 'hidden';
-        textDiv.style.textOverflow = 'ellipsis';
-        textDiv.style.whiteSpace = 'nowrap';
-        // Set initial class based on length and mode
-        const length = parseInt(currentBlock.dataset.length);
-
-        // Always use narrow text in mobile mode, add wide and resized only if length >= 60
-        textDiv.className = getIsMobile()
-            ? (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-narrow')
-            : (length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-vertical');
-        currentBlock.appendChild(textDiv);
-
-        // Add tooltip to show the selected child item when hovering
-        if (window.selectedActivity.parentName) {
-            currentBlock.setAttribute('title', `${window.selectedActivity.parentName}: ${window.selectedActivity.name}`);
-        }
-
-        // Convert minutes to percentage for positioning
-        const startPositionPercent = minutesToPercentage(startMinutes);
-        const endPositionPercent = minutesToPercentage(endMinutes);
-        // Set block size to exactly 10/1440 percentage (10 minutes out of 24 hours)
-        let blockSize = (10 / 1440) * 100;  // This equals approximately 0.694444%
-
-        // Ensure minimum block width is maintained
-        blockSize = Math.max(blockSize, calculateMinimumBlockWidth());
-
-        // Adjust end time to match the block size
-        const adjustedEndMinutes = startMinutes + 10;
-
-        // Fixed dimensions for consistency
-        const MOBILE_BLOCK_WIDTH = 75; // 75% width in mobile mode
-        const DESKTOP_BLOCK_HEIGHT = 90; // Changed from 60 to 90
-        const MOBILE_OFFSET = 25; // Centers the block at 25% from left
-        const DESKTOP_OFFSET = 5; // Changed from 25 to 5 to keep blocks centered
-
-        if (isMobile) {
-            currentBlock.style.height = `${blockSize}%`;
-            currentBlock.style.top = `${startPositionPercent}%`;
-            currentBlock.style.width = `${MOBILE_BLOCK_WIDTH}%`;
-            currentBlock.style.left = `${MOBILE_OFFSET}%`;
-
-            // Add original data attributes for mobile/vertical layout
-            currentBlock.dataset.originalStart = formattedStartTime;
-            currentBlock.dataset.originalEnd = formattedEndTime;
-            currentBlock.dataset.originalLength = adjustedEndMinutes - startMinutes;
-            currentBlock.dataset.originalHeight = `${blockSize}%`;
-            currentBlock.dataset.originalWidth = `${MOBILE_BLOCK_WIDTH}%`;
-            currentBlock.dataset.originalTop = `${startPositionPercent}%`;
-            currentBlock.dataset.originalLeft = `${MOBILE_OFFSET}%`;
-        } else {
-            currentBlock.style.width = `${blockSize}%`;
-            currentBlock.style.left = `${startPositionPercent}%`;
-            currentBlock.style.height = '75%';
-            currentBlock.style.top = '25%';
-
-            // Update desktop/horizontal layout attributes
-            currentBlock.dataset.originalStart = formattedStartTime;
-            currentBlock.dataset.originalEnd = formattedEndTime;
-            currentBlock.dataset.originalLength = adjustedEndMinutes - startMinutes;
-            currentBlock.dataset.originalHeight = '75%';
-            currentBlock.dataset.originalWidth = `${blockSize}%`;
-            currentBlock.dataset.originalLeft = `${startPositionPercent}%`;
-            currentBlock.dataset.originalTop = '25%';
-        }
+        const result = createActivityBlock(activityData);
+        const currentBlock = result.block;
 
         const activitiesContainer = window.timelineManager.activeTimeline.querySelector('.activities') || (() => {
             const container = document.createElement('div');
@@ -2164,40 +2241,9 @@ function initTimelineInteraction(timeline) {
         console.log('[ACTIVITY] Clearing window.selectedActivity after successful placement');
         window.selectedActivity = null;
 
-        const startTime = currentBlock.dataset.start;
-        const endTime = currentBlock.dataset.end;
-        const times = formatTimeDDMMYYYYHHMM(startTime, endTime);
-        if (!times.startTime || !times.endTime) {
-            throw new Error('Activity start time and end time must be defined');
-        }
-        // Get activity name and category from the block's text content and dataset
-        const activityText = textDiv.textContent;
-        const activityCategory = currentBlock.dataset.category;
-
-        // Create activity data with parent name if it exists
-        const activityData = {
-            id: generateUniqueId(),
-            activity: combinedActivityText,
-            category: activityCategory,
-            startTime: times.startTime,
-            endTime: times.endTime,
-            blockLength: parseInt(currentBlock.dataset.length),
-            color: window.selectedActivity?.color || '#808080',
-            count: parseInt(currentBlock.dataset.count) || 1
-        };
-
-        // Add parent and selected attributes
-        if (currentBlock.dataset.parentName) {
-            activityData.parentName = currentBlock.dataset.parentName;
-            activityData.selected = combinedActivityText;
-        } else {
-            // For items without child items, parent and selected are the same
-            activityData.parentName = combinedActivityText;
-            activityData.selected = combinedActivityText;
-        }
-
-        getCurrentTimelineData().push(activityData);
-        currentBlock.dataset.id = activityData.id;
+        // Store in timelineManager
+        getCurrentTimelineData().push(result.activityData);
+        currentBlock.dataset.id = result.activityData.id;
 
         // Validate timeline after adding activity
         try {
@@ -2206,8 +2252,8 @@ function initTimelineInteraction(timeline) {
         } catch (error) {
             console.error('Timeline validation failed:', error);
             console.warn('Invalid activity placement:', {
-                activity: combinedActivityText,
-                category: activityCategory,
+                activity: result.activityData.activity,
+                category: result.activityData.category,
                 timelineKey,
                 reason: error.message
             });
@@ -2228,7 +2274,7 @@ function initTimelineInteraction(timeline) {
 
         updateButtonStates();
 
-        console.log(`[Drag & Resize] Added event listeners for activity block: ${activityData.id}`);
+        console.log(`[Drag & Resize] Added event listeners for activity block: ${result.activityData.id}`);
 
     };
 
