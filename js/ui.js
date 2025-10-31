@@ -239,12 +239,9 @@ function createModal() {
     modalActivitiesContainer.addEventListener('click', (e) => {
         console.log('Activities modal clicked:', e.target);
         if (
-            e.target.classList.contains('activity-name') &&
-            (e.target.textContent.trim() === 'Other not listed (enter)' ||
-             e.target.textContent.trim().includes('Other activities not listed') ||
-             e.target.textContent.trim().includes('other time use (please specify)'))
+            e.target.classList.contains('activity-name') && e.target.classList.contains('custom-input')
         ) {
-            console.log('Activities modal triggered by textContent:', e.target);
+            console.log('Activities modal triggered by custom-input class:', e.target);
             // Hide the activities modal
             activitiesModal.style.cssText = 'display: none !important';
             // Show the custom activity input modal
