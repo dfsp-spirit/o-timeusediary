@@ -55,6 +55,13 @@ window.timelineManager = {
     general: {} // Store general configuration
 };
 
+// Additional context for custom input activities: manages free text input state for top-level or child items
+window.customInputContext = {
+    type: null, // 'topLevel' or 'childItem'
+    parentActivity: null,
+    categoryName: null
+};
+
 // Function to calculate timeline coverage in minutes
 window.getTimelineCoverage = getTimelineCoverage;
 
@@ -664,7 +671,6 @@ function createChildItemsModal() {
     return modal;
 }
 
-// Function to render child items in the modal
 function renderChildItems(activity, categoryName) {
     const modal = createChildItemsModal();
     const container = document.getElementById('childItemsContainer');
@@ -692,17 +698,59 @@ function renderChildItems(activity, categoryName) {
             console.log(`>>Adding child item button: "${childItem.name}" with color "${childItem.color || activity.color}"`);
             const button = document.createElement('button');
             button.className = 'child-item-button';
+
+            // Add custom-input class if this is a custom child item
+            const is_custom_input = childItem.is_custom_input || false;
+            if (is_custom_input) {
+                button.classList.add('custom-input');
+            }
+
             button.textContent = childItem.name;
             button.style.setProperty('--color', childItem.color || activity.color);
 
             button.addEventListener('click', () => {
-                // Use parent activity properties but with child item name
+                // Check if this is a custom input child item
+                if (is_custom_input) {
+                    console.log('>>>>[CHILD ITEM] Custom input child item clicked, showing custom activity modal');
+
+                    // Set context for custom input
+                    window.customInputContext = {
+                        type: 'childItem',
+                        parentActivity: activity,
+                        categoryName: categoryName,
+                        childItem: childItem
+                    };
+
+                    // Close child items modal
+                    modal.style.display = 'none';
+
+                    // Show custom activity modal with appropriate title
+                    const customActivityModal = document.getElementById('customActivityModal');
+                    const customActivityInput = document.getElementById('customActivityInput');
+                    const modalTitle = customActivityModal.querySelector('h3');
+
+                    // Update modal title for child item context
+                    if (window.i18n && window.i18n.isReady()) {
+                        const template = window.i18n.t('modals.customActivity.childItemTitle');
+                        modalTitle.textContent = template.replace(/\{parentActivity\}/g, activity.name);
+                    } else {
+                        modalTitle.textContent = `Enter custom ${activity.name}`;
+                    }
+
+                    customActivityInput.value = ''; // Clear previous input
+                    customActivityModal.style.display = 'block';
+                    customActivityInput.focus();
+
+                    return; // Stop further processing
+                }
+
+                // Regular child item selection (existing code)
                 window.selectedActivity = {
                     name: childItem.name,
                     parentName: activity.name,
                     color: childItem.color || activity.color,
                     category: categoryName,
-                    selected: childItem.name  // Store the selected child item
+                    selected: childItem.name
                 };
 
                 // Close the modal
@@ -821,24 +869,53 @@ function renderActivities(categories, container = document.getElementById('activ
                         const handleCustomActivity = () => {
                             const customText = customActivityInput.value.trim();
                             if (customText) {
-                                if (isMultipleChoice) {
-                                    activityButton.classList.add('selected');
-                                    const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
-                                    window.selectedActivity = {
-                                        name: btn === activityButton ? customText : btn.querySelector('.activity-text').textContent,
-                                        color: btn.style.getPropertyValue('--color')
-                                    };
-                                } else {
-                                    categoryButtons.forEach(b => b.classList.remove('selected'));
+                                // Check if this is a child item custom input
+                                if (window.customInputContext && window.customInputContext.type === 'childItem') {
+                                    const context = window.customInputContext;
+
+                                    // Create child item structure with custom text
                                     window.selectedActivity = {
                                         name: customText,
-                                        color: activityButton.style.getPropertyValue('--color'),
-                                        category: category.name
+                                        parentName: context.parentActivity.name,
+                                        color: context.childItem.color || context.parentActivity.color,
+                                        category: context.categoryName,
+                                        selected: customText
                                     };
-                                    activityButton.classList.add('selected');
+
+                                    // Reset context
+                                    window.customInputContext = { type: null, parentActivity: null, categoryName: null };
+
+                                } else {
+                                    // Original top-level custom input logic
+                                    if (isMultipleChoice) {
+                                        activityButton.classList.add('selected');
+                                        const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
+                                        window.selectedActivity = {
+                                            selections: selectedButtons.map(btn => ({
+                                                name: btn === activityButton ? customText : btn.querySelector('.activity-text').textContent,
+                                                color: btn.style.getPropertyValue('--color')
+                                            })),
+                                            category: category.name
+                                        };
+                                    } else {
+                                        categoryButtons.forEach(b => b.classList.remove('selected'));
+                                        window.selectedActivity = {
+                                            name: customText,
+                                            color: activity.color,
+                                            category: category.name
+                                        };
+                                        activityButton.classList.add('selected');
+                                    }
                                 }
+
                                 customActivityModal.style.display = 'none';
                                 document.getElementById('activitiesModal').style.display = 'none';
+
+                                // Also close child items modal if it's open
+                                const childItemsModal = document.getElementById('childItemsModal');
+                                if (childItemsModal) {
+                                    childItemsModal.style.display = 'none';
+                                }
                             }
                         };
 
@@ -1041,27 +1118,53 @@ function renderActivities(categories, container = document.getElementById('activ
                         const handleCustomActivity = () => {
                             const customText = customActivityInput.value.trim();
                             if (customText) {
-                                if (isMultipleChoice) {
-                                    activityButton.classList.add('selected');
-                                    const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
-                                    window.selectedActivity = {
-                                        selections: selectedButtons.map(btn => ({
-                                            name: btn === activityButton ? customText : btn.querySelector('.activity-text').textContent,
-                                            color: btn.style.getPropertyValue('--color')
-                                        })),
-                                        category: category.name
-                                    };
-                                } else {
-                                    categoryButtons.forEach(b => b.classList.remove('selected'));
+                                // Check if this is a child item custom input
+                                if (window.customInputContext && window.customInputContext.type === 'childItem') {
+                                    const context = window.customInputContext;
+
+                                    // Create child item structure with custom text
                                     window.selectedActivity = {
                                         name: customText,
-                                        color: activity.color,
-                                        category: category.name
+                                        parentName: context.parentActivity.name,
+                                        color: context.childItem.color || context.parentActivity.color,
+                                        category: context.categoryName,
+                                        selected: customText
                                     };
-                                    activityButton.classList.add('selected');
+
+                                    // Reset context
+                                    window.customInputContext = { type: null, parentActivity: null, categoryName: null };
+
+                                } else {
+                                    // Original top-level custom input logic
+                                    if (isMultipleChoice) {
+                                        activityButton.classList.add('selected');
+                                        const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
+                                        window.selectedActivity = {
+                                            selections: selectedButtons.map(btn => ({
+                                                name: btn === activityButton ? customText : btn.querySelector('.activity-text').textContent,
+                                                color: btn.style.getPropertyValue('--color')
+                                            })),
+                                            category: category.name
+                                        };
+                                    } else {
+                                        categoryButtons.forEach(b => b.classList.remove('selected'));
+                                        window.selectedActivity = {
+                                            name: customText,
+                                            color: activity.color,
+                                            category: category.name
+                                        };
+                                        activityButton.classList.add('selected');
+                                    }
                                 }
+
                                 customActivityModal.style.display = 'none';
                                 document.getElementById('activitiesModal').style.display = 'none';
+
+                                // Also close child items modal if it's open
+                                const childItemsModal = document.getElementById('childItemsModal');
+                                if (childItemsModal) {
+                                    childItemsModal.style.display = 'none';
+                                }
                             }
                         };
 

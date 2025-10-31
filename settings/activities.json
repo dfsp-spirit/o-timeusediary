@@ -900,7 +900,7 @@
                     "color": "#f5b9ac"
                   },
                   {
-                    "name": "Other not listed (enter)",
+                    "name": "Other games not listed (enter)",
                     "is_custom_input": true,
                     "code": 132,
                     "label": "playing computer games",
