@@ -764,6 +764,7 @@ function renderActivities(categories, container = document.getElementById('activ
                 console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "in accordion (mobile modal)");
                 const activityButton = document.createElement('button');
                 const isMultipleChoice = container.getAttribute('data-mode') === 'multiple-choice';
+                const is_custom_input = activity.is_custom_input || false;
                 activityButton.className = `activity-button ${isMultipleChoice ? 'checkbox-style' : ''}`;
                 // Add indicator class if activity has child items
                 if (activity.childItems && activity.childItems.length > 0) {
@@ -778,12 +779,17 @@ function renderActivities(categories, container = document.getElementById('activ
                     activityButton.appendChild(checkmark);
                 }
 
+
+
                 const textSpan = document.createElement('span');
                 textSpan.className = 'activity-text';
 
                 // Create name span
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'activity-name';
+                if (is_custom_input) {
+                    nameSpan.classList.add('custom-input');
+                }
                 nameSpan.textContent = activity.name;
                 textSpan.appendChild(nameSpan);
 
@@ -802,9 +808,7 @@ function renderActivities(categories, container = document.getElementById('activ
                     const categoryButtons = activityButton.closest('.activity-category').querySelectorAll('.activity-button');
 
                     // Check if this is the "other not listed" button
-                    if (activity.name.toLowerCase().includes('other not listed (enter)') ||
-                        activity.name.toLowerCase().includes('other time use (please specify)') ||
-                        activity.name.toLowerCase().includes('other activities not listed')) {
+                    if (is_custom_input) {
                         // Show custom activity modal
                         console.log('[ACTIVITY] "Other not listed" button clicked, showing custom activity modal');
                         const customActivityModal = document.getElementById('customActivityModal');
