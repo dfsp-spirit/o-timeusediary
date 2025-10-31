@@ -1,7 +1,7 @@
 {
   "general": {
     "experimentID": "irrelevant",
-    "app_name": "O-ELIDDI",
+    "app_name": "O-ELIDDI MPIAE",
     "version": "1.0.0",
     "author": "John",
     "language": "en",
@@ -901,6 +901,7 @@
                   },
                   {
                     "name": "Other not listed (enter)",
+                    "is_custom_input": true,
                     "code": 132,
                     "label": "playing computer games",
                     "short": "playing comp games",
@@ -1187,8 +1188,9 @@
                 "childItems": []
               },
               {
-                "name": "Other time use (please specify)",
+                "name": "Whatever time use (will specify)",
                 "color": "#808080",
+                "is_custom_input": true,
                 "childItems": []
               }
             ]
