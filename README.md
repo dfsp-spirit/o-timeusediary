@@ -4,7 +4,7 @@ A web-based tool for collecting and visualizing daily activities in a timeline f
 
 ## Note on this forked version
 
-This fork is an adaptation of the tool to our needs at MPIAE.
+This fork is an adaptation of the tool to our needs at MPIAE/Karolinska, see branch 'mpiae_adapt'.
 
 ## 🚀 Quick Start
 
