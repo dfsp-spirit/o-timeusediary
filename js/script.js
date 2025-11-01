@@ -2211,7 +2211,8 @@ function initTimelineInteraction(timeline) {
             startMinutes: startMinutes,
             endMinutes: endMinutes,
             mode: window.selectedActivity.selections ? 'multiple-choice' : 'single-choice',
-            count: window.selectedActivity.selections ? window.selectedActivity.selections.length : 1
+            count: window.selectedActivity.selections ? window.selectedActivity.selections.length : 1,
+            selections: window.selectedActivity.selections || undefined
         };
 
         const result = createActivityBlock(activityData);
