@@ -11,7 +11,7 @@
     "playwright:install": "playwright install"
   },
   "devDependencies": {
-    "@playwright/test": "^1.53.2",
+    "@playwright/test": "^1.56.1",
     "@types/node": "^24.0.10",
     "live-server": "^1.2.2"
   },
