@@ -42,6 +42,7 @@
   "modals": {
     "customActivity": {
       "title": "Ingresa Actividad Personalizada",
+      "childItemTitle": "Ingresa {parentActivity} personalizado/a",
       "placeholder": "Ingresa tu actividad (máx. 30 caracteres)"
     },
     "addActivity": {

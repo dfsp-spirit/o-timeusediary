@@ -19,20 +19,20 @@ window.getCurrentTimelineData = getCurrentTimelineData;
 function createTimeLabel(block, showImmediately = false) {
     // Check if we're in vertical mode by looking at window width
     const isVerticalMode = window.innerWidth <= 1440;
-    
+
     if (isVerticalMode) {
         // Create activity text container
         const textContainer = document.createElement('div');
         textContainer.className = 'activity-text';
         textContainer.textContent = block.dataset.activityName;
         block.appendChild(textContainer);
-        
+
         // Create time label (hidden by default in vertical mode unless showImmediately is true)
         const label = document.createElement('div');
         label.className = 'time-label';
         label.style.display = showImmediately ? 'block' : 'none';
         block.appendChild(label);
-        
+
         return label;
     } else {
         // Horizontal mode - original implementation
@@ -49,12 +49,12 @@ function createTimeLabel(block, showImmediately = false) {
         label.style.whiteSpace = 'nowrap';
         label.style.pointerEvents = 'none';
         label.style.zIndex = '10';
-        
+
         label.style.bottom = '-20px';
         label.style.top = 'auto';
-        
+
         block.appendChild(label);
-        
+
         // Only look for labels within the active timeline
         const existingLabels = block.parentElement.querySelectorAll('.time-label');
         existingLabels.forEach(existingLabel => {
@@ -70,24 +70,24 @@ function createTimeLabel(block, showImmediately = false) {
 
 function updateTimeLabel(label, startTime, endTime) {
     if (!label || !label.parentElement) return;
-    
+
     const parentBlock = label.parentElement;
     // Instead of using data-start and data-end directly (which lack the (+1) marker),
     // use data-start-minutes and data-end-minutes if available.
-    const startMinutes = parentBlock.dataset.startMinutes 
+    const startMinutes = parentBlock.dataset.startMinutes
         ? parseInt(parentBlock.dataset.startMinutes, 10)
         : timeToMinutes(parentBlock.dataset.start);
-    const endMinutes = parentBlock.dataset.endMinutes 
+    const endMinutes = parentBlock.dataset.endMinutes
         ? parseInt(parentBlock.dataset.endMinutes, 10)
         : timeToMinutes(parentBlock.dataset.end);
-    
+
     // Get formatted times using formatTimeHHMM; for the end time, pass isEndTime=true.
     const formattedStartTime = formatTimeHHMM(startMinutes);
     const formattedEndTime = formatTimeHHMM(endMinutes, true);
-    
+
     // Always remove the (+1) marker from the displayed label text.
     label.textContent = `${formattedStartTime.replace('(+1)', '')} - ${formattedEndTime.replace('(+1)', '')}`;
-    
+
     // Position label based on layout
     if (window.innerWidth <= 1440) {
         label.style.display = 'block';
@@ -117,37 +117,37 @@ export function formatTimeDDMMYYYYHHMM(startTime, endTime) {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-    
+
     // Remove (+1) notation for date processing
     const startTimeOnly = startTime.replace('(+1)', '').trim();
     const endTimeOnly = endTime.replace('(+1)', '').trim();
-    
+
     const [startHour, startMin] = startTimeOnly.split(':').map(Number);
     const [endHour, endMin] = endTimeOnly.split(':').map(Number);
-    
+
     // Create base dates - everything starts on yesterday by default
     // since our timeline starts at 4:00 AM yesterday
     const startDate = new Date(yesterday);
     const endDate = new Date(yesterday);
-    
+
     // If time has (+1) or is between 00:00-03:59, it's next day
     if (startTime.includes('(+1)') || (startHour >= 0 && startHour < 4)) {
         startDate.setDate(today.getDate());
     }
-    
+
     if (endTime.includes('(+1)') || (endHour >= 0 && endHour < 4)) {
         endDate.setDate(today.getDate());
     }
-    
+
     // Set hours and minutes
     startDate.setHours(startHour, startMin, 0);
     endDate.setHours(endHour, endMin, 0);
-    
+
     // Format dates to YYYY-MM-DD HH:MM
     const formatDate = (d) => {
         return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
     };
-    
+
     return {
         startTime: formatDate(startDate),
         endTime: formatDate(endDate)
@@ -181,17 +181,17 @@ export function formatTimeHHMM(minutes, isEndTime = false) {
 
 export function timeToMinutes(timeStr) {
     if (typeof timeStr === 'number') return Math.round(timeStr);
-    
+
     const isNextDay = timeStr.includes('(+1)');
     const timeOnly = timeStr.replace('(+1)', '').trim();
     const [hours, minutes] = timeOnly.split(':').map(Number);
-    
+
     // Calculate absolute minutes since midnight
     let totalMinutes = (hours * 60) + minutes;
-    
+
     // Adjust for next day notation
     if (isNextDay) totalMinutes += 1440;
-    
+
     return totalMinutes;
 }
 
@@ -207,15 +207,15 @@ export function findNearestMarkers(minutes, isMobile = false) {
 export function minutesToPercentage(minutes) {
     const TIMELINE_START = 240; // 04:00 in minutes
     const TIMELINE_HOURS = 24;
-    
+
     // Normalize minutes to be relative to timeline start (04:00 AM)
     let minutesSinceStart = minutes - TIMELINE_START;
-    
+
     // If the time is before 04:00 AM, adjust it to be after the previous day
     if (minutes < TIMELINE_START) {
         minutesSinceStart += MINUTES_PER_DAY;
     }
-    
+
     // Calculate percentage, ensuring it stays within 0-100 range
     return Math.min(100, Math.max(0, (minutesSinceStart / MINUTES_PER_DAY) * 100));
 }
@@ -227,13 +227,13 @@ export function positionToMinutes(positionPercent, isMobile = false, options = {
 
     // Convert percentage to absolute timeline minutes
     let timelineMinutes = TIMELINE_START + (positionPercent / 100) * VISIBLE_TIMELINE_MINUTES;
-    
+
     // Round to nearest 10 minutes
     let roundedMinutes = Math.round(timelineMinutes / 10) * 10;
-    
+
     // Check for allowEnd option (defaults to false)
     const allowEnd = options.allowEnd === true;
-    
+
     // For new activity placements, clamp so that start time never reaches TIMELINE_END.
     if (!allowEnd && roundedMinutes >= TIMELINE_END) {
         roundedMinutes = TIMELINE_END - 10;
@@ -241,7 +241,7 @@ export function positionToMinutes(positionPercent, isMobile = false, options = {
 
     // Set maximum value based on allowEnd flag:
     const maxVal = allowEnd ? TIMELINE_END : TIMELINE_END - 10;
-    
+
     // Clamp within timeline bounds and return the value
     return Math.min(maxVal, Math.max(TIMELINE_START, roundedMinutes));
 }
@@ -278,25 +278,25 @@ export function hasOverlap(startMinutes, endMinutes, excludeBlock = null) {
         const activityEndTime = activity.endTime.split(' ')[1];
         const [startHour, startMin] = activityStartTime.split(':').map(Number);
         const [endHour, endMin] = activityEndTime.split(':').map(Number);
-        
+
         const activityStartMinutes = normalizeMinutes(startHour * 60 + startMin);
         const activityEndMinutes = normalizeMinutes(endHour * 60 + endMin);
 
         // Check for overlap considering the normalized timeline
         const hasOverlap = (
-            Math.max(normalizedStart, activityStartMinutes) < 
+            Math.max(normalizedStart, activityStartMinutes) <
             Math.min(normalizedEnd, activityEndMinutes)
         );
 
         if (hasOverlap && DEBUG_MODE) {
             console.warn('Overlap detected:', {
-                new: { 
-                    start: startMinutes, 
+                new: {
+                    start: startMinutes,
                     end: endMinutes,
                     normalizedStart,
-                    normalizedEnd 
+                    normalizedEnd
                 },
-                existing: { 
+                existing: {
                     start: startHour * 60 + startMin,
                     end: endHour * 60 + endMin,
                     normalizedStart: activityStartMinutes,
@@ -316,7 +316,7 @@ export function canPlaceActivity(newStart, newEnd, excludeId = null) {
     // Get current timeline key and activities
     const currentKey = getCurrentTimelineKey();
     const activities = window.timelineManager.activities[currentKey] || [];
-    
+
     // Normalize minutes to handle day wrap-around
     const MINUTES_IN_DAY = 1440;
     const TIMELINE_START = 240; // 4:00 AM in minutes
@@ -331,7 +331,7 @@ export function canPlaceActivity(newStart, newEnd, excludeId = null) {
     // Normalize the new activity times
     const normalizedNewStart = normalizeMinutes(newStart);
     const normalizedNewEnd = normalizeMinutes(newEnd);
-    
+
     // Check for overlaps in current timeline only
     const hasOverlap = activities.some(activity => {
         if (excludeId && activity.id === excludeId) return false;
@@ -339,10 +339,10 @@ export function canPlaceActivity(newStart, newEnd, excludeId = null) {
         // Extract and normalize existing activity times
         const [activityStartHour, activityStartMin] = activity.startTime.split(' ')[1].split(':').map(Number);
         const [activityEndHour, activityEndMin] = activity.endTime.split(' ')[1].split(':').map(Number);
-        
+
         const activityStart = activityStartHour * 60 + activityStartMin;
         const activityEnd = activityEndHour * 60 + activityEndMin;
-        
+
         const normalizedActivityStart = normalizeMinutes(activityStart);
         const normalizedActivityEnd = normalizeMinutes(activityEnd);
 
@@ -351,7 +351,7 @@ export function canPlaceActivity(newStart, newEnd, excludeId = null) {
             normalizedNewStart < normalizedActivityEnd &&
             normalizedNewEnd > normalizedActivityStart
         );
-        
+
         if (DEBUG_MODE && overlaps) {
             console.warn('Overlap detected:', {
                 existingActivity: activity.activity,
@@ -366,7 +366,7 @@ export function canPlaceActivity(newStart, newEnd, excludeId = null) {
 
         return overlaps;
     });
-    
+
     return !hasOverlap;
 }
 
@@ -374,7 +374,7 @@ export function canPlaceActivity(newStart, newEnd, excludeId = null) {
 export function isTimelineFull() {
     const currentKey = getCurrentTimelineKey();
     const currentData = getCurrentTimelineData();
-    
+
     // Calculate total covered minutes
     const coveredMinutes = currentData.reduce((total, activity) => {
         const startMinutes = timeToMinutes(activity.startTime.split(' ')[1]);
@@ -411,7 +411,7 @@ export function calculateTimeDifference(startTime, endTime) {
 
     // Calculate difference
     let difference = endMinutes - startMinutes;
-    
+
     // If end time is before start time, add 24 hours worth of minutes
     if (difference <= 0) {
         difference += 1440; // 24 hours * 60 minutes
@@ -431,42 +431,83 @@ export function isOverlapping(elem1, elem2) {
     );
 }
 
+
 export function createTimelineDataFrame() {
-    // Initialize array to hold all timeline data
-    const dataFrame = [];
-    
-    // Get all timeline keys
-    const timelineKeys = window.timelineManager.keys;
-    
-    // Get study parameters if they exist
-    const studyParams = (window.timelineManager.study && Object.keys(window.timelineManager.study).length > 0) 
-        ? window.timelineManager.study 
-        : {};
-    
-    // Iterate through each timeline
-    timelineKeys.forEach(timelineKey => {
-        const activities = window.timelineManager.activities[timelineKey] || [];
-        
-        // Add each activity to the dataframe with its timeline key
+    const data = [];
+
+    Object.keys(window.timelineManager.activities).forEach(timelineKey => {
+        const activities = window.timelineManager.activities[timelineKey];
+
         activities.forEach(activity => {
             const row = {
+                // Basic fields
                 timelineKey: timelineKey,
                 activity: activity.activity,
                 category: activity.category,
                 startTime: activity.startTime,
-                endTime: activity.endTime
+                endTime: activity.endTime,
+                blockLength: activity.blockLength,
+                color: activity.color,
+
+                // Enhanced context for recreation
+                parentActivity: activity.parentName || activity.activity,
+                selected: activity.selected || activity.activity,
+                isCustomInput: activity.isCustomInput || false,
+                originalSelection: activity.originalSelection || null,
+
+                // For proper ordering and positioning
+                startMinutes: activity.startMinutes,
+                endMinutes: activity.endMinutes,
+
+                // Unique identifier
+                id: activity.id
             };
-            
-            // Only add study params if they exist
-            if(Object.keys(studyParams).length > 0) {
-                Object.assign(row, studyParams);
-            }
-            
-            dataFrame.push(row);
+            data.push(row);
         });
     });
-    
-    return dataFrame;
+
+    return data;
+}
+
+export function createTimelineJSON(stringify = false) {
+    const data = [];
+
+    Object.keys(window.timelineManager.activities).forEach(timelineKey => {
+        const activities = window.timelineManager.activities[timelineKey];
+
+        activities.forEach(activity => {
+            const row = {
+                // Basic fields
+                timelineKey: timelineKey,
+                activity: activity.activity,
+                category: activity.category,
+                startTime: activity.startTime,
+                endTime: activity.endTime,
+                blockLength: activity.blockLength,
+                color: activity.color,
+
+                // Enhanced context for recreation
+                parentActivity: activity.parentName || activity.activity,
+                selected: activity.selected || activity.activity,
+                isCustomInput: activity.isCustomInput || false,
+                originalSelection: activity.originalSelection || null,
+
+                // For proper ordering and positioning
+                startMinutes: activity.startMinutes,
+                endMinutes: activity.endMinutes,
+
+                // Unique identifier
+                id: activity.id
+            };
+            data.push(row);
+        });
+    });
+
+    if (!stringify) {
+        return data;
+    }
+
+    return JSON.stringify(data, null, 2);
 }
 
 /**
@@ -485,11 +526,11 @@ export async function sendDataToDataPipe() {
     // Get study data if available
     let studyData = window.timelineManager?.study || {};
     let pid;
-    
+
     // Check if ppid exists and is not empty
-    const hasPpid = (studyData.ppid !== undefined && studyData.ppid !== null && studyData.ppid !== '') || 
+    const hasPpid = (studyData.ppid !== undefined && studyData.ppid !== null && studyData.ppid !== '') ||
                    (studyData.PPID !== undefined && studyData.PPID !== null && studyData.PPID !== '');
-    
+
     if (hasPpid) {
       // Use ppid as pid when ppid is not empty
       pid = studyData.ppid || studyData.PPID;
@@ -518,8 +559,8 @@ export async function sendDataToDataPipe() {
     }
 
     // Determine session_id based on whether ppid exists
-    const session_id = hasPpid && (studyData.survey || studyData.SURVEY) 
-      ? (studyData.survey || studyData.SURVEY) 
+    const session_id = hasPpid && (studyData.survey || studyData.SURVEY)
+      ? (studyData.survey || studyData.SURVEY)
       : (studyData.SESSION_ID || null);
 
     // Combine timeline and participant data
@@ -544,7 +585,7 @@ export async function sendDataToDataPipe() {
 
     // Convert to CSV format
     const csvData = convertArrayToCSV(combinedData);
-    
+
     // Generate unique filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `timeline_${pid}_${timestamp}.csv`;
@@ -574,7 +615,7 @@ export async function sendDataToDataPipe() {
 
     // Handle redirect to thank you page
     const redirectUrl = window.timelineManager?.general?.primary_redirect_url;
-      
+
     if (redirectUrl) {
       // Check if it's a relative URL (like our thank-you.html page)
       if (!redirectUrl.startsWith('http')) {
@@ -584,9 +625,9 @@ export async function sendDataToDataPipe() {
         // For external URLs, preserve existing URL parameters
         const currentParams = new URLSearchParams(window.location.search);
         const separator = redirectUrl.includes('?') ? '&' : '?';
-        const finalRedirectUrl = redirectUrl + 
+        const finalRedirectUrl = redirectUrl +
           (currentParams.toString() ? separator + currentParams.toString() : '');
-        
+
         window.location.href = finalRedirectUrl;
       }
     }
@@ -594,10 +635,10 @@ export async function sendDataToDataPipe() {
     return { success: true };
   } catch (error) {
     console.error('Error sending data to DataPipe:', error);
-    
+
     // Hide loading modal on error
     hideLoadingModal();
-    
+
     return { success: false, error: error.message };
   }
 }
@@ -605,35 +646,35 @@ export async function sendDataToDataPipe() {
 export function validateMinCoverage(coverage) {
     // Convert to number if it's a string
     const numCoverage = parseInt(coverage);
-    
+
     // Check if it's a valid number
     if (isNaN(numCoverage)) {
         throw new Error('min_coverage must be a valid number');
     }
-    
+
     // Check range
     if (numCoverage < 0 || numCoverage > 1440) {
         throw new Error('min_coverage must be between 0 and 1440');
     }
-    
+
     // Check if divisible by 10
     if (numCoverage % 10 !== 0) {
         throw new Error('min_coverage must be divisible by 10');
     }
-    
+
     return numCoverage;
 }
 
 /**
  * Calculates the total time coverage of the current timeline by summing up
  * the blockLength of all activities.
- * 
+ *
  * @returns {number} Total minutes covered by all activities in the current timeline
  */
 export function getTimelineCoverage() {
     const currentKey = getCurrentTimelineKey();
     const activities = window.timelineManager.activities[currentKey] || [];
-    
+
     return activities.reduce((total, activity) => total + activity.blockLength, 0);
 }
 
@@ -659,7 +700,7 @@ function validateActivityBlockTransformation(startMinutes, endMinutes, target) {
     // Validate timeline bounds
     const isStartValid = (startMinutes >= TIMELINE_START && startMinutes <= TIMELINE_END) ||
                         (startMinutes + 1440 >= TIMELINE_START && startMinutes + 1440 <= TIMELINE_END);
-    
+
     const isEndValid = (endMinutes >= TIMELINE_START && endMinutes <= TIMELINE_END) ||
                       (endMinutes + 1440 >= TIMELINE_START && endMinutes + 1440 <= TIMELINE_END);
 
@@ -685,13 +726,13 @@ export function formatTimelineTime(minutes, isEndTime = false) {
     const h = Math.floor((minutes % 1440) / 60);
     const m = Math.floor(minutes % 60);
     const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    
+
     // Add (+1) marker for:
     // 1. Times between 00:00-03:59 (0-239 minutes)
     // 2. When minutes >= 1440 (next day)
     // 3. When it's exactly 04:00 next day (1680 minutes) and it's an end time
     const needsNextDayMarker = minutes < 240 || minutes >= 1440 || (isEndTime && minutes === 240);
-    
+
     return needsNextDayMarker ? `${timeStr}(+1)` : timeStr;
 }
 
@@ -731,7 +772,7 @@ export function toggleDebugOverlay(show = true) {
             border: 1px solid #444;
         `;
         document.body.appendChild(debugOverlay);
-        
+
         // Make overlay draggable
         let isDragging = false;
         let currentX;
@@ -775,11 +816,11 @@ export function toggleDebugOverlay(show = true) {
 
             const rect = activeTimeline.getBoundingClientRect();
             const isMobile = window.innerWidth <= 1440;
-            
+
             // Calculate relative position
             let relativePos;
             let positionPercent;
-            
+
             if (isMobile) {
                 relativePos = e.clientY - rect.top;
                 positionPercent = (relativePos / rect.height) * 100;
@@ -809,7 +850,7 @@ export function toggleDebugOverlay(show = true) {
 
         // Add mousemove listener to document
         document.addEventListener('mousemove', updateDebugInfo);
-        
+
     } else if (!show && debugOverlay) {
         debugOverlay.remove();
         debugOverlay = null;
@@ -877,27 +918,44 @@ function downloadCSV(csvString, filename) {
 
 /**
  * sendData function to either send data via DataPipe or download as CSV locally.
- * 
+ *
  * @param {Object} options - Options to control the sending behavior.
  *   Use { mode: 'datapipe' } to upload via DataPipe API,
  *   or { mode: 'csv' } to trigger a CSV file download.
  *   During development, the default is 'datapipe' mode.
  */
-export async function sendData(options = { mode: 'datapipe' }) {
+export async function sendData(options = { mode: 'json' }) {  // TODO: change default back to 'datapipe'. options: 'datapipe', 'csv', 'json'
     // Sync URL parameters before sending data
     syncURLParamsToStudy();
-    
+
     if (options.mode === 'datapipe') {
         // Call the function that sends data to DataPipe
         return await sendDataToDataPipe();
     } else if (options.mode === 'csv') {
         // Create timeline data frame and convert to CSV for download
         const dataFrame = createTimelineDataFrame();
+
+        // Temporary console logging for debugging
+        console.log('=== DATA FRAME FOR CSV ===');
+        console.log('Full data structure:', JSON.stringify(dataFrame, null, 2));
+        console.log('Number of records:', dataFrame.length);
+        console.log('Study parameters:', window.timelineManager.study);
+        console.log('Columns:', dataFrame.length > 0 ? Object.keys(dataFrame[0]) : []);
+        console.log('================================');
         const csv = convertArrayToCSV(dataFrame);
         downloadCSV(csv, 'timeline_data.csv');
-        
+
         // Hide loading modal after CSV download
         hideLoadingModal();
+    } else if (options.mode === 'json') {
+        // Create timeline data frame and convert to JSON for download
+        const dataJSON = createTimelineJSON(false);
+        const jsonString = JSON.stringify(dataJSON, null, 2);
+        console.log('=== DATA FRAME FOR JSON ===');
+        console.log('Full data structure:', jsonString);
+        console.log('Number of records:', dataJSON.length);
+        hideLoadingModal();
+
     } else {
         throw new Error(`Unsupported send mode: ${options.mode}`);
     }
@@ -906,22 +964,22 @@ export async function sendData(options = { mode: 'datapipe' }) {
 export function checkAndRequestPID() {
   const urlParams = new URLSearchParams(window.location.search);
   const pid = urlParams.get('pid');
-  
+
   if (!pid) {
     // Temporarily disabled modal - instead generate a random PID
     const randomPid = ('0000000000000000' + Math.floor(Math.random() * 1e16)).slice(-16);
-    
+
     // Update URL with the random PID
     urlParams.set('pid', randomPid);
     const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
     window.history.replaceState({}, '', newUrl);
-    
+
     // Update timelineManager.study with the random PID
     if (!window.timelineManager.study) {
       window.timelineManager.study = {};
     }
     window.timelineManager.study.pid = randomPid;
-    
+
     console.log('PID modal disabled - generated random PID:', randomPid);
   }
 }
@@ -931,7 +989,7 @@ export function syncURLParamsToStudy() {
     if (!window.timelineManager.study) {
         window.timelineManager.study = {};
     }
-    
+
     // Sync all URL parameters into the study object
     for (const [key, value] of urlParams) {
         window.timelineManager.study[key] = value;
