@@ -952,6 +952,7 @@ function renderChildItems(activity, categoryName) {
                                     color: childItem.color || activity.color,
                                     category: categoryName,
                                     selected: customText,
+                                    originalSelection: childItem.name, // Store what was originally clicked
                                     isCustomInput: true
                                 };
 
@@ -985,13 +986,17 @@ function renderChildItems(activity, categoryName) {
                     return; // Stop further processing
                 }
 
-                // Regular child item selection (existing code)
+                console.log(`>>[CHILD ITEM] non-custom Selected child item: "${childItem.name}"`);
+
+                // Regular child item selection (not custom)
                 window.selectedActivity = {
                     name: childItem.name,
                     parentName: activity.name,
                     color: childItem.color || activity.color,
                     category: categoryName,
-                    selected: childItem.name
+                    selected: childItem.name,
+                    originalSelection: childItem.name, // Store what was originally clicked
+                    isCustomInput: false
                 };
 
                 // Close the modal
@@ -1120,7 +1125,10 @@ function renderActivities(categories, container = document.getElementById('activ
                                         parentName: context.parentActivity.name,
                                         color: context.childItem.color || context.parentActivity.color,
                                         category: context.categoryName,
-                                        selected: customText
+                                        selected: customText,
+                                        originalSelection: context.childItem.name, // Store what was originally clicked
+                                        isCustomInput: true,
+                                        mode: 'single-choice'
                                     };
 
                                     // Reset context
@@ -1128,7 +1136,9 @@ function renderActivities(categories, container = document.getElementById('activ
 
                                 } else {
                                     // Original top-level custom input logic
+                                    // This branch should not be hit: custom acticvity AND multuople-choice is not supported
                                     if (isMultipleChoice) {
+                                        console.error('[ACTIVITY] ERROR: Custom activity input in multiple-choice mode is not supported.');
                                         activityButton.classList.add('selected');
                                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
                                         window.selectedActivity = {
@@ -1142,8 +1152,13 @@ function renderActivities(categories, container = document.getElementById('activ
                                         categoryButtons.forEach(b => b.classList.remove('selected'));
                                         window.selectedActivity = {
                                             name: customText,
+                                            parentName: null,
                                             color: activity.color,
-                                            category: category.name
+                                            category: category.name,
+                                            selected: customText,
+                                            originalSelection: activity.name, // Store what was originally clicked
+                                            isCustomInput: true,
+                                            mode: 'single-choice'
                                         };
                                         activityButton.classList.add('selected');
                                     }
@@ -1175,7 +1190,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                 handleCustomActivity();
                             }
                         });
-
+                        console.log('window.customInputContext: ', window.customInputContext);
                         return;
                     } else {
                         console.log('[ACTIVITY] This click was not a "Other not listed" activity, continuing...');
@@ -1197,6 +1212,7 @@ function renderActivities(categories, container = document.getElementById('activ
 
                         // Get all selected activities in this category
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
+                        const availableOptions = Array.from(categoryButtons).map(btn => btn.querySelector('.activity-text').textContent);
 
                         if (selectedButtons.length > 0) {
                             window.selectedActivity = {
@@ -1204,7 +1220,11 @@ function renderActivities(categories, container = document.getElementById('activ
                                     name: btn.textContent,
                                     color: btn.style.getPropertyValue('--color')
                                 })),
-                                category: category.name
+                                category: category.name,
+                                mode: 'multiple-choice',
+                                count: selectedButtons.length,
+                                availableOptions: availableOptions,
+                                isCustomInput: false
                             };
                         } else {
                             // Only clear window.selectedActivity in multiple-choice mode if user actively deselected
@@ -1222,8 +1242,13 @@ function renderActivities(categories, container = document.getElementById('activ
                         categoryButtons.forEach(b => b.classList.remove('selected'));
                         window.selectedActivity = {
                             name: activity.name,
+                            parentName: null,
                             color: activity.color,
-                            category: category.name
+                            category: category.name,
+                            selected: activity.name,
+                            originalSelection: activity.name, // Store what was originally clicked,
+                            isCustomInput: is_custom_input,
+                            mode: 'single-choice'
                         };
                         console.log('[ACTIVITY] Selected activity:', window.selectedActivity);
                         activityButton.classList.add('selected');
@@ -1361,6 +1386,7 @@ function renderActivities(categories, container = document.getElementById('activ
                             if (customText) {
                                 // Check if this is a child item custom input
                                 if (window.customInputContext && window.customInputContext.type === 'childItem') {
+                                    console.log('>>>>[ACTIVITY] This is a child-level custom input activity');
                                     const context = window.customInputContext;
 
                                     // Create child item structure with custom text
@@ -1369,15 +1395,20 @@ function renderActivities(categories, container = document.getElementById('activ
                                         parentName: context.parentActivity.name,
                                         color: context.childItem.color || context.parentActivity.color,
                                         category: context.categoryName,
-                                        selected: customText
+                                        selected: customText,
+                                        originalSelection: context.childItem.name, // Store what was originally clicked
+                                        mode: 'single-choice',
+                                        isCustomInput: true
                                     };
 
                                     // Reset context
                                     window.customInputContext = { type: null, parentActivity: null, categoryName: null };
 
                                 } else {
+                                    console.log('>>>>[ACTIVITY] This is a top-level custom input activity');
                                     // Original top-level custom input logic
                                     if (isMultipleChoice) {
+                                        console.error("ERROR: cucstom input with multiple-choice is not supported");
                                         activityButton.classList.add('selected');
                                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
                                         window.selectedActivity = {
@@ -1385,14 +1416,20 @@ function renderActivities(categories, container = document.getElementById('activ
                                                 name: btn === activityButton ? customText : btn.querySelector('.activity-text').textContent,
                                                 color: btn.style.getPropertyValue('--color')
                                             })),
-                                            category: category.name
+                                            category: category.name,
+                                            mode: 'multiple-choice',
                                         };
                                     } else {
                                         categoryButtons.forEach(b => b.classList.remove('selected'));
                                         window.selectedActivity = {
                                             name: customText,
+                                            parentName: null,
                                             color: activity.color,
-                                            category: category.name
+                                            category: category.name,
+                                            originalSelection: activity.name, // Store what was originally clicked
+                                            selected: customText,
+                                            mode: 'single-choice',
+                                            isCustomInput: true
                                         };
                                         activityButton.classList.add('selected');
                                     }
@@ -1427,7 +1464,7 @@ function renderActivities(categories, container = document.getElementById('activ
 
                         return;
                     } else {
-                        console.log('[ACTIVITY] The button clicked was not a "Other not listed" button, proceeding...');
+                        console.log('[ACTIVITY] The button clicked was not a custom input button, proceeding with logic for non-custom buttons...');
                     }
 
                     // Check if activity has child items
@@ -1444,11 +1481,16 @@ function renderActivities(categories, container = document.getElementById('activ
 
 
                     if (isMultipleChoice) {
+                        console.log('>>>>[ACTIVITY] non-custom Multiple-choice mode active');
                         // Toggle selection for this button
                         activityButton.classList.toggle('selected');
 
                         // Get all selected activities in this category
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
+
+                        // compute all available options to store in window.selectedActivity
+                        const availableOptions = Array.from(categoryButtons).map(btn => btn.querySelector('.activity-text').textContent);
+                        //console.log('>>>>[ACTIVITY] availableOptions for multiple-choice selection:', availableOptions);
 
                         if (selectedButtons.length > 0) {
                             window.selectedActivity = {
@@ -1456,7 +1498,10 @@ function renderActivities(categories, container = document.getElementById('activ
                                     name: btn.querySelector('.activity-text').textContent,
                                     color: btn.style.getPropertyValue('--color')
                                 })),
-                                category: category.name
+                                category: category.name,
+                                mode: 'multiple-choice',
+                                isCustomInput: false,
+                                availableOptions: availableOptions
                             };
                         } else {
                             // Only clear window.selectedActivity in multiple-choice mode if user actively deselected
@@ -1469,15 +1514,22 @@ function renderActivities(categories, container = document.getElementById('activ
                                 console.log('[ACTIVITY] NOT clearing window.selectedActivity - in modal');
                             }
                         }
+                        console.log('>>>>[ACTIVITY] window.selectedActivity after multiple-choice selection:', window.selectedActivity);
                     } else {
                         // Single choice mode
+                        console.log('>>>>[ACTIVITY] non-custom Single-choice mode active');
                         categoryButtons.forEach(b => b.classList.remove('selected'));
                         window.selectedActivity = {
                             name: activity.name,
+                            parentName: null,
                             color: activity.color,
-                            category: category.name
+                            category: category.name,
+                            selected: activity.name,
+                            originalSelection: activity.name, // Store what was originally clicked,
+                            mode: 'single-choice',
+                            isCustomInput: is_custom_input
                         };
-                        console.log('[ACTIVITY] Selected activity:', window.selectedActivity);
+                        console.log('[ACTIVITY] Selected activity after single-choice selection:', window.selectedActivity);
                         activityButton.classList.add('selected');
                     }
                     // Only close modal in single-choice mode
