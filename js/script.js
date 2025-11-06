@@ -915,6 +915,7 @@ function renderChildItems(activity, categoryName) {
                     const customActivityModal = document.getElementById('customActivityModal');
                     const customActivityInput = document.getElementById('customActivityInput');
                     const modalTitle = customActivityModal.querySelector('h3');
+                    const activitiesModal = document.getElementById('activitiesModal');
 
                     // Update modal title for child item context
                     if (window.i18n && window.i18n.isReady()) {
@@ -955,10 +956,14 @@ function renderChildItems(activity, categoryName) {
                                 };
 
                                 // Close modals
+                                console.log('>>>>Closing modals after custom child item input');
                                 customActivityModal.style.cssText = 'display: none !important';
                                 const childItemsModal = document.getElementById('childItemsModal');
                                 if (childItemsModal) {
                                     childItemsModal.style.cssText = 'display: none !important';
+                                }
+                                if (activitiesModal) {
+                                    activitiesModal.style.cssText = 'display: none !important';
                                 }
 
                                 newInputField.value = '';
