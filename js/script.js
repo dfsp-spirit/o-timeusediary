@@ -928,6 +928,55 @@ function renderChildItems(activity, categoryName) {
                     customActivityModal.style.display = 'block';
                     customActivityInput.focus();
 
+                    // SET UP EVENT LISTENERS FOR CUSTOM ACTIVITY MODAL (CHILD ITEM VERSION)
+                    const confirmBtn = document.getElementById('confirmCustomActivity');
+                    const inputField = document.getElementById('customActivityInput');
+
+                    if (confirmBtn && inputField) {
+                        // Remove any existing listeners
+                        const newConfirmBtn = confirmBtn.cloneNode(true);
+                        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                        const newInputField = inputField.cloneNode(true);
+                        inputField.parentNode.replaceChild(newInputField, inputField);
+
+                        // Handle custom activity submission for child items
+                        const handleChildItemCustomActivity = () => {
+                            const customText = newInputField.value.trim();
+                            if (customText) {
+                                // Create child item structure with custom text
+                                window.selectedActivity = {
+                                    name: customText,
+                                    parentName: activity.name,
+                                    color: childItem.color || activity.color,
+                                    category: categoryName,
+                                    selected: customText,
+                                    isCustomInput: true
+                                };
+
+                                // Close modals
+                                customActivityModal.style.cssText = 'display: none !important';
+                                const childItemsModal = document.getElementById('childItemsModal');
+                                if (childItemsModal) {
+                                    childItemsModal.style.cssText = 'display: none !important';
+                                }
+
+                                newInputField.value = '';
+
+                                // Reset context
+                                window.customInputContext = { type: null, parentActivity: null, categoryName: null };
+                            }
+                        };
+
+                        // Add new listeners
+                        newConfirmBtn.addEventListener('click', handleChildItemCustomActivity);
+                        newInputField.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                handleChildItemCustomActivity();
+                            }
+                        });
+                    }
+
                     return; // Stop further processing
                 }
 
