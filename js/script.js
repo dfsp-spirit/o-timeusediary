@@ -209,7 +209,9 @@ function createActivityBlock(activityData, isFromTemplate = false) {
             startMinutes: activityData.startMinutes,
             endMinutes: activityData.endMinutes,
             mode: activityData.mode || 'single-choice',
-            count: activityData.count || 1
+            count: activityData.count || 1,
+            selections: activityData.selections || null,
+            availableOptions: activityData.availableOptions || null
         }
     };
 }
@@ -1212,7 +1214,10 @@ function renderActivities(categories, container = document.getElementById('activ
 
                         // Get all selected activities in this category
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
-                        const availableOptions = Array.from(categoryButtons).map(btn => btn.querySelector('.activity-text').textContent);
+                        const availableOptions = categoryButtons.map(btn => ({
+                            name: btn.querySelector('.activity-text').textContent,
+                            color: btn.style.getPropertyValue('--color')
+                        }));
 
                         if (selectedButtons.length > 0) {
                             window.selectedActivity = {
@@ -1489,8 +1494,11 @@ function renderActivities(categories, container = document.getElementById('activ
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
 
                         // compute all available options to store in window.selectedActivity
+
                         const availableOptions = Array.from(categoryButtons).map(btn => btn.querySelector('.activity-text').textContent);
                         //console.log('>>>>[ACTIVITY] availableOptions for multiple-choice selection:', availableOptions);
+
+                        //TODO: log full available options with colors, not just names
 
                         if (selectedButtons.length > 0) {
                             window.selectedActivity = {
@@ -1501,7 +1509,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                 category: category.name,
                                 mode: 'multiple-choice',
                                 isCustomInput: false,
-                                availableOptions: availableOptions
+                                availableOptions: availableOptions,
                             };
                         } else {
                             // Only clear window.selectedActivity in multiple-choice mode if user actively deselected
@@ -2318,7 +2326,8 @@ function initTimelineInteraction(timeline) {
             endMinutes: endMinutes,
             mode: window.selectedActivity.selections ? 'multiple-choice' : 'single-choice',
             count: window.selectedActivity.selections ? window.selectedActivity.selections.length : 1,
-            selections: window.selectedActivity.selections || undefined
+            selections: window.selectedActivity.selections || undefined,
+            availableOptions: window.selectedActivity.availableOptions || undefined
         };
 
         const result = createActivityBlock(activityData);
