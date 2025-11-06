@@ -496,6 +496,10 @@ export function createTimelineJSON(stringify = false) {
                 startMinutes: activity.startMinutes,
                 endMinutes: activity.endMinutes,
 
+                selections: activity.selections || null,
+                mode: activity.mode || 'single-choice',
+                count: activity.count || 1,
+
                 // Unique identifier
                 id: activity.id
             };
