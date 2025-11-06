@@ -476,6 +476,7 @@ export function createTimelineJSON(stringify = false) {
         const activities = window.timelineManager.activities[timelineKey];
 
         activities.forEach(activity => {
+            console.log('Processing activity for JSON:', activity);
             const row = {
                 // Basic fields
                 timelineKey: timelineKey,
@@ -488,7 +489,6 @@ export function createTimelineJSON(stringify = false) {
 
                 // Enhanced context for recreation
                 parentActivity: activity.parentName || activity.activity,
-                selected: activity.selected || activity.activity,
                 isCustomInput: activity.isCustomInput || false,
                 originalSelection: activity.originalSelection || null,
 
@@ -496,9 +496,11 @@ export function createTimelineJSON(stringify = false) {
                 startMinutes: activity.startMinutes,
                 endMinutes: activity.endMinutes,
 
-                selections: activity.selections || null,
+                // multiple-choice / single-choice context
                 mode: activity.mode || 'single-choice',
-                count: activity.count || 1,
+                selections: activity.selections || null,
+                availableOptions: activity.availableOptions || null,
+                count: activity.count || 1,   // number of selections for multiple-choice
 
                 // Unique identifier
                 id: activity.id
