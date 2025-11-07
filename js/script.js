@@ -1214,7 +1214,9 @@ function renderActivities(categories, container = document.getElementById('activ
 
                         // Get all selected activities in this category
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
-                        const availableOptions = categoryButtons.map(btn => ({
+                        const buttonsArray = Array.from(categoryButtons); // Convert node list to array, we need map()
+
+                        const availableOptions = buttonsArray.map(btn => ({
                             name: btn.querySelector('.activity-text').textContent,
                             color: btn.style.getPropertyValue('--color')
                         }));
