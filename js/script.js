@@ -2138,6 +2138,10 @@ function initTimelineInteraction(timeline) {
                         currentData[activityIndex].endTime = times.endTime;
                         currentData[activityIndex].blockLength = parseInt(target.dataset.length);
 
+                        // Update the minutes in the activity data
+                        currentData[activityIndex].startMinutes = startMinutes;
+                        currentData[activityIndex].endMinutes = endMinutes;
+
                         // Update original values incrementally
                         target.dataset.originalStart = newStartTime;
                         target.dataset.originalEnd = newEndTime;

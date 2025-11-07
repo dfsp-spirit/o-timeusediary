@@ -11,7 +11,7 @@
     "isCustomInput": false,
     "originalSelection": "Sleeping",
     "startMinutes": 390,
-    "endMinutes": 400,
+    "endMinutes": 490,
     "mode": "single-choice",
     "selections": null,
     "availableOptions": null,
@@ -30,7 +30,7 @@
     "isCustomInput": true,
     "originalSelection": "Whatever time use (will specify)",
     "startMinutes": 930,
-    "endMinutes": 940,
+    "endMinutes": 1040,
     "mode": "single-choice",
     "selections": null,
     "availableOptions": null,
@@ -48,7 +48,7 @@
     "isCustomInput": false,
     "originalSelection": null,
     "startMinutes": 840,
-    "endMinutes": 850,
+    "endMinutes": 990,
     "mode": "multiple-choice",
     "selections": [
       {
