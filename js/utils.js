@@ -9,7 +9,9 @@ export function getCurrentTimelineKey() {
 // Export to both module and window
 export function getCurrentTimelineData() {
     const currentKey = getCurrentTimelineKey();
-    return window.timelineManager.activities[currentKey] || [];
+    const result = window.timelineManager.activities[currentKey] || [];
+    console.log('getCurrentTimelineData called, returning:', result);
+    return result;
 }
 
 // Make getCurrentTimelineData available globally
