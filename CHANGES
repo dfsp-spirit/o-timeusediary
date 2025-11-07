@@ -1,0 +1,11 @@
+o-timeusediary MPIAE Changes
+============================
+
+
+Current WIP
+-----------
+
+
+Version 0.1.0 -- Support custom activites on top and child level
+-----------------------------------------------------------------
+* Add support for custom activities, which are not dependent on parsing the activity name, but uses new  'is_custom_input' field in JSON
