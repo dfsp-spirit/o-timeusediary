@@ -2562,14 +2562,21 @@ async function init() {
             throw new Error('Timelines wrapper not found');
         }
 
-        // Initialize first timeline using addNextTimeline
-        window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
-        await addNextTimeline();
-
-
         // LOAD PRELOAD DATA HERE - after first timeline is created but before UI setup
         const urlParams = new URLSearchParams(window.location.search);
         const shouldPreload = urlParams.get('preload') === '1';
+
+        // Initialize first timeline using addNextTimeline
+        window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
+        if(shouldPreload) {
+            for (let i = 0; i < window.timelineManager.keys.length; i++) {
+                await addNextTimeline();
+            }
+        } else {
+            await addNextTimeline(); // Only add first timeline initially, the others get added when user navigates.
+        }
+
+
 
         const hasExistingActivities = Object.keys(window.timelineManager.activities).some(
             key => window.timelineManager.activities[key].length > 0
