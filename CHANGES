@@ -5,6 +5,13 @@ o-timeusediary MPIAE Changes
 Current WIP
 -----------
 
+Version 0.2.0 -- Display data from JSON
+---------------------------------------
+* Support loading and displaying data from JSON
+  - currently this is a demo, to see it you need to set URL parameter preload=1 when loading the app
+* FIX: fix computation of endMinutes, it was not updated when resizing bars in timeline, so always was 10 minutes after start (the default length is 10 minutes when adding)
+
+
 
 Version 0.1.0 -- Support custom activites on top and child level
 -----------------------------------------------------------------
