@@ -1,0 +1,80 @@
+[
+  {
+    "timelineKey": "primary",
+    "activity": "Sleeping",
+    "category": "Personal",
+    "startTime": "2025-11-06 06:30",
+    "endTime": "2025-11-06 08:10",
+    "blockLength": 100,
+    "color": "#a2b4ee",
+    "parentActivity": "Sleeping",
+    "isCustomInput": false,
+    "originalSelection": "Sleeping",
+    "startMinutes": 390,
+    "endMinutes": 400,
+    "mode": "single-choice",
+    "selections": null,
+    "availableOptions": null,
+    "count": 1,
+    "id": "uojcwo2ic"
+  },
+  {
+    "timelineKey": "primary",
+    "activity": "minecraft",
+    "category": "Other",
+    "startTime": "2025-11-06 15:30",
+    "endTime": "2025-11-06 17:20",
+    "blockLength": 110,
+    "color": "#808080",
+    "parentActivity": "minecraft",
+    "isCustomInput": true,
+    "originalSelection": "Whatever time use (will specify)",
+    "startMinutes": 930,
+    "endMinutes": 940,
+    "mode": "single-choice",
+    "selections": null,
+    "availableOptions": null,
+    "count": 1,
+    "id": "9ovj7adsh"
+  },
+  {
+    "timelineKey": "device",
+    "activity": "Computer | Tablet",
+    "category": " ",
+    "startTime": "2025-11-06 14:00",
+    "endTime": "2025-11-06 16:30",
+    "blockLength": 150,
+    "parentActivity": "Computer | Tablet",
+    "isCustomInput": false,
+    "originalSelection": null,
+    "startMinutes": 840,
+    "endMinutes": 850,
+    "mode": "multiple-choice",
+    "selections": [
+      {
+        "name": "Computer",
+        "color": "#a8f0a8"
+      },
+      {
+        "name": "Tablet",
+        "color": "#f0a8d7"
+      }
+    ],
+    "availableOptions": [
+      {
+        "name": "Computer",
+        "color": "#a8f0a8"
+      },
+      {
+        "name": "Tablet",
+        "color": "#f0a8d7"
+      },
+      {
+        "name": "Smartphone",
+        "color": "#a8f0ef"
+      }
+    ],
+    "count": 2,
+    "id": "ikimgcn5q"
+  }
+]

@@ -216,59 +216,48 @@ function createActivityBlock(activityData, isFromTemplate = false) {
     };
 }
 
-// Recreate a single activity block from template (JSON data, typically loaded from storage)
 function recreateActivityBlockFromTemplate(activityData) {
+    console.log('=== RECREATE ACTIVITY BLOCK START ===');
+    console.log('Input activityData:', activityData);
+
     const result = createActivityBlock(activityData, true);
     const currentBlock = result.block;
 
+    console.log('Activity block created:', currentBlock);
+    console.log('Activity data result:', result.activityData);
+
     // Add to DOM
     const activitiesContainer = window.timelineManager.activeTimeline.querySelector('.activities') || (() => {
+        console.log('Creating new activities container');
         const container = document.createElement('div');
         container.className = 'activities';
         window.timelineManager.activeTimeline.appendChild(container);
         return container;
     })();
 
+    console.log('Activities container:', activitiesContainer);
     activitiesContainer.appendChild(currentBlock);
+    console.log('Block appended to DOM');
 
     // Create time label
     const timeLabel = createTimeLabel(currentBlock);
     updateTimeLabel(timeLabel, activityData.startTime, activityData.endTime, currentBlock);
 
     // Store in timeline manager
+    const currentKey = getCurrentTimelineKey();
+    console.log('Current timeline key:', currentKey);
+    console.log('Before push - activities for this timeline:', window.timelineManager.activities[currentKey]);
+
     getCurrentTimelineData().push(result.activityData);
+
+    console.log('After push - activities for this timeline:', window.timelineManager.activities[currentKey]);
+    console.log('=== RECREATE ACTIVITY BLOCK END ===');
 
     // Re-initialize interact.js for the new block
     initTimelineInteraction(window.timelineManager.activeTimeline);
 
     return result;
 }
-
-// Load entire timeline from JSON data (array of activity objects)
-export function loadTimelineFromJSON(jsonData) {
-    // Clear existing timeline data
-    const currentKey = getCurrentTimelineKey();
-    window.timelineManager.activities[currentKey] = [];
-
-    // Clear visual timeline
-    const activitiesContainer = window.timelineManager.activeTimeline.querySelector('.activities');
-    if (activitiesContainer) {
-        activitiesContainer.innerHTML = '';
-    }
-
-    // Sort by start time to maintain order
-    const sortedData = jsonData.sort((a, b) => a.startMinutes - b.startMinutes);
-
-    // Recreate each activity
-    sortedData.forEach(activityData => {
-        recreateActivityBlockFromTemplate(activityData);
-    });
-
-    updateButtonStates();
-
-    console.log(`Loaded ${jsonData.length} activities from template`);
-}
-
 
 
 // NEW: Helper functions to format timeline times based on our 04:00 (240 minutes) rule
@@ -1214,7 +1203,7 @@ function renderActivities(categories, container = document.getElementById('activ
 
                         // Get all selected activities in this category
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
-                        const buttonsArray = Array.from(categoryButtons); // Convert node list to array, we need map()
+                        const buttonsArray = Array.from(categoryButtons); // Convert node list to array for map()
 
                         const availableOptions = buttonsArray.map(btn => ({
                             name: btn.querySelector('.activity-text').textContent,
@@ -2449,7 +2438,55 @@ function initTimelineInteraction(timeline) {
     });
 }
 
+export function loadTimelineFromJSON(jsonData) {
+    console.log('loadTimelineFromJSON: Loading timeline data from JSON...');
+    console.trace('loadTimelineFromJSON called from:');
+
+    // Group activities by timelineKey
+    const activitiesByTimeline = {};
+    jsonData.forEach(activity => {
+        if (!activitiesByTimeline[activity.timelineKey]) {
+            activitiesByTimeline[activity.timelineKey] = [];
+        }
+        activitiesByTimeline[activity.timelineKey].push(activity);
+    });
+
+    // Process each timeline
+    Object.keys(activitiesByTimeline).forEach(timelineKey => {
+        console.log(`loadTimelineFromJSON: === PROCESSING TIMELINE: ${timelineKey} ===`);
+        console.log(`loadTimelineFromJSON: Number of activities for ${timelineKey}:`, activitiesByTimeline[timelineKey].length);
+        // Check if this timeline exists in our metadata
+        if (!window.timelineManager.metadata[timelineKey]) {
+            console.warn(`loadTimelineFromJSON: Timeline "${timelineKey}" not found in metadata, skipping activities`);
+            return;
+        }
+
+        // Clear existing activities for this timeline
+        window.timelineManager.activities[timelineKey] = [];
+
+        // Switch to this timeline temporarily to create DOM elements
+        const timelineElement = document.getElementById(timelineKey);
+        if (timelineElement) {
+            window.timelineManager.activeTimeline = timelineElement;
+
+            // Load activities in sorted order
+            const sortedActivities = activitiesByTimeline[timelineKey].sort((a, b) => a.startMinutes - b.startMinutes);
+            sortedActivities.forEach(activityData => {
+                recreateActivityBlockFromTemplate(activityData);
+            });
+
+            console.log(`loadTimelineFromJSON: Loaded ${sortedActivities.length} activities for timeline "${timelineKey}"`);
+        } else {
+            console.warn(`loadTimelineFromJSON: Timeline element "${timelineKey}" not found in DOM`);
+        }
+    });
+
+    updateButtonStates();
+    console.log(`loadTimelineFromJSON: Loaded ${jsonData.length} total activities from JSON`);
+}
+
 async function init() {
+    console.log('==================== Initializing application... ====================');
     try {
         // Reinitialize timelineManager with an empty study object
         window.timelineManager = {
@@ -2524,6 +2561,67 @@ async function init() {
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
         await addNextTimeline();
+
+
+        // LOAD PRELOAD DATA HERE - after first timeline is created but before UI setup
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldPreload = urlParams.get('preload') === '1';
+
+        const hasExistingActivities = Object.keys(window.timelineManager.activities).some(
+            key => window.timelineManager.activities[key].length > 0
+        );
+
+        if (shouldPreload && !hasExistingActivities) {
+            console.log('Loading preload data from my_entry.json...');
+            try {
+                const response = await fetch('my_entry.json');
+                if (response.ok) {
+                    const externalData = await response.json();
+                    loadTimelineFromJSON(externalData);
+                    sessionStorage.setItem('preloadDataLoaded', 'true');
+                    console.log('Preload data loaded successfully');
+                } else {
+                    console.error('Failed to load my_entry.json:', response.status);
+                }
+            } catch (error) {
+                console.error('Error loading preload data:', error);
+            }
+        }
+
+        console.log('Timeline structure after initialization:', {
+            keys: window.timelineManager.keys,
+            currentIndex: window.timelineManager.currentIndex,
+            activities: Object.keys(window.timelineManager.activities).reduce((acc, key) => {
+                acc[key] = window.timelineManager.activities[key].length + ' activities';
+                return acc;
+            }, {}),
+            initialized: Array.from(window.timelineManager.initialized)
+        });
+
+        setTimeout(() => {
+            console.log('=== POST-PRELOAD DEBUG ===');
+
+            // Check data structure
+            Object.keys(window.timelineManager.activities).forEach(timelineKey => {
+                const activities = window.timelineManager.activities[timelineKey];
+                console.log(`Timeline "${timelineKey}" has ${activities.length} activities in data`);
+
+                // Check if timeline DOM element exists and has activities container
+                const timelineElement = document.getElementById(timelineKey);
+                if (timelineElement) {
+                    const activitiesContainer = timelineElement.querySelector('.activities');
+                    console.log(`Timeline "${timelineKey}" DOM:`, {
+                        elementExists: !!timelineElement,
+                        hasActivitiesContainer: !!activitiesContainer,
+                        activitiesContainerChildren: activitiesContainer ? activitiesContainer.children.length : 0
+                    });
+                }
+            });
+
+            // Count all activity blocks in DOM
+            const allActivityBlocks = document.querySelectorAll('.activity-block');
+            console.log(`Total activity blocks in DOM: ${allActivityBlocks.length}`);
+        }, 500);
 
         // Update gradient bar layout
         updateGradientBarLayout();

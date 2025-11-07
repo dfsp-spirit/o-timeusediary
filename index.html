@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Loading...</title>
-    
+
     <!-- Favicons -->
     <link rel="shortcut icon" href="favicon/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
@@ -68,16 +68,16 @@
     <div class="activities-container" id="activitiesContainer">
         <div class="activities-accordion"></div>
     </div>
-    
+
     <!-- Debug overlay element -->
     <div id="debugOverlay" class="debugOverlay"></div>
 
     <!-- Load environment variables first -->
     <script src="env-loader.js"></script>
-    
+
     <!-- Load i18n (internationalization) module -->
     <script src="js/i18n.js" type="module"></script>
-    
+
     <!-- Load Bowser and other scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bowser/2.11.0/bundled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
@@ -85,15 +85,11 @@
     <script src="js/timeline.js" type="module"></script>
     <script src="js/utils.js" type="module"></script>
     <script src="js/autoscroll.js" type="module"></script>
-    <script src="js/script.js?v=1.1" type="module"></script>
+    <script src="js/script.js" type="module"></script>
     <!-- <script src="tests/timeline_test.js" type="module"></script> -->
-    <script type="module">
-        import { calculateTimeDifference } from './js/utils.js';
-        window.calculateTimeDifference = calculateTimeDifference;
-    </script>
     <!-- <script type="module">
         import { testTimelineMarkerPositioning } from './tests/timeline_test.js';
-        
+
         // Run tests after page load
         window.addEventListener('load', () => {
             const testResult = testTimelineMarkerPositioning();
@@ -104,7 +100,7 @@
             }
         });
     </script> -->
-    
+
     <!-- Attribute Tracker Script -->
     <script src="js/attributeTracker.js"></script>
 
