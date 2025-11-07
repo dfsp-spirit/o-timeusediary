@@ -1493,12 +1493,20 @@ function renderActivities(categories, container = document.getElementById('activ
                         // Get all selected activities in this category
                         const selectedButtons = Array.from(categoryButtons).filter(btn => btn.classList.contains('selected'));
 
-                        // compute all available options to store in window.selectedActivity
 
-                        const availableOptions = Array.from(categoryButtons).map(btn => btn.querySelector('.activity-text').textContent);
-                        //console.log('>>>>[ACTIVITY] availableOptions for multiple-choice selection:', availableOptions);
+                        console.log('>>>>[ACTIVITY] Computing available options for multiple-choice selection');
+                        console.log('categoryButtons:', categoryButtons);
+                        console.log('categoryButtons type:', typeof categoryButtons);
+                        console.log('categoryButtons length:', categoryButtons?.length);
 
-                        //TODO: log full available options with colors, not just names
+
+
+                        const buttonsArray = Array.from(categoryButtons); // Convert node list to array, we need map()
+
+                        const availableOptions = buttonsArray.map(btn => ({
+                            name: btn.querySelector('.activity-text').textContent,
+                            color: btn.style.getPropertyValue('--color')
+                        }));
 
                         if (selectedButtons.length > 0) {
                             window.selectedActivity = {
