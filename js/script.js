@@ -2569,7 +2569,7 @@ async function init() {
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
         if(shouldPreload) {
-            for (let i = 0; i < window.timelineManager.keys.length; i++) {
+            for (let i = 0; i < window.timelineManager.keys.length; i++) {  // Add all timelines if preloading, so user can see all data.
                 await addNextTimeline();
             }
         } else {
