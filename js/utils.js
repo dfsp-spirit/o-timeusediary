@@ -519,77 +519,92 @@ export function createTimelineJSON(stringify = false) {
 }
 
 /**
+ * Creates combined timeline and participant data for sending to any target.
+ * This function handles all data preparation and combination logic.
+ */
+export function createCombinedData() {
+  // --- Prepare Timeline Data ---
+  const timelineData = createTimelineDataFrame();
+
+  // Get study data if available
+  let studyData = window.timelineManager?.study || {};
+  let pid;
+
+  // Check if ppid exists and is not empty
+  const hasPpid = (studyData.ppid !== undefined && studyData.ppid !== null && studyData.ppid !== '') ||
+                 (studyData.PPID !== undefined && studyData.PPID !== null && studyData.PPID !== '');
+
+  if (hasPpid) {
+    // Use ppid as pid when ppid is not empty
+    pid = studyData.ppid || studyData.PPID;
+  } else if (!('pid' in studyData) && !('PID' in studyData)) {
+    // Generate random pid if neither pid nor ppid exists
+    pid = ('0000000000000000' + Math.floor(Math.random() * 1e16)).slice(-16);
+    studyData.pid = pid;
+  } else {
+    // Use existing pid if ppid doesn't exist but pid does
+    pid = studyData.pid || studyData.PID;
+  }
+
+  // --- Prepare Participant Data ---
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const layoutHorizontal = viewportWidth >= 1440;
+
+  // Get browser info if available
+  let browserInfo = { name: 'unknown', version: 'unknown' };
+  if (window.bowser) {
+    const browserParser = window.bowser.getParser(window.navigator.userAgent);
+    browserInfo = {
+      name: browserParser.getBrowserName(),
+      version: browserParser.getBrowserVersion()
+    };
+  }
+
+  // Determine session_id based on whether ppid exists
+  const session_id = hasPpid && (studyData.survey || studyData.SURVEY)
+    ? (studyData.survey || studyData.SURVEY)
+    : (studyData.SESSION_ID || null);
+
+  // Combine timeline and participant data
+  const combinedData = timelineData.map(row => ({
+    timelineKey: row.timelineKey,
+    activity: row.activity,
+    category: row.category,
+    startTime: row.startTime,
+    endTime: row.endTime,
+    pid: pid,
+    diaryWave: studyData.DIARY_WAVE ? parseInt(studyData.DIARY_WAVE) : null,
+    viewportWidth,
+    viewportHeight,
+    layoutHorizontal,
+    browserName: browserInfo.name,
+    browserVersion: browserInfo.version,
+    instructions: studyData.instructions === 'completed',
+    PROLIFIC_PID: studyData.PROLIFIC_PID || null,
+    STUDY_ID: studyData.STUDY_ID || null,
+    SESSION_ID: session_id
+  }));
+
+  return {
+    combinedData,
+    pid,
+    studyData
+  };
+}
+
+/**
  * Sends timeline and participant data to DataPipe API.
  *
  * This function performs the following steps:
- * 1. Prepare the timeline data and ensure each record contains the unique identifier (pid).
+ * 1. Prepare the combined data using createCombinedData().
  * 2. Send the data to DataPipe API endpoint.
  * 3. Handle redirect to thank you page.
  */
 export async function sendDataToDataPipe() {
   try {
-    // --- Prepare Timeline Data ---
-    const timelineData = createTimelineDataFrame();
-
-    // Get study data if available
-    let studyData = window.timelineManager?.study || {};
-    let pid;
-
-    // Check if ppid exists and is not empty
-    const hasPpid = (studyData.ppid !== undefined && studyData.ppid !== null && studyData.ppid !== '') ||
-                   (studyData.PPID !== undefined && studyData.PPID !== null && studyData.PPID !== '');
-
-    if (hasPpid) {
-      // Use ppid as pid when ppid is not empty
-      pid = studyData.ppid || studyData.PPID;
-    } else if (!('pid' in studyData) && !('PID' in studyData)) {
-      // Generate random pid if neither pid nor ppid exists
-      pid = ('0000000000000000' + Math.floor(Math.random() * 1e16)).slice(-16);
-      studyData.pid = pid;
-    } else {
-      // Use existing pid if ppid doesn't exist but pid does
-      pid = studyData.pid || studyData.PID;
-    }
-
-    // --- Prepare Participant Data ---
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const layoutHorizontal = viewportWidth >= 1440;
-
-    // Get browser info if available
-    let browserInfo = { name: 'unknown', version: 'unknown' };
-    if (window.bowser) {
-      const browserParser = window.bowser.getParser(window.navigator.userAgent);
-      browserInfo = {
-        name: browserParser.getBrowserName(),
-        version: browserParser.getBrowserVersion()
-      };
-    }
-
-    // Determine session_id based on whether ppid exists
-    const session_id = hasPpid && (studyData.survey || studyData.SURVEY)
-      ? (studyData.survey || studyData.SURVEY)
-      : (studyData.SESSION_ID || null);
-
-    // Combine timeline and participant data
-    const combinedData = timelineData.map(row => ({
-      timelineKey: row.timelineKey,
-      activity: row.activity,
-      category: row.category,
-      startTime: row.startTime,
-      endTime: row.endTime,
-      pid: pid,
-      diaryWave: studyData.DIARY_WAVE ? parseInt(studyData.DIARY_WAVE) : null,
-      viewportWidth,
-      viewportHeight,
-      layoutHorizontal,
-      browserName: browserInfo.name,
-      browserVersion: browserInfo.version,
-      instructions: studyData.instructions === 'completed',
-      PROLIFIC_PID: studyData.PROLIFIC_PID || null,
-      STUDY_ID: studyData.STUDY_ID || null,
-      SESSION_ID: session_id
-    }));
+    // Get combined data using the refactored function
+    const { combinedData, pid } = createCombinedData();
 
     // Convert to CSV format
     const csvData = convertArrayToCSV(combinedData);
@@ -933,7 +948,7 @@ function downloadCSV(csvString, filename) {
  *   During development, the default is 'datapipe' mode.
  */
 export async function sendData(options = { mode: 'json' }) {  // TODO: change default back to 'datapipe'. options: 'datapipe', 'csv', 'json'
-    // Sync URL parameters before sending data
+    // Sync URL parameters before sending data, so that URL params are included in study data
     syncURLParamsToStudy();
 
     if (options.mode === 'datapipe') {
@@ -959,9 +974,36 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
         // Create timeline data frame and convert to JSON for download
         const dataJSON = createTimelineJSON(false);
         const jsonString = JSON.stringify(dataJSON, null, 2);
+
+        const BACKEND_API_URL = "http://127.0.0.1:8000/api/submit";
+
         console.log('=== DATA FRAME FOR JSON ===');
-        console.log('Full data structure:', jsonString);
+        console.log('Full data structure we send to backend at ' + BACKEND_API_URL + ':', jsonString);
         console.log('Number of records:', dataJSON.length);
+
+
+
+        // Send JSON data to backend API
+        try {
+            const response = await fetch(BACKEND_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "*/*",
+                },
+                body: jsonString,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Backend API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const responseData = await response.json();
+            console.log('Data sent to backend API successfully:', responseData);
+        } catch (error) {
+            console.error('Error sending data to backend API:', error);
+        }
+
         hideLoadingModal();
 
     } else {
