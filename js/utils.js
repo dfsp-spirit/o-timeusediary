@@ -472,7 +472,7 @@ export function createTimelineDataFrame() {
 }
 
 export function createTimelineJSON(stringify = false) {
-    const data = [];
+    const activity_data = [];
 
     Object.keys(window.timelineManager.activities).forEach(timelineKey => {
         const activities = window.timelineManager.activities[timelineKey];
@@ -507,15 +507,23 @@ export function createTimelineJSON(stringify = false) {
                 // Unique identifier
                 id: activity.id
             };
-            data.push(row);
+            activity_data.push(row);
         });
     });
 
-    if (!stringify) {
-        return data;
+    const full_data = {
+        activities: activity_data,
+        metadata: {
+            study: {},
+            participant: {},
+        }
     }
 
-    return JSON.stringify(data, null, 2);
+    if (!stringify) {
+        return full_data;
+    }
+
+    return JSON.stringify(full_data, null, 2);
 }
 
 /**
@@ -973,18 +981,25 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
     } else if (options.mode === 'json') {
         // Create timeline data frame and convert to JSON for download
         const dataJSON = createTimelineJSON(false);
+
+        const { pid } = createCombinedData();
+        console.log('Participant ID (pid):', pid);
+
+        dataJSON.metadata.study = window.timelineManager.study || {};
+        dataJSON.metadata.participant = { pid: pid};
+
         const jsonString = JSON.stringify(dataJSON, null, 2);
 
         const BACKEND_API_URL = "http://127.0.0.1:8000/api/submit";
 
         console.log('=== DATA FRAME FOR JSON ===');
         console.log('Full data structure we send to backend at ' + BACKEND_API_URL + ':', jsonString);
-        console.log('Number of records:', dataJSON.length);
-
+        console.log('Number of records:', dataJSON.activities.length);
 
 
         // Send JSON data to backend API
         try {
+            console.log('Sending data to backend API at', BACKEND_API_URL);
             const response = await fetch(BACKEND_API_URL, {
                 method: "POST",
                 headers: {
