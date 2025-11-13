@@ -203,7 +203,7 @@
               },
               {
                 "name": "Self-study/Personal Development: Recreational courses, learning a skill or language",
-                "code": 119,
+                "code": 131,
                 "label": "recreational courses, study",
                 "short": "rec study",
                 "vshort": "stud",
@@ -213,440 +213,198 @@
             ]
           },
           {
-            "name": "Social, Leisure & Hobbies",
+            "name": "Social, Leisure & Hobbies At Home",
             "activities": [
               {
-                "name": "Watching TV/DVD, Listening to Music",
-                "code": 127,
-                "label": "watching TV/video, dvd, radio, other music",
-                "short": "media",
-                "vshort": "mda",
-                "color": "#afe2da",
-                "childItems": [
-                  {
-                    "name": "Watching TV, video, or DVD",
-                    "code": 127,
-                    "label": "watching TV/video, dvd, radio, other music",
-                    "short": "media",
-                    "vshort": "mda",
-                    "color": "#afe2da"
-                  },
-                  {
-                    "name": "Listening to radio or recordings",
-                    "code": 127,
-                    "label": "watching TV/video, dvd, radio, other music",
-                    "short": "media",
-                    "vshort": "mda",
-                    "color": "#afe2da"
-                  }
-                ]
-              },
-              {
-                "name": "Communication",
-                "code": 134,
-                "label": "telephone,text,email, social networking, read/write letters",
-                "short": "communicate",
-                "vshort": "com",
-                "color": "#dbe9e0",
-                "childItems": [
-                  {
-                    "name": "Talking on phone, texting, email, social media, reading/writing letters",
-                    "code": 134,
-                    "label": "telephone,text,email, social networking, read/write letters",
-                    "short": "communicate",
-                    "vshort": "com",
-                    "color": "#dbe9e0"
-                  },
-                  {
-                    "name": "Communication by text (SMS, instant messages, email, etc.)",
-                    "code": 134,
-                    "label": "telephone,text,email, social networking, read/write letters",
-                    "short": "communicate",
-                    "vshort": "com",
-                    "color": "#dbe9e0"
-                  },
-                  {
-                    "name": "Other time spent on social media",
-                    "code": 134,
-                    "label": "telephone,text,email, social networking, read/write letters",
-                    "short": "communicate",
-                    "vshort": "com",
-                    "color": "#dbe9e0"
-                  }
-                ]
-              },
-              {
-                "name": "Reading (Including E-books)",
-                "code": 128,
-                "label": "reading including e-books",
-                "short": "read",
-                "vshort": "rea",
-                "color": "#dfd4fd",
-                "childItems": [
-                  {
-                    "name": "Reading periodicals",
-                    "code": 128,
-                    "label": "reading including e-books",
-                    "short": "read",
-                    "vshort": "rea",
-                    "color": "#dfd4fd"
-                  },
-                  {
-                    "name": "Reading books",
-                    "code": 128,
-                    "label": "reading including e-books",
-                    "short": "read",
-                    "vshort": "rea",
-                    "color": "#dfd4fd"
-                  },
-                  {
-                    "name": "Other reading",
-                    "code": 128,
-                    "label": "reading including e-books",
-                    "short": "read",
-                    "vshort": "rea",
-                    "color": "#dfd4fd"
-                  }
-                ]
-              },
-              {
-                "name": "Using Computer",
-                "code": 132,
-                "label": "using computer",
-                "short": "using comp",
-                "vshort": "comp",
-                "color": "#f8d7da",
-                "childItems": [
-                  {
-                    "name": "Computer programming, learning software",
-                    "childItems": []
-                  },
-                  {
-                    "name": "Information search using internet",
-                    "childItems": []
-                  },
-                  {
-                    "name": "Other computing",
-                    "childItems": []
-                  }
-                ]
-              },
-              {
-                "name": "Playing Computer Games",
-                "code": 132,
-                "label": "playing computer games",
-                "short": "playing comp games",
-                "vshort": "pla",
-                "color": "#f5b9ac",
-                "childItems": [
-                  {
-                    "name": "Computer games",
-                    "code": 132,
-                    "label": "playing computer games",
-                    "short": "playing comp games",
-                    "vshort": "pla",
-                    "color": "#f5b9ac"
-                  },
-                  {
-                    "name": "Console games (on home console)",
-                    "code": 132,
-                    "label": "playing computer games",
-                    "short": "playing comp games",
-                    "vshort": "pla",
-                    "color": "#f5b9ac"
-                  },
-                  {
-                    "name": "Mobile games (on handheld device/smartphone)",
-                    "code": 132,
-                    "label": "playing computer games",
-                    "short": "playing comp games",
-                    "vshort": "pla",
-                    "color": "#f5b9ac"
-                  },
-                  {
-                    "name": "Solo games and play, gambling",
-                    "code": 132,
-                    "label": "playing computer games",
-                    "short": "playing comp games",
-                    "vshort": "pla",
-                    "color": "#f5b9ac"
-                  },
-                  {
-                    "name": "Other games not listed (enter)",
-                    "is_custom_input": true,
-                    "code": 132,
-                    "label": "playing computer games",
-                    "short": "playing comp games",
-                    "vshort": "pla",
-                    "color": "#f5b9ac"
-                  }
-                ]
-              },
-              {
-                "name": "Spending Time with Friends, Family",
-                "code": 133,
-                "label": "spending time with friends, family",
-                "short": "socialise",
+                "name": "Socialising at Home (with family, friends, phone call)",
+                "code": 140,
+                "label": "socialising at home with family, friends, phone call",
+                "short": "socialise home",
                 "vshort": "soc",
-                "color": "#b6cff1",
-                "childItems": [
-                  {
-                    "name": "Socialising with family",
-                    "code": 133,
-                    "label": "spending time with friends, family",
-                    "short": "socialise",
-                    "vshort": "soc",
-                    "color": "#b6cff1"
-                  },
-                  {
-                    "name": "Visiting and receiving visitors",
-                    "code": 133,
-                    "label": "spending time with friends, family",
-                    "short": "socialise",
-                    "vshort": "soc",
-                    "color": "#b6cff1"
-                  },
-                  {
-                    "name": "Celebrations",
-                    "code": 133,
-                    "label": "spending time with friends, family",
-                    "short": "socialise",
-                    "vshort": "soc",
-                    "color": "#b6cff1"
-                  },
-                  {
-                    "name": "Parlour games and play",
-                    "code": 133,
-                    "label": "spending time with friends, family",
-                    "short": "socialise",
-                    "vshort": "soc",
-                    "color": "#b6cff1"
-                  },
-                  {
-                    "name": "Audio and video conversation",
-                    "code": 133,
-                    "label": "spending time with friends, family",
-                    "short": "socialise",
-                    "vshort": "soc",
-                    "color": "#b6cff1"
-                  },
-                  {
-                    "name": "Other social life",
-                    "code": 133,
-                    "label": "spending time with friends, family",
-                    "short": "socialise",
-                    "vshort": "soc",
-                    "color": "#b6cff1"
-                  }
-                ]
-              },
-              {
-                "name": "Hobbies",
-                "code": 136,
-                "label": "hobbies",
-                "short": "hobby",
-                "vshort": "hob",
-                "color": "#f2d8cb",
-                "childItems": [
-                  {
-                    "name": "Arts (visual, performing, literary)",
-                    "code": 136,
-                    "label": "hobbies",
-                    "short": "hobby",
-                    "vshort": "hob",
-                    "color": "#f2d8cb"
-                  },
-                  {
-                    "name": "Collecting",
-                    "code": 136,
-                    "label": "hobbies",
-                    "short": "hobby",
-                    "vshort": "hob",
-                    "color": "#f2d8cb"
-                  },
-                  {
-                    "name": "Making handicraft products",
-                    "code": 136,
-                    "label": "hobbies",
-                    "short": "hobby",
-                    "vshort": "hob",
-                    "color": "#f2d8cb"
-                  },
-                  {
-                    "name": "Other hobbies",
-                    "code": 136,
-                    "label": "hobbies",
-                    "short": "hobby",
-                    "vshort": "hob",
-                    "color": "#f2d8cb"
-                  }
-                ]
-              },
-              {
-                "name": "Walking/Dog Walking",
-                "code": 131,
-                "label": "walking/dog walking",
-                "short": "walking",
-                "vshort": "wlk",
-                "color": "#f5b9ac",
+                "color": "#afe2da",
                 "childItems": []
               },
               {
-                "name": "Playing Sports, Exercise",
-                "code": 129,
+                "name": "Reading (Physical book, magazine, newspaper)",
+                "code": 141,
+                "label": "reading physical",
+                "short": "read",
+                "vshort": "rea",
+                "color": "#dfd4fd",
+                "childItems": []
+              },
+              {
+                "name": "Playing instrument / Creating music",
+                "code": 142,
+                "label": "playing instrument or creating music",
+                "short": "play music",
+                "vshort": "music",
+                "color": "#f8d7da"
+              },
+              {
+                "name": "Religious / Spiritual Practice, Meditation",
+                "code": 143,
+                "label": "religious or spiritual practice, meditation",
+                "short": "religious practice",
+                "vshort": "rel",
+                "color": "#f8d7da"
+              },
+              {
+                "name": "Exercise",
+                "code": 144,
                 "label": "playing sports, exercise",
+                "short": "exercise",
+                "vshort": "ex",
+                "color": "#b9ead3",
+                "childItems": []
+              },
+              {
+                "name": "Digital Media",
+                "code": 145,
+                "label": "digital media",
+                "short": "digital media",
+                "vshort": "dig",
+                "color": "#de9ff3",
+                "childItems": []
+              },
+              {
+                "name": "Cooking",
+                "code": 146,
+                "label": "cooking",
+                "short": "cooking",
+                "vshort": "cook",
+                "color": "#de9ff3",
+                "childItems": []
+              },
+              {
+                "name": "Other home activities (please specify)",
+                "code": 147,
+                "label": "other",
+                "short": "other",
+                "vshort": "other",
+                "color": "#de9ff3",
+                "childItems": [],
+                "is_custom_input": true
+              }
+            ]
+          },
+          {
+            "name": "Social, Leisure & Hobbies Outside of Home",
+            "activities": [
+              {
+                "name": "Socialising out of Home (e.g., meeting family, friends)",
+                "code": 160,
+                "label": "socialising out of home with family, friends, phone call",
+                "short": "socialise out",
+                "vshort": "soc",
+                "color": "#afe2da",
+                "childItems": []
+              },
+              {
+                "name": "Religious / Spiritual Practice (Chruch, Temple, Mosque, Synagogue, Meditation Center, Visit Cemetery)",
+                "code": 161,
+                "label": "religious or spiritual practice, meditation outside",
+                "short": "religious out",
+                "vshort": "rel",
+                "color": "#f8d7da"
+              },
+              {
+                "name": "Shopping / Errands",
+                "code": 162,
+                "label": "shopping or running errands outside",
+                "short": "shopping out",
+                "vshort": "shop",
+                "color": "#f8d7da"
+              },
+              {
+                "name": "Events / Entertainment (e.g., cinema, theatre, concert, sports event)",
+                "code": 163,
+                "label": "events or entertainment outside",
+                "short": "events out",
+                "vshort": "events",
+                "color": "#f8d7da"
+              },
+              {
+                "name": "Hobby non-sports, e.g., visiting a museum, music lesson, book club, voluntary work. (Please specify)",
+                "code": 164,
+                "label": "hobby non-sports",
+                "short": "hobby non-sports",
+                "vshort": "hobby",
+                "color": "#b9ead3",
+                "childItems": [],
+                "is_custom_input": true
+              },
+              {
+                "name": "Sports / Exercise outdoors",
+                "code": 166,
+                "label": "sports outdoors",
                 "short": "exercise",
                 "vshort": "ex",
                 "color": "#b9ead3",
                 "childItems": [
                   {
-                    "name": "Walking and hiking",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
+                    "name": "Walking alone",
+                    "code": 167,
+                    "label": "Walking",
+                    "short": "walk",
+                    "vshort": "walk",
+                    "color": "#d0c79c"
                   },
                   {
-                    "name": "Jogging and running",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
+                    "name": "Walking with someone else",
+                    "code": 168,
+                    "label": "Walking",
+                    "short": "walk",
+                    "vshort": "walk",
+                    "color": "#d0c70c"
                   },
                   {
-                    "name": "Cycling, skiing, and skating",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
+                    "name": "Running alone",
+                    "code": 169,
+                    "label": "Running",
+                    "short": "run",
+                    "vshort": "run",
+                    "color": "#d0c79c"
                   },
                   {
-                    "name": "Ball games",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
+                    "name": "Running with someone else",
+                    "code": 170,
+                    "label": "Running",
+                    "short": "run",
+                    "vshort": "run",
+                    "color": "#d0c70c"
                   },
                   {
-                    "name": "Gymnastics and fitness",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
-                  },
-                  {
-                    "name": "Water sports",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
-                  },
-                  {
-                    "name": "Productive exercise (e.g., hunt, fish, pick berries, mushrooms, herbs)",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
-                  },
-                  {
-                    "name": "Sports-related activities",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
-                  },
-                  {
-                    "name": "Other sports or outdoor activities",
-                    "code": 129,
-                    "label": "playing sports, exercise",
-                    "short": "exercise",
-                    "vshort": "ex",
-                    "color": "#b9ead3"
+                    "name": "Other outdoor sports/exercise (please specify)",
+                    "code": 171,
+                    "label": "sports outdoors other",
+                    "short": "other outdoor sports",
+                    "vshort": "other out sports",
+                    "color": "#d0c70c",
+                    "is_custom_input": true
                   }
                 ]
               },
               {
-                "name": "Going Out to Eat/Drink (e.g. Pub, Restaurant)",
-                "code": 130,
-                "label": "going out to eat, drink eg pub, restaurant",
-                "short": "eat out",
-                "vshort": "eat",
+                "name": "Sports / Exercise indoors, e.g. gym (please specify)",
+                "code": 172,
+                "label": "playing sports, exercise indoors",
+                "short": "exercise",
+                "vshort": "ex",
+                "color": "#b9ead3",
+                "childItems": [],
+                "is_custom_input": true
+              },
+
+              {
+                "name": "Other out of home activities (please specify)",
+                "code": 147,
+                "label": "other",
+                "short": "other",
+                "vshort": "other",
                 "color": "#de9ff3",
-                "childItems": []
-              },
-              {
-                "name": "Cinema, Theatre, Sports, Cultural Event",
-                "code": 135,
-                "label": "cinema, theatre, sports, cultural event",
-                "short": "event",
-                "vshort": "eve",
-                "color": "#dcd3f9",
-                "childItems": [
-                  {
-                    "name": "Cinema",
-                    "code": 135,
-                    "label": "cinema, theatre, sports, cultural event",
-                    "short": "event",
-                    "vshort": "eve",
-                    "color": "#dcd3f9"
-                  },
-                  {
-                    "name": "Theatre and concerts",
-                    "code": 135,
-                    "label": "cinema, theatre, sports, cultural event",
-                    "short": "event",
-                    "vshort": "eve",
-                    "color": "#dcd3f9"
-                  },
-                  {
-                    "name": "Art exhibitions and museums",
-                    "code": 135,
-                    "label": "cinema, theatre, sports, cultural event",
-                    "short": "event",
-                    "vshort": "eve",
-                    "color": "#dcd3f9"
-                  },
-                  {
-                    "name": "Library",
-                    "code": 135,
-                    "label": "cinema, theatre, sports, cultural event",
-                    "short": "event",
-                    "vshort": "eve",
-                    "color": "#dcd3f9"
-                  },
-                  {
-                    "name": "Attending live sports events",
-                    "code": 135,
-                    "label": "cinema, theatre, sports, cultural event",
-                    "short": "event",
-                    "vshort": "eve",
-                    "color": "#dcd3f9"
-                  },
-                  {
-                    "name": "Zoos, botanical gardens, natural reserves, etc.",
-                    "code": 135,
-                    "label": "cinema, theatre, sports, cultural event",
-                    "short": "event",
-                    "vshort": "eve",
-                    "color": "#dcd3f9"
-                  },
-                  {
-                    "name": "Other entertainment and culture",
-                    "code": 135,
-                    "label": "cinema, theatre, sports, cultural event",
-                    "short": "event",
-                    "vshort": "eve",
-                    "color": "#dcd3f9"
-                  }
-                ]
+                "childItems": [],
+                "is_custom_input": true
               }
             ]
           },
@@ -655,12 +413,8 @@
             "color": "#808080",
             "activities": [
               {
-                "name": "Filling in the time use diary",
-                "color": "#808080",
-                "childItems": []
-              },
-              {
-                "name": "Whatever time use (will specify)",
+                "name": "Other Activity (please specify)",
+                "code": 148,
                 "color": "#808080",
                 "is_custom_input": true,
                 "childItems": []
