@@ -913,7 +913,7 @@ function renderChildItems(activity, categoryName) {
                         const template = window.i18n.t('modals.customActivity.childItemTitle');
                         modalTitle.textContent = template.replace(/\{parentActivity\}/g, activity.name);
                     } else {
-                        modalTitle.textContent = `Enter custom ${activity.name}`;
+                        modalTitle.textContent = `Enter custom value for: ${activity.name}`;
                     }
 
                     customActivityInput.value = ''; // Clear previous input
@@ -1100,7 +1100,7 @@ function renderActivities(categories, container = document.getElementById('activ
                         const customActivityModal = document.getElementById('customActivityModal');
                         const customActivityInput = document.getElementById('customActivityInput');
                         const modalTitle = customActivityModal.querySelector('h3');
-                        modalTitle.textContent = `Enter custom  ${activity.name}`;
+                        modalTitle.textContent = `Enter custom value for: ${activity.name}`;
 
                         customActivityInput.value = ''; // Clear previous input
                         customActivityModal.style.display = 'block';
@@ -1380,7 +1380,7 @@ function renderActivities(categories, container = document.getElementById('activ
                         customActivityModal.style.display = 'block';
                         customActivityInput.focus(); // Focus the input field
                         const modalTitle = customActivityModal.querySelector('h3');
-                        modalTitle.textContent = `Enter custom  ${activity.name}`;
+                        modalTitle.textContent = `Enter custom value for:  ${activity.name}`;
 
                         // Handle custom activity submission
                         const handleCustomActivity = () => {
