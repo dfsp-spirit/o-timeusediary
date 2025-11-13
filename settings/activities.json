@@ -424,27 +424,42 @@
         ]
       },
     "device": {
-      "name": "Device",
+      "name": "Digital Media Use",
       "description": "Were you using a computer/tablet/smartphone?",
-      "mode": "multiple-choice",
+      "mode": "single-choice",
       "min_coverage": "0",
       "categories": [
         {
           "name": " ",
           "activities": [
             {
-              "name": "Computer",
-              "examples": "",
+              "name": "Streaming Video",
+              "examples": "TV shows, YouTube, etc",
               "color": "#a8f0a8"
             },
             {
-              "name": "Tablet",
+              "name": "Social Media",
               "examples": "",
               "color": "#f0a8d7"
             },
             {
-              "name": "Smartphone",
+              "name": "Gaming",
               "examples": "",
+              "color": "#a8f0ef"
+            },
+            {
+              "name": "Audio Consumption",
+              "examples": "",
+              "color": "#a8f0ef"
+            },
+            {
+              "name": "Reading (digital)",
+              "examples": "News, articles, e-books, etc",
+              "color": "#a8f0ef"
+            },
+            {
+              "name": "Web browsing / Life Admin",
+              "examples": "General surfing, online shopping, banking, emails, etc",
               "color": "#a8f0ef"
             }
           ]
