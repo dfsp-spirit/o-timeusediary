@@ -41,7 +41,7 @@
   "modals": {
     "customActivity": {
       "title": "Enter Custom Activity",
-      "childItemTitle": "Enter custom {parentActivity}",
+      "childItemTitle": "Enter custom value for: {parentActivity}",
       "placeholder": "Enter your activity (max 30 chars)"
     },
     "addActivity": {
