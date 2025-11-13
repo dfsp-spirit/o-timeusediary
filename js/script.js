@@ -1095,9 +1095,13 @@ function renderActivities(categories, container = document.getElementById('activ
                     // Check if this is the "other not listed" button
                     if (is_custom_input) {
                         // Show custom activity modal
+                        console.log('>>[ACTIVITY] Detected "Other not listed" custom input activity button click');
                         console.log('[ACTIVITY] "Other not listed" button clicked, showing custom activity modal');
                         const customActivityModal = document.getElementById('customActivityModal');
                         const customActivityInput = document.getElementById('customActivityInput');
+                        const modalTitle = customActivityModal.querySelector('h3');
+                        modalTitle.textContent = `Enter custom  ${activity.name}`;
+
                         customActivityInput.value = ''; // Clear previous input
                         customActivityModal.style.display = 'block';
                         customActivityInput.focus(); // Focus the input field
@@ -1375,6 +1379,8 @@ function renderActivities(categories, container = document.getElementById('activ
                         customActivityInput.value = ''; // Clear previous input
                         customActivityModal.style.display = 'block';
                         customActivityInput.focus(); // Focus the input field
+                        const modalTitle = customActivityModal.querySelector('h3');
+                        modalTitle.textContent = `Enter custom  ${activity.name}`;
 
                         // Handle custom activity submission
                         const handleCustomActivity = () => {
