@@ -423,29 +423,117 @@
           }
         ]
       },
-    "device": {
+    "digitalmediause": {
       "name": "Digital Media Use",
-      "description": "Were you using a computer/tablet/smartphone?",
+      "description": "Details for the sections above where Digital Media Use was selected as the main activity",
       "mode": "single-choice",
-      "min_coverage": "0",
+      "min_coverage": "10",
       "categories": [
         {
-          "name": " ",
+          "name": "Media Types",
           "activities": [
             {
               "name": "Streaming Video",
+              "code": 200,
               "examples": "TV shows, YouTube, etc",
               "color": "#a8f0a8"
             },
             {
               "name": "Social Media",
+              "code": 210,
               "examples": "",
-              "color": "#f0a8d7"
+              "color": "#f0a8d7",
+              "childItems": [
+                  {
+                    "name": "Scrolling / Content Consumption",
+                    "code": 211,
+                    "examples": "TikTok, Instagram Reels, Youtube Shorts, Facebook feed, Twitter feed, etc",
+                    "label": "Scrolling / Content Consumption",
+                    "short": "scroll",
+                    "vshort": "scroll",
+                    "color": "#d0c79c"
+                  },
+                  {
+                    "name": "Building networks / Engaging with posts",
+                    "examples": "On Facebook, Instagram, Twitter, LinkedIn, etc",
+                    "code": 212,
+                    "label": "Building networks / Engaging with posts",
+                    "short": "engage",
+                    "vshort": "engage",
+                    "color": "#d0c79c"
+                  },
+                  {
+                    "name": "Messenger / Chatting",
+                    "code": 213,
+                    "examples": "Facebook Messenger, WhatsApp, Snapchat, etc",
+                    "label": "Messenger / Chatting",
+                    "short": "chat",
+                    "vshort": "chat",
+                    "color": "#d0c79c"
+                  }
+                ]
             },
             {
               "name": "Gaming",
+              "code": 220,
               "examples": "",
-              "color": "#a8f0ef"
+              "color": "#a8f0ef",
+              "childItems": [
+                  {
+                    "name": "Console, alone",
+                    "code": 221,
+                    "examples": "Playstation, Xbox, Nintendo Switch, etc",
+                    "label": "Console Gaming, alone",
+                    "short": "console",
+                    "vshort": "console",
+                    "color": "#d0c79c"
+                  },
+                  {
+                    "name": "Console, with others",
+                    "code": 222,
+                    "examples": "Playstation, Xbox, Nintendo Switch, etc",
+                    "label": "Console Gaming, with others",
+                    "short": "console",
+                    "vshort": "console",
+                    "color": "#d0c79c"
+                  },
+                  {
+                    "name": "Computer Gaming, alone",
+                    "code": 223,
+                    "examples": "PC, Mac,etc",
+                    "label": "Computer Gaming, alone",
+                    "short": "computer",
+                    "vshort": "comp",
+                    "color": "#d0c79c"
+                  },
+                  {
+                    "name": "Computer Gaming, with others",
+                    "code": 224,
+                    "examples": "PC, Mac, etc",
+                    "label": "Computer Gaming, with others",
+                    "short": "computer",
+                    "vshort": "comp",
+                    "color": "#d0c79c"
+                  },
+                  {
+                    "name": "Mobile Gaming (phone/tablet), alone",
+                    "code": 225,
+                    "examples": "Phone, tablet, etc",
+                    "label": "Mobile Gaming, alone",
+                    "short": "mobile",
+                    "vshort": "mob",
+                    "color": "#d0c79c"
+                  },
+                  {
+                    "name": "Mobile Gaming (phone/tablet), with others",
+                    "code": 226,
+                    "examples": "Phone, tablet, etc",
+                    "label": "Mobile Gaming, with others",
+                    "short": "mobile",
+                    "vshort": "mob",
+                    "color": "#d0c79c"
+                  }
+                ]
             },
             {
               "name": "Audio Consumption",
