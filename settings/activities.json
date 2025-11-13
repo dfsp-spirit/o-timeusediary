@@ -436,7 +436,7 @@
       },
     "digitalmediause": {
       "name": "Digital Media Use",
-      "description": "Details for the sections above where Digital Media Use was selected as the main activity",
+      "description": "Digital media use during all activites listed above.",
       "mode": "single-choice",
       "min_coverage": "10",
       "categories": [
