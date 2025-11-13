@@ -29,7 +29,8 @@
                 "childItems": []
               },
               {
-                "name": "Activities of Daily Living (e.g., eating, drinking, personal care, household routines, caring for children, pets.)",
+                "name": "Activities of Daily Living",
+                "examples": "Eating, drinking, personal care, household routines, caring for children, pets, ...",
                 "code": 104,
                 "label": "activities of daily living",
                 "short": "adl",
@@ -38,7 +39,8 @@
                 "childItems": []
               },
               {
-                "name": "Resting (E.g., lunch break, couch time, downtime)",
+                "name": "Resting",
+                "examples": "Lunch break, couch time, downtime, ...",
                 "code": 102,
                 "label": "resting",
                 "short": "rest",
@@ -202,7 +204,8 @@
                 ]
               },
               {
-                "name": "Self-study/Personal Development: Recreational courses, learning a skill or language",
+                "name": "Self-study / Personal Development",
+                "examples": "Recreational courses, learning a skill or language, ...",
                 "code": 131,
                 "label": "recreational courses, study",
                 "short": "rec study",
@@ -216,7 +219,8 @@
             "name": "Social, Leisure & Hobbies At Home",
             "activities": [
               {
-                "name": "Socialising at Home (with family, friends, phone call)",
+                "name": "Socialising at Home",
+                "examples": "Meeting family, friends, phone call",
                 "code": 140,
                 "label": "socialising at home with family, friends, phone call",
                 "short": "socialise home",
@@ -260,6 +264,7 @@
               },
               {
                 "name": "Digital Media",
+                "examples": "TV, streaming, social media, gaming, web browsing, digital reading, audio consumption, ...",
                 "code": 145,
                 "label": "digital media",
                 "short": "digital media",
@@ -292,18 +297,20 @@
             "name": "Social, Leisure & Hobbies Outside of Home",
             "activities": [
               {
-                "name": "Socialising out of Home (e.g., meeting family, friends)",
+                "name": "Socialising out of Home",
+                "examples": "meeting family, friends",
                 "code": 160,
-                "label": "socialising out of home with family, friends, phone call",
+                "label": "Socialising out of home with family, friends, phone call",
                 "short": "socialise out",
                 "vshort": "soc",
                 "color": "#afe2da",
                 "childItems": []
               },
               {
-                "name": "Religious / Spiritual Practice (Chruch, Temple, Mosque, Synagogue, Meditation Center, Visit Cemetery)",
+                "name": "Religious / Spiritual Practice, Meditation outside",
+                "examples": "Church, temple, mosque, synagogue, meditation center, visit cemetery",
                 "code": 161,
-                "label": "religious or spiritual practice, meditation outside",
+                "label": "Religious or spiritual practice, meditation outside",
                 "short": "religious out",
                 "vshort": "rel",
                 "color": "#f8d7da"
@@ -311,13 +318,14 @@
               {
                 "name": "Shopping / Errands",
                 "code": 162,
-                "label": "shopping or running errands outside",
+                "label": "Shopping or running errands outside",
                 "short": "shopping out",
                 "vshort": "shop",
                 "color": "#f8d7da"
               },
               {
-                "name": "Events / Entertainment (e.g., cinema, theatre, concert, sports event)",
+                "name": "Events / Entertainment",
+                "examples": "Cinema, theatre, concert, sports event",
                 "code": 163,
                 "label": "events or entertainment outside",
                 "short": "events out",
@@ -325,7 +333,8 @@
                 "color": "#f8d7da"
               },
               {
-                "name": "Hobby non-sports, e.g., visiting a museum, music lesson, book club, voluntary work. (Please specify)",
+                "name": "Hobby non-sports (Please specify)",
+                "examples": "Visiting a museum, music lesson, book club, voluntary work, etc",
                 "code": 164,
                 "label": "hobby non-sports",
                 "short": "hobby non-sports",
@@ -376,6 +385,7 @@
                   },
                   {
                     "name": "Other outdoor sports/exercise (please specify)",
+                    "examples": "Cycling, hiking, team sports, etc",
                     "code": 171,
                     "label": "sports outdoors other",
                     "short": "other outdoor sports",
@@ -386,7 +396,8 @@
                 ]
               },
               {
-                "name": "Sports / Exercise indoors, e.g. gym (please specify)",
+                "name": "Sports / Exercise indoors (please specify)",
+                "examples": "Gym, swimming, fitness classes, indoor climbing, etc",
                 "code": 172,
                 "label": "playing sports, exercise indoors",
                 "short": "exercise",
@@ -500,7 +511,7 @@
                   {
                     "name": "Computer Gaming, alone",
                     "code": 223,
-                    "examples": "PC, Mac,etc",
+                    "examples": "PC, Mac, etc",
                     "label": "Computer Gaming, alone",
                     "short": "computer",
                     "vshort": "comp",
