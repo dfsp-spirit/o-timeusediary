@@ -127,7 +127,7 @@ body {
         align-items: flex-start;
         justify-content: flex-start;
     }
-    
+
     /* When both wrappers have timelines, adjust their spacing */
     .timelines-wrapper:not(:has(.past-initialized-timelines-wrapper:empty)) .last-initialized-timeline-wrapper {
         margin-left: 0; /* Reset to 0 instead of -5px */
@@ -172,7 +172,7 @@ body {
         touch-action: pan-y pinch-zoom;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .timeline-container[data-active="false"] {
         opacity: 0.6;
         pointer-events: none;
@@ -256,7 +256,7 @@ body {
         width: 100%;
         height: 80px;
     }
-    
+
     /* Horizontal layout for timeline header - title and description side by side */
     .timeline-header {
         display: flex;
@@ -265,15 +265,15 @@ body {
         gap: 12px;
         margin: clamp(4px, 1vw, 6px) 0;
     }
-    
+
     .timeline-title {
         margin: 0;
     }
-    
+
     .timeline-description {
         margin: 0;
     }
-    
+
     /* Improve text wrapping for desktop view */
     .activity-block-text-narrow.wide.resized {
         white-space: normal !important; /* Override any inline styles */
@@ -309,7 +309,7 @@ body {
         margin: 0;
         padding-top: 0; /* Remove padding since we're using flexbox */
     }
-    
+
     /* Additional timeline container styles for past timelines */
     .past-initialized-timelines-wrapper .timeline-container {
         flex: 0 0 auto;
@@ -324,7 +324,7 @@ body {
         position: relative;
         top: 2px; /* Align with last-initialized-timeline-wrapper */
     }
-    
+
     /* Align last initialized timeline with past timelines */
     .last-initialized-timeline-wrapper .timeline-container {
         flex: 0 0 auto;
@@ -339,7 +339,7 @@ body {
         -webkit-overflow-scrolling: touch;
         padding-top: 2px; /* Small padding for last initialized timeline */
     }
-    
+
     /* Position timeline titles properly in mobile layout */
     .timeline-container .title {
         position: relative;
@@ -352,7 +352,7 @@ body {
         padding: 6px 6px 0 6px;
         font-weight: bold;
     }
-    
+
     .timeline-container[data-active="false"] {
         opacity: 0.6;
         pointer-events: none;
@@ -449,7 +449,7 @@ body {
     .timeline .hour-marker:first-child .hour-label {
         top: 0;
     }
-    
+
     .timeline .hour-marker:last-child .hour-label {
         top: -12px;
     }
@@ -498,17 +498,17 @@ body {
     .timeline-container {
         padding-top: 2px;  /* Reduced space for hour labels */
     }
-    
+
     .hour-label {
         top: 5px;  /* Position above timeline */
         transform: translateX(-50%);
     }
-    
+
     /* Conditional styling for inactive timelines */
     .timeline-container[data-active="false"] {
         height: 60px; /* 20px shorter than default 80px */
     }
-    
+
     .timeline-container[data-active="false"] .hour-label,
     .timeline-container[data-active="false"] .hour-labels {
         visibility: hidden;
@@ -517,7 +517,7 @@ body {
         padding: 0;
         margin: 0;
     }
-    
+
     /* Activities within inactive timelines */
     .timeline-container[data-active="false"] .activity-block {
         height: 100% !important;
@@ -533,14 +533,14 @@ body {
         text-align: right;
         width: 35px;
     }
-    
+
     /* Conditional styling for inactive timelines in mobile */
     .timeline-container[data-active="false"] {
         width: 150px; /* 30px narrower than default 180px */
         min-width: 150px;
         max-width: 150px;
     }
-    
+
     .timeline-container[data-active="false"] .hour-label,
     .timeline-container[data-active="false"] .hour-labels {
         visibility: hidden;
@@ -549,7 +549,7 @@ body {
         padding: 0;
         margin: 0;
     }
-    
+
     /* Activities within inactive timelines in mobile */
     .timeline-container[data-active="false"] .activity-block {
         width: 100% !important;
@@ -602,18 +602,18 @@ body {
     #activitiesContainer {
         display: none;
     }
-    
+
     .activity-category {
         margin-bottom: 0;
         padding: 0;
         border: none;
     }
-    
+
     .activities-accordion .activity-category {
         padding: 0;
         margin-bottom: 0;
     }
-    
+
     .activity-category h3 {
         background-color: #f0f0f0;
         padding: 10px;
@@ -637,12 +637,12 @@ body {
     .activity-category.active h3::after {
         transform: translateY(-50%) rotate(180deg);
     }
-    
+
     .activity-category .activity-buttons {
         display: none;
         padding: 10px;
     }
-    
+
     .activity-category.active .activity-buttons {
         display: block;
     }
@@ -818,7 +818,7 @@ body {
     .activity-text {
         gap: 1px;
     }
-    
+
     .activity-examples {
         font-size: 0.8em;
     }
@@ -1378,12 +1378,12 @@ body {
         flex-wrap: wrap;
         order: 1;
     }
-    
+
     .timeline-title {
         order: 2;
         margin-top: 20px;
     }
-    
+
     .timeline-container {
         order: 3;
         margin-top: 20px;
@@ -1466,9 +1466,9 @@ body {
         padding: 6px 8px; /* Further reduce padding for better scalability */
     }
 
-    .header-section h1, 
-    .header-section h2, 
-    .header-section h3, 
+    .header-section h1,
+    .header-section h2,
+    .header-section h3,
     .header-section p {
         font-size: 0.9rem; /* Smaller font sizes to prevent excessive growth */
         line-height: 1.1;
@@ -1646,7 +1646,7 @@ body {
         min-width: auto;
         gap: 6px;
     }
-    
+
     .navigation-btn i {
         font-size: 12px;
     }
@@ -1662,7 +1662,7 @@ body {
     .last-initialized-timeline-wrapper .timeline-container .title {
         display: block;
     }
-    
+
     /* Add padding to account for visible title positioned at top: -25px */
     .last-initialized-timeline-wrapper .timeline-container {
         padding-top: 2px;
@@ -1927,7 +1927,7 @@ body {
         margin: 30% auto;
         padding: 15px;
     }
-    
+
     #childItemsModal .child-item-button {
         padding: 14px 16px;
         font-size: 16px;
@@ -2141,3 +2141,25 @@ body {
     }
 }
 
+/* Custom input activity buttons */
+.activity-button.custom-input {
+    position: relative;
+    padding-right: 30px; /* Extra space for the edit icon */
+}
+
+.activity-button.custom-input::after {
+    content: '\270E'; /* Pencil/edit symbol */
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.activity-button.custom-input:hover::after {
+    transform: translateY(-50%) scale(1.2);
+    color: rgba(0, 0, 0, 0.8);
+}

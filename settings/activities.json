@@ -491,73 +491,83 @@
               "color": "#a8f0ef",
               "childItems": [
                   {
-                    "name": "Console, alone",
+                    "name": "Console, alone (please specify game)",
                     "code": 221,
                     "examples": "Playstation, Xbox, Nintendo Switch, etc",
                     "label": "Console Gaming, alone",
                     "short": "console",
                     "vshort": "console",
-                    "color": "#d0c79c"
+                    "color": "#d0c79c",
+                    "is_custom_input": true
                   },
                   {
-                    "name": "Console, with others",
+                    "name": "Console, with others (please specify game)",
                     "code": 222,
                     "examples": "Playstation, Xbox, Nintendo Switch, etc",
                     "label": "Console Gaming, with others",
                     "short": "console",
                     "vshort": "console",
-                    "color": "#d0c79c"
+                    "color": "#d0c79c",
+                    "is_custom_input": true
+
                   },
                   {
-                    "name": "Computer Gaming, alone",
+                    "name": "Computer Gaming, alone (please specify game)",
                     "code": 223,
                     "examples": "PC, Mac, etc",
                     "label": "Computer Gaming, alone",
                     "short": "computer",
                     "vshort": "comp",
-                    "color": "#d0c79c"
+                    "color": "#d0c79c",
+                    "is_custom_input": true
                   },
                   {
-                    "name": "Computer Gaming, with others",
+                    "name": "Computer Gaming, with others (please specify game)",
                     "code": 224,
                     "examples": "PC, Mac, etc",
                     "label": "Computer Gaming, with others",
                     "short": "computer",
                     "vshort": "comp",
-                    "color": "#d0c79c"
+                    "color": "#d0c79c",
+                    "is_custom_input": true
                   },
                   {
-                    "name": "Mobile Gaming (phone/tablet), alone",
+                    "name": "Mobile Gaming, alone (please specify game)",
                     "code": 225,
                     "examples": "Phone, tablet, etc",
                     "label": "Mobile Gaming, alone",
                     "short": "mobile",
                     "vshort": "mob",
-                    "color": "#d0c79c"
+                    "color": "#d0c79c",
+                    "is_custom_input": true
                   },
                   {
-                    "name": "Mobile Gaming (phone/tablet), with others",
+                    "name": "Mobile Gaming, with others (please specify game)",
                     "code": 226,
                     "examples": "Phone, tablet, etc",
                     "label": "Mobile Gaming, with others",
                     "short": "mobile",
                     "vshort": "mob",
-                    "color": "#d0c79c"
+                    "color": "#d0c79c",
+                    "is_custom_input": true
                   }
                 ]
             },
             {
               "name": "Audio Consumption",
-              "examples": "",
+              "code": 230,
+              "examples": "Music, podcasts, audiobooks, etc",
               "color": "#a8f0ef"
             },
             {
               "name": "Reading (digital)",
+              "code": 231,
               "examples": "News, articles, e-books, etc",
               "color": "#a8f0ef"
             },
             {
-              "name": "Web browsing / Life Admin",
+              "name": "Web browsing / Life Administration",
+              "code": 232,
               "examples": "General surfing, online shopping, banking, emails, etc",
               "color": "#a8f0ef"
             }
