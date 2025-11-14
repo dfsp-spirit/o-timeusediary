@@ -113,7 +113,8 @@
             "name": "Work / Study",
             "activities": [
               {
-                "name": "Paid Work (Including at Home)",
+                "name": "Paid Work",
+                "examples": "Including work from home",
                 "code": 120,
                 "label": "paid work (including at home)",
                 "short": "work",
@@ -122,7 +123,8 @@
                 "childItems": []
               },
               {
-                "name": "Education, Studying, Learning (Formal)",
+                "name": "Education, Studying, Learning",
+                "examples": "Formal education",
                 "code": 121,
                 "label": "formal education",
                 "short": "education",
