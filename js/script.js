@@ -1056,6 +1056,7 @@ function renderActivities(categories, container = document.getElementById('activ
                     activityButton.classList.add('has-child-items');
                 }
 
+
                 activityButton.style.setProperty('--color', activity.color);
 
                 if (isMultipleChoice) {
@@ -1073,6 +1074,7 @@ function renderActivities(categories, container = document.getElementById('activ
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'activity-name';
                 if (is_custom_input) {
+                    activityButton.classList.add('custom-input');
                     nameSpan.classList.add('custom-input');
                 }
                 nameSpan.textContent = activity.name;
@@ -1351,6 +1353,7 @@ function renderActivities(categories, container = document.getElementById('activ
                 const nameSpan = document.createElement('span');
                 nameSpan.className = 'activity-name';
                 if (is_custom_input) {
+                    activityButton.classList.add('custom-input');
                     nameSpan.classList.add('custom-input');
                 }
                 nameSpan.textContent = activity.name;
