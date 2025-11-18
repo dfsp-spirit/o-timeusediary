@@ -982,25 +982,36 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
         // Create timeline data frame and convert to JSON for download
         const dataJSON = createTimelineJSON(false);
 
+        if (typeof TUD_SETTINGS === 'undefined') {
+           console.error('TUD_SETTINGS variable not available, please include js/app_settings.js before using this function.');
+        }
+
         const { pid } = createCombinedData();
         console.log('Participant ID (pid):', pid);
 
         dataJSON.metadata.study = window.timelineManager.study || {};
-        dataJSON.metadata.participant = { pid: pid};
+        dataJSON.metadata.study.study_name = TUD_SETTINGS.STUDY_NAME;
+        dataJSON.metadata.study.daily_entry_index = 0; // For future multi-day studies, index into TUD_SETTINGS.DAILY_ENTRY_NAMES or the names we get from backend once that is implemented.
+
+        dataJSON.metadata.participant = { user_id: pid};
 
         const jsonString = JSON.stringify(dataJSON, null, 2);
 
-        const BACKEND_API_URL = "http://127.0.0.1:8000/api/submit";
+
+
+        const api_url = TUD_SETTINGS.API_BASE_URL;
+
+        const api_submit_url = api_url + '/timeline/submit';
 
         console.log('=== DATA FRAME FOR JSON ===');
-        console.log('Full data structure we send to backend at ' + BACKEND_API_URL + ':', jsonString);
+        console.log('Full data structure we send to backend at ' + api_submit_url + ':', jsonString);
         console.log('Number of records:', dataJSON.activities.length);
 
 
         // Send JSON data to backend API
         try {
-            console.log('Sending data to backend API at', BACKEND_API_URL);
-            const response = await fetch(BACKEND_API_URL, {
+            console.log('Sending data to backend API at', api_submit_url);
+            const response = await fetch(api_submit_url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
