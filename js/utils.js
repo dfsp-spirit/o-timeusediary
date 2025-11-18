@@ -481,31 +481,31 @@ export function createTimelineJSON(stringify = false) {
             console.log('Processing activity for JSON:', activity);
             const row = {
                 // Basic fields
-                timelineKey: timelineKey,
+                timeline_key: timelineKey,
                 activity: activity.activity,
                 category: activity.category,
-                startTime: activity.startTime,
-                endTime: activity.endTime,
-                blockLength: activity.blockLength,
+                start_time: activity.startTime,
+                end_time: activity.endTime,
+                block_length: activity.blockLength,
                 color: activity.color,
 
                 // Enhanced context for recreation
-                parentActivity: activity.parentName || activity.activity,
-                isCustomInput: activity.isCustomInput || false,
-                originalSelection: activity.originalSelection || null,
+                parent_activity: activity.parentName || activity.activity,
+                is_custom_input: activity.isCustomInput || false,
+                original_selection: activity.originalSelection || null,
 
                 // For proper ordering and positioning
-                startMinutes: activity.startMinutes,
-                endMinutes: activity.endMinutes,
+                start_minutes: activity.startMinutes,
+                end_minutes: activity.endMinutes,
 
                 // multiple-choice / single-choice context
                 mode: activity.mode || 'single-choice',
                 selections: activity.selections || null,
-                availableOptions: activity.availableOptions || null,
+                available_options: activity.availableOptions || null,
                 count: activity.count || 1,   // number of selections for multiple-choice
 
-                // Unique identifier
-                id: activity.id
+                // Unique identifier from frontend, defined in activities.json file for whatever reason
+                frontend_activity_id: activity.id
             };
             activity_data.push(row);
         });
@@ -513,7 +513,7 @@ export function createTimelineJSON(stringify = false) {
 
     const full_data = {
         activities: activity_data,
-        metadata: {
+        entry_metadata: {
             study: {},
             participant: {},
         }
@@ -989,11 +989,13 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
         const { pid } = createCombinedData();
         console.log('Participant ID (pid):', pid);
 
-        dataJSON.metadata.study = window.timelineManager.study || {};
-        dataJSON.metadata.study.study_name = TUD_SETTINGS.STUDY_NAME;
-        dataJSON.metadata.study.daily_entry_index = 0; // For future multi-day studies, index into TUD_SETTINGS.DAILY_ENTRY_NAMES or the names we get from backend once that is implemented.
+        const study_data = window.timelineManager.study || {}; // This contains all URL parameters synced earlier. So if you use ?study_name=XYZ, it will be included here.
 
-        dataJSON.metadata.participant = { user_id: pid};
+        // We only extract some relevant fields to send to backend.
+        dataJSON.entry_metadata.study.study_name = study_data.studyName || TUD_SETTINGS.STUDY_NAME;
+        dataJSON.entry_metadata.study.daily_entry_index = study_data.dailyEntryIndex || 0; // For future multi-day studies, index into TUD_SETTINGS.DAILY_ENTRY_NAMES or the names we get from backend once that is implemented.
+
+        dataJSON.entry_metadata.participant = { pid: pid };
 
         const jsonString = JSON.stringify(dataJSON, null, 2);
 
