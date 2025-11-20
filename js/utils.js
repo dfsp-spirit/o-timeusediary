@@ -471,6 +471,8 @@ export function createTimelineDataFrame() {
     return data;
 }
 
+// Generates a JSON representation of the timeline data for the backend,
+// using snake_case for field names.
 export function createTimelineJSON(stringify = false) {
     const activity_data = [];
 

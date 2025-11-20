@@ -256,13 +256,14 @@
                 "color": "#D8BFD8"
               },
               {
-                "name": "Exercise",
+                "name": "Sports / Exercise at Home (please specify)",
                 "code": 144,
                 "label": "playing sports, exercise",
                 "short": "exercise",
                 "vshort": "ex",
                 "color": "#BA55D3",
-                "childItems": []
+                "childItems": [],
+                "is_custom_input": true
               },
               {
                 "name": "Digital Media",
