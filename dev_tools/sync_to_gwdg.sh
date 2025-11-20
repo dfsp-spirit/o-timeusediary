@@ -6,4 +6,4 @@
 #    git remote add gwdg https://gitlab.gwdg.de/yourusername/yourrepo.git
 #
 git pull origin main
-git push gwdg main
+git push gwdg mpiae_adapt
