@@ -1030,13 +1030,14 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
             });
 
             if (!response.ok) {
-                throw new Error(`Backend API request failed: ${response.status} ${response.statusText}`);
+                throw new Error(`Backend API request failed, received response but no OKAY: ${response.status} ${response.statusText}`);
             }
 
             const responseData = await response.json();
             console.log('Data sent to backend API successfully:', responseData);
         } catch (error) {
-            console.error('Error sending data to backend API:', error);
+            console.log('Error sending data to backend API, did not receive any response:', String(error));
+            console.log('Is the backend running and accessible at', api_submit_url, '?');
         }
 
         hideLoadingModal();
