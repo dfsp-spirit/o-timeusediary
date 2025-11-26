@@ -2143,8 +2143,8 @@ function initTimelineInteraction(timeline) {
                         if (!times.startTime || !times.endTime) {
                             throw new Error('Activity start time and end time must be defined');
                         }
-                        currentData[activityIndex].startTime = times.startTime;
-                        currentData[activityIndex].endTime = times.endTime;
+                        currentData[activityIndex].startTime = newStartTime;
+                        currentData[activityIndex].endTime = newEndTime;
                         currentData[activityIndex].blockLength = parseInt(target.dataset.length);
 
                         // Update the minutes in the activity data
