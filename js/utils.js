@@ -556,6 +556,10 @@ export function createCombinedData() {
     pid = studyData.pid || studyData.PID;
   }
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const study_name = urlParams.get('study_name') || 'default';
+  studyData.study_name = study_name;
+
   // --- Prepare Participant Data ---
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
@@ -988,8 +992,9 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
            console.error('TUD_SETTINGS variable not available, please include js/app_settings.js before using this function.');
         }
 
-        const { pid } = createCombinedData();
-        console.log('Participant ID (pid):', pid);
+        const { pid, studyData } = createCombinedData();
+        const study_name = studyData.study_name || TUD_SETTINGS.STUDY_NAME;
+        console.log('Participant ID (pid):', pid, 'Study Name:', study_name);
 
         const study_data = window.timelineManager.study || {}; // This contains all URL parameters synced earlier. So if you use ?study_name=XYZ, it will be included here.
 
