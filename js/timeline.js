@@ -61,10 +61,10 @@ export class Timeline {
         for (let i = 0; i < sortedActivities.length - 1; i++) {
             const current = sortedActivities[i];
             const next = sortedActivities[i + 1];
-            
+
             const currentEnd = new Date(current.endTime);
             const nextStart = new Date(next.startTime);
-            
+
             // console.log('Checking overlap:', {
             //     currentActivity: current.activity,
             //     currentStart: current.startTime,
@@ -74,7 +74,7 @@ export class Timeline {
             //     nextEnd: next.endTime,
             //     isOverlapping: currentEnd > nextStart
             // });
-            
+
             if (currentEnd > nextStart) {
                 // console.error('Overlap detected:', {
                 //     current: current,

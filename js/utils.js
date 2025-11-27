@@ -73,6 +73,8 @@ function createTimeLabel(block, showImmediately = false) {
 function updateTimeLabel(label, startTime, endTime) {
     if (!label || !label.parentElement) return;
 
+    console.log("in function updateTimeLabel");
+
     const parentBlock = label.parentElement;
     // Instead of using data-start and data-end directly (which lack the (+1) marker),
     // use data-start-minutes and data-end-minutes if available.
@@ -379,6 +381,7 @@ export function isTimelineFull() {
 
     // Calculate total covered minutes
     const coveredMinutes = currentData.reduce((total, activity) => {
+        console.log('in isTimelineFull, computing coveredMinutes for activity:', activity);
         const startMinutes = timeToMinutes(activity.startTime.split(' ')[1]);
         const endMinutes = timeToMinutes(activity.endTime.split(' ')[1]);
         return total + (endMinutes - startMinutes);
@@ -486,15 +489,16 @@ export function createTimelineJSON(stringify = false) {
                 timeline_key: timelineKey,
                 activity: activity.activity,
                 category: activity.category,
-                start_time: activity.startTime,
-                end_time: activity.endTime,
-                block_length: activity.blockLength,
-                color: activity.color,
+                code: activity.mode === 'multiple-choice' ? null : activity.code,
+                //start_time: activity.startTime,
+                //end_time: activity.endTime,
+                //block_length: activity.blockLength,
+                //color: activity.color,
 
                 // Enhanced context for recreation
-                parent_activity: activity.parentName || activity.activity,
-                is_custom_input: activity.isCustomInput || false,
-                original_selection: activity.originalSelection || null,
+                //parent_activity: activity.parentName || activity.activity,
+                //is_custom_input: activity.isCustomInput || false,
+                //original_selection: activity.originalSelection || null,
 
                 // For proper ordering and positioning
                 start_minutes: activity.startMinutes,
@@ -502,30 +506,25 @@ export function createTimelineJSON(stringify = false) {
 
                 // multiple-choice / single-choice context
                 mode: activity.mode || 'single-choice',
-                selections: activity.selections || null,
-                available_options: activity.availableOptions || null,
-                count: activity.count || 1,   // number of selections for multiple-choice
+                codes: activity.mode === 'multiple-choice' ? activity.codes : null,
+                //selections: activity.selections || null,
+                //available_options: activity.availableOptions || null,
+                //count: activity.count || 1,   // number of selections for multiple-choice
 
                 // Unique identifier from frontend, defined in activities.json file for whatever reason
-                frontend_activity_id: activity.id
+                // frontend_activity_id: activity.id
             };
             activity_data.push(row);
         });
     });
 
-    const full_data = {
-        activities: activity_data,
-        entry_metadata: {
-            study: {},
-            participant: {},
-        }
-    }
+
 
     if (!stringify) {
-        return full_data;
+        return activity_data;
     }
 
-    return JSON.stringify(full_data, null, 2);
+    return JSON.stringify(activity_data, null, 2);
 }
 
 /**
@@ -986,7 +985,7 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
         hideLoadingModal();
     } else if (options.mode === 'json') {
         // Create timeline data frame and convert to JSON for download
-        const dataJSON = createTimelineJSON(false);
+        const activitiesDataJSON = createTimelineJSON(false);
 
         if (typeof TUD_SETTINGS === 'undefined') {
            console.error('TUD_SETTINGS variable not available, please include js/app_settings.js before using this function.');
@@ -999,22 +998,21 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
         const study_data = window.timelineManager.study || {}; // This contains all URL parameters synced earlier. So if you use ?study_name=XYZ, it will be included here.
 
         // We only extract some relevant fields to send to backend.
-        dataJSON.entry_metadata.study.study_name = study_data.studyName || TUD_SETTINGS.STUDY_NAME;
-        dataJSON.entry_metadata.study.daily_entry_index = study_data.dailyEntryIndex || 0; // For future multi-day studies, index into TUD_SETTINGS.DAILY_ENTRY_NAMES or the names we get from backend once that is implemented.
 
-        dataJSON.entry_metadata.participant = { pid: pid };
+        const daily_entry_index = study_data.dailyEntryIndex || 0; // For future multi-day studies, index into TUD_SETTINGS.DAILY_ENTRY_NAMES or the names we get from backend once that is implemented.
+        const daily_entry_name = TUD_SETTINGS.DAILY_ENTRY_NAMES && TUD_SETTINGS.DAILY_ENTRY_NAMES[daily_entry_index] ? TUD_SETTINGS.DAILY_ENTRY_NAMES[daily_entry_index] : `day_${daily_entry_index + 1}`;
 
-        const jsonString = JSON.stringify(dataJSON, null, 2);
+        const jsonString = JSON.stringify(activitiesDataJSON, null, 2);
 
 
 
         const api_url = TUD_SETTINGS.API_BASE_URL;
 
-        const api_submit_url = api_url + '/timeline/submit';
+        const api_submit_url = `${api_url}/studies/${study_name}/participants/${pid}/entries/${daily_entry_name}/submissions`;
 
         console.log('=== DATA FRAME FOR JSON ===');
         console.log('Full data structure we send to backend at ' + api_submit_url + ':', jsonString);
-        console.log('Number of records:', dataJSON.activities.length);
+        console.log('Number of records:', activitiesDataJSON.length);
 
 
         // Send JSON data to backend API
@@ -1024,7 +1022,7 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Accept: "*/*",
+                    Accept: "application/json",
                 },
                 body: jsonString,
             });

@@ -101,15 +101,20 @@ function createActivityBlock(activityData, isFromTemplate = false) {
     currentBlock.dataset.count = activityData.count || 1;
     currentBlock.dataset.startMinutes = activityData.startMinutes;
     currentBlock.dataset.endMinutes = activityData.endMinutes;
+    currentBlock.dataset.code = activityData.code;
 
     // Store parent name if this is a child activity
     if (activityData.parentName && activityData.parentName !== activityData.activity) {
         currentBlock.dataset.parentName = activityData.parentName;
     }
 
+    console.log("Creating activity block", currentBlock, " from activityData:", activityData);
+
     // Handle multiple selections (gradient backgrounds)
     if (activityData.selections) {
         const colors = activityData.selections.map(s => s.color);
+        const codes = activityData.selections.map(s => s.code);
+        currentBlock.dataset.codes = codes.join('|');
         const isMobile = getIsMobile();
         const numSelections = colors.length;
         const percentage = 100 / numSelections;
@@ -202,6 +207,8 @@ function createActivityBlock(activityData, isFromTemplate = false) {
             endTime: activityData.endTime,
             blockLength: activityData.blockLength,
             color: activityData.color,
+            code: activityData.code,
+            codes: activityData.codes,
             parentName: activityData.parentName || combinedActivityText,
             selected: activityData.selected || combinedActivityText,
             isCustomInput: activityData.isCustomInput || false,
@@ -944,7 +951,8 @@ function renderChildItems(activity, categoryName) {
                                     category: categoryName,
                                     selected: customText,
                                     originalSelection: childItem.name, // Store what was originally clicked
-                                    isCustomInput: true
+                                    isCustomInput: true,
+                                    code: childItem.code,
                                 };
 
                                 // Close modals
@@ -987,7 +995,8 @@ function renderChildItems(activity, categoryName) {
                     category: categoryName,
                     selected: childItem.name,
                     originalSelection: childItem.name, // Store what was originally clicked
-                    isCustomInput: false
+                    isCustomInput: false,
+                    code: childItem.code,
                 };
 
                 // Close the modal
@@ -1058,6 +1067,7 @@ function renderActivities(categories, container = document.getElementById('activ
 
 
                 activityButton.style.setProperty('--color', activity.color);
+                activityButton.dataset.code = activity.code;
 
                 if (isMultipleChoice) {
                     const checkmark = document.createElement('span');
@@ -1125,7 +1135,8 @@ function renderActivities(categories, container = document.getElementById('activ
                                         selected: customText,
                                         originalSelection: context.childItem.name, // Store what was originally clicked
                                         isCustomInput: true,
-                                        mode: 'single-choice'
+                                        mode: 'single-choice',
+                                        code: context.childItem.code,
                                     };
 
                                     // Reset context
@@ -1143,7 +1154,8 @@ function renderActivities(categories, container = document.getElementById('activ
                                                 name: btn === activityButton ? customText : btn.querySelector('.activity-text').textContent,
                                                 color: btn.style.getPropertyValue('--color')
                                             })),
-                                            category: category.name
+                                            category: category.name,
+                                            codes: selectedButtons.map(btn => btn === activityButton ? null : btn.dataset.code),
                                         };
                                     } else {
                                         categoryButtons.forEach(b => b.classList.remove('selected'));
@@ -1155,7 +1167,8 @@ function renderActivities(categories, container = document.getElementById('activ
                                             selected: customText,
                                             originalSelection: activity.name, // Store what was originally clicked
                                             isCustomInput: true,
-                                            mode: 'single-choice'
+                                            mode: 'single-choice',
+                                            code: activity.code,
                                         };
                                         activityButton.classList.add('selected');
                                     }
@@ -1226,7 +1239,8 @@ function renderActivities(categories, container = document.getElementById('activ
                                 mode: 'multiple-choice',
                                 count: selectedButtons.length,
                                 availableOptions: availableOptions,
-                                isCustomInput: false
+                                isCustomInput: false,
+                                codes: selectedButtons.map(btn => btn.dataset.code),
                             };
                         } else {
                             // Only clear window.selectedActivity in multiple-choice mode if user actively deselected
@@ -1250,7 +1264,8 @@ function renderActivities(categories, container = document.getElementById('activ
                             selected: activity.name,
                             originalSelection: activity.name, // Store what was originally clicked,
                             isCustomInput: is_custom_input,
-                            mode: 'single-choice'
+                            mode: 'single-choice',
+                            code: activity.code,
                         };
                         console.log('[ACTIVITY] Selected activity:', window.selectedActivity);
                         activityButton.classList.add('selected');
@@ -1339,6 +1354,7 @@ function renderActivities(categories, container = document.getElementById('activ
                 }
 
                 activityButton.style.setProperty('--color', activity.color);
+                activityButton.dataset.code = activity.code;
 
                 if (isMultipleChoice) {
                     const checkmark = document.createElement('span');
@@ -1403,7 +1419,8 @@ function renderActivities(categories, container = document.getElementById('activ
                                         selected: customText,
                                         originalSelection: context.childItem.name, // Store what was originally clicked
                                         mode: 'single-choice',
-                                        isCustomInput: true
+                                        isCustomInput: true,
+                                        code: context.childItem.code,
                                     };
 
                                     // Reset context
@@ -1423,6 +1440,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                             })),
                                             category: category.name,
                                             mode: 'multiple-choice',
+                                            codes: selectedButtons.map(btn => btn.dataset.code)
                                         };
                                     } else {
                                         categoryButtons.forEach(b => b.classList.remove('selected'));
@@ -1434,7 +1452,8 @@ function renderActivities(categories, container = document.getElementById('activ
                                             originalSelection: activity.name, // Store what was originally clicked
                                             selected: customText,
                                             mode: 'single-choice',
-                                            isCustomInput: true
+                                            isCustomInput: true,
+                                            code: activity.code,
                                         };
                                         activityButton.classList.add('selected');
                                     }
@@ -1512,12 +1531,14 @@ function renderActivities(categories, container = document.getElementById('activ
                             window.selectedActivity = {
                                 selections: selectedButtons.map(btn => ({
                                     name: btn.querySelector('.activity-text').textContent,
-                                    color: btn.style.getPropertyValue('--color')
+                                    color: btn.style.getPropertyValue('--color'),
+                                    code: btn.dataset.code
                                 })),
                                 category: category.name,
                                 mode: 'multiple-choice',
                                 isCustomInput: false,
                                 availableOptions: availableOptions,
+                                codes: selectedButtons.map(btn => btn.dataset.code),
                             };
                         } else {
                             // Only clear window.selectedActivity in multiple-choice mode if user actively deselected
@@ -1543,7 +1564,8 @@ function renderActivities(categories, container = document.getElementById('activ
                             selected: activity.name,
                             originalSelection: activity.name, // Store what was originally clicked,
                             mode: 'single-choice',
-                            isCustomInput: is_custom_input
+                            isCustomInput: is_custom_input,
+                            code: activity.code,
                         };
                         console.log('[ACTIVITY] Selected activity after single-choice selection:', window.selectedActivity);
                         activityButton.classList.add('selected');
@@ -2143,8 +2165,8 @@ function initTimelineInteraction(timeline) {
                         if (!times.startTime || !times.endTime) {
                             throw new Error('Activity start time and end time must be defined');
                         }
-                        currentData[activityIndex].startTime = newStartTime;
-                        currentData[activityIndex].endTime = newEndTime;
+                        currentData[activityIndex].startTime = times.startTime;
+                        currentData[activityIndex].endTime = times.endTime;
                         currentData[activityIndex].blockLength = parseInt(target.dataset.length);
 
                         // Update the minutes in the activity data
@@ -2326,6 +2348,8 @@ function initTimelineInteraction(timeline) {
                 window.selectedActivity.selections.map(s => s.name).join(' | ') :
                 window.selectedActivity.name,
             category: window.selectedActivity.category,
+            code: window.selectedActivity.code,
+            codes: window.selectedActivity.codes,
             startTime: formattedStartTime,
             endTime: formattedEndTime,
             blockLength: endMinutes - startMinutes,
