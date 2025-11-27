@@ -575,6 +575,37 @@
           ]
         }
       ]
+    },
+    "device": {
+      "name": "Device",
+      "description": "Were you using a computer/tablet/smartphone?",
+      "mode": "multiple-choice",
+      "min_coverage": "0",
+      "categories": [
+        {
+          "name": " ",
+          "activities": [
+            {
+              "name": "Computer",
+              "examples": "",
+              "color": "#a8f0a8",
+              "code": 1000
+            },
+            {
+              "name": "Tablet",
+              "examples": "",
+              "color": "#f0a8d7",
+              "code": 1010
+            },
+            {
+              "name": "Smartphone",
+              "examples": "",
+              "color": "#a8f0ef",
+              "code": 1020
+            }
+          ]
+        }
+      ]
     }
   }
 }
