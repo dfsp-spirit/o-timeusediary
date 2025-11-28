@@ -106,6 +106,7 @@ function createActivityBlock(activityData, isFromTemplate = false) {
     // Store parent name if this is a child activity
     if (activityData.parentName && activityData.parentName !== activityData.activity) {
         currentBlock.dataset.parentName = activityData.parentName;
+        currentBlock.dataset.parentCode = activityData.parentCode;
     }
 
     console.log("Creating activity block", currentBlock, " from activityData:", activityData);
@@ -210,6 +211,7 @@ function createActivityBlock(activityData, isFromTemplate = false) {
             code: activityData.code,
             codes: activityData.codes,
             parentName: activityData.parentName || combinedActivityText,
+            parentCode: activityData.parentCode || null,
             selected: activityData.selected || combinedActivityText,
             isCustomInput: activityData.isCustomInput || false,
             originalSelection: activityData.originalSelection || null,
@@ -947,6 +949,7 @@ function renderChildItems(activity, categoryName) {
                                 window.selectedActivity = {
                                     name: customText,
                                     parentName: activity.name,
+                                    parentCode: activity.code,
                                     color: childItem.color || activity.color,
                                     category: categoryName,
                                     selected: customText,
@@ -991,6 +994,7 @@ function renderChildItems(activity, categoryName) {
                 window.selectedActivity = {
                     name: childItem.name,
                     parentName: activity.name,
+                    parentCode: activity.code,
                     color: childItem.color || activity.color,
                     category: categoryName,
                     selected: childItem.name,
@@ -1130,6 +1134,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                     window.selectedActivity = {
                                         name: customText,
                                         parentName: context.parentActivity.name,
+                                        parentCode: context.parentActivity.code,
                                         color: context.childItem.color || context.parentActivity.color,
                                         category: context.categoryName,
                                         selected: customText,
@@ -1162,6 +1167,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                         window.selectedActivity = {
                                             name: customText,
                                             parentName: null,
+                                            parentCode: null,
                                             color: activity.color,
                                             category: category.name,
                                             selected: customText,
@@ -1259,6 +1265,7 @@ function renderActivities(categories, container = document.getElementById('activ
                         window.selectedActivity = {
                             name: activity.name,
                             parentName: null,
+                            parentCode: null,
                             color: activity.color,
                             category: category.name,
                             selected: activity.name,
@@ -1414,6 +1421,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                     window.selectedActivity = {
                                         name: customText,
                                         parentName: context.parentActivity.name,
+                                        parentCode: context.parentActivity.code,
                                         color: context.childItem.color || context.parentActivity.color,
                                         category: context.categoryName,
                                         selected: customText,
@@ -1447,6 +1455,7 @@ function renderActivities(categories, container = document.getElementById('activ
                                         window.selectedActivity = {
                                             name: customText,
                                             parentName: null,
+                                            parentCode: null,
                                             color: activity.color,
                                             category: category.name,
                                             originalSelection: activity.name, // Store what was originally clicked
@@ -1559,6 +1568,7 @@ function renderActivities(categories, container = document.getElementById('activ
                         window.selectedActivity = {
                             name: activity.name,
                             parentName: null,
+                            parentCode: null,
                             color: activity.color,
                             category: category.name,
                             selected: activity.name,
@@ -2355,6 +2365,7 @@ function initTimelineInteraction(timeline) {
             blockLength: endMinutes - startMinutes,
             color: window.selectedActivity.color,
             parentName: window.selectedActivity.parentName,
+            parentCode: window.selectedActivity.parentCode,
             selected: window.selectedActivity.selected,
             isCustomInput: window.selectedActivity.isCustomInput,
             originalSelection: window.selectedActivity.originalSelection,

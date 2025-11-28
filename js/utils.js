@@ -496,7 +496,8 @@ export function createTimelineJSON(stringify = false) {
                 //color: activity.color,
 
                 // Enhanced context for recreation
-                //parent_activity: activity.parentName || activity.activity,
+                parent_activity_name: activity.parentName || null,
+                parent_activity_code: activity.parentCode || null,
                 //is_custom_input: activity.isCustomInput || false,
                 //original_selection: activity.originalSelection || null,
 
