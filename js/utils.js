@@ -499,7 +499,7 @@ export function createTimelineJSON(stringify = false) {
                 parent_activity_name: activity.parentName || null,
                 parent_activity_code: activity.parentCode || null,
                 //is_custom_input: activity.isCustomInput || false,
-                //original_selection: activity.originalSelection || null,
+                original_selection: activity.originalSelection || null,
 
                 // For proper ordering and positioning
                 start_minutes: activity.startMinutes,

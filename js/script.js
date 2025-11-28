@@ -998,7 +998,7 @@ function renderChildItems(activity, categoryName) {
                     color: childItem.color || activity.color,
                     category: categoryName,
                     selected: childItem.name,
-                    originalSelection: childItem.name, // Store what was originally clicked
+                    //originalSelection: childItem.name, // Store what was originally clicked
                     isCustomInput: false,
                     code: childItem.code,
                 };
@@ -1269,8 +1269,8 @@ function renderActivities(categories, container = document.getElementById('activ
                             color: activity.color,
                             category: category.name,
                             selected: activity.name,
-                            originalSelection: activity.name, // Store what was originally clicked,
-                            isCustomInput: is_custom_input,
+                            //originalSelection: activity.name, // Store what was originally clicked,
+                            isCustomInput: is_custom_input, // false
                             mode: 'single-choice',
                             code: activity.code,
                         };
@@ -1572,7 +1572,7 @@ function renderActivities(categories, container = document.getElementById('activ
                             color: activity.color,
                             category: category.name,
                             selected: activity.name,
-                            originalSelection: activity.name, // Store what was originally clicked,
+                            originalSelection: null, // this is not a custom input, so no original selection
                             mode: 'single-choice',
                             isCustomInput: is_custom_input,
                             code: activity.code,
@@ -2472,13 +2472,13 @@ function initTimelineInteraction(timeline) {
 
                     // Update the data structure
                     activityData.selected = activityData.activity;
-                    activityData.parentName = activityName;
+                    //activityData.parentName = activityName;
 
                     // Update the block
                     target.setAttribute('title', `${activityName}: ${activityData.activity}`);
                 } else if (!activityData.parentName) {
                     // For items without parent, both are the same
-                    activityData.parentName = activityData.activity;
+                    //activityData.parentName = activityData.activity;
                     activityData.selected = activityData.activity;
                 }
             }
