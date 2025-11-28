@@ -507,7 +507,10 @@ export function createTimelineJSON(stringify = false) {
 
                 // multiple-choice / single-choice context
                 mode: activity.mode || 'single-choice',
-                codes: activity.mode === 'multiple-choice' ? activity.codes : null,
+
+                // we need to make sure the codes are int:
+                codes: activity.mode === 'multiple-choice' ? activity.codes.map(code => parseInt(code, 10)) : null,
+
                 //selections: activity.selections || null,
                 //available_options: activity.availableOptions || null,
                 //count: activity.count || 1,   // number of selections for multiple-choice
