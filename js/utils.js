@@ -522,13 +522,13 @@ export function createTimelineJSON(stringify = false) {
         });
     });
 
-
+    const full_data = { "activities": activity_data };
 
     if (!stringify) {
-        return activity_data;
+        return full_data;
     }
 
-    return JSON.stringify(activity_data, null, 2);
+    return JSON.stringify(full_data, null, 2);
 }
 
 /**
@@ -996,8 +996,8 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
         }
 
         const { pid, studyData } = createCombinedData();
-        const study_name = studyData.study_name || TUD_SETTINGS.STUDY_NAME;
-        console.log('Participant ID (pid):', pid, 'Study Name:', study_name);
+        const study_name_short = studyData.study_name || TUD_SETTINGS.STUDY_NAME;
+        console.log('Participant ID (pid):', pid, 'Study Name:', study_name_short);
 
         const study_data = window.timelineManager.study || {}; // This contains all URL parameters synced earlier. So if you use ?study_name=XYZ, it will be included here.
 
@@ -1010,9 +1010,9 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
 
 
 
-        const api_url = TUD_SETTINGS.API_BASE_URL;
+        const api_url = TUD_SETTINGS.API_BASE_URL; // includes the "/api" part
 
-        const api_submit_url = `${api_url}/studies/${study_name}/participants/${pid}/entries/${daily_entry_name}/submissions`;
+        const api_submit_url = `${api_url}/studies/${study_name_short}/participants/${pid}/day_labels/${daily_entry_name}/activities`;
 
         console.log('=== DATA FRAME FOR JSON ===');
         console.log('Full data structure we send to backend at ' + api_submit_url + ':', jsonString);
