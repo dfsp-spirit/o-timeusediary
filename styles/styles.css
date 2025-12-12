@@ -2187,3 +2187,90 @@ body {
     color: rgba(0, 0, 0, 0.8);
 }
 
+
+/* Desktop hover tooltip for activity blocks */
+@media (min-width: 1440px) {
+    .activity-block:hover::before {
+        content: attr(data-tooltip-text);
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(100, 100, 100, 0.7);
+        color: white;
+        padding: 1px 6px; /* Minimal vertical padding */
+        border-radius: 2px;
+        font-size: 11px;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+        min-width: 80px;
+        max-width: 250px;
+        width: auto;
+        text-align: center;
+        box-sizing: border-box;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease 0.5s, visibility 0.2s ease 0.5s;
+        line-height: 1; /* Minimal line height */
+        height: auto; /* Let it be as small as possible */
+    }
+
+    .activity-block:hover::before {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0.5s;
+    }
+
+    /* When resizing, hide the tooltip immediately */
+    .activity-block.resizing:hover::before {
+        opacity: 0;
+        visibility: hidden;
+        transition-delay: 0s;
+    }
+
+    .activity-block:hover {
+        z-index: 999;
+    }
+}
+
+/* Desktop hover tooltip for activity blocks - INACTIVE TIMELINES */
+@media (min-width: 1440px) {
+    /* For inactive timeline containers */
+    .timeline-container[data-active="false"] .activity-block:hover::before {
+        content: attr(data-tooltip-text);
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(100, 100, 100, 0.7);
+        color: white;
+        padding: 1px 6px;
+        border-radius: 2px;
+        font-size: 11px;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: auto; /* Override parent's pointer-events: none */
+        min-width: 80px;
+        max-width: 250px;
+        width: auto;
+        text-align: center;
+        box-sizing: border-box;
+        opacity: 1 !important; /* Force visibility */
+        visibility: visible !important;
+        line-height: 1;
+        height: auto;
+        /* Remove transitions since they're already hidden */
+        transition: none;
+    }
+
+    /* Make sure activity blocks in inactive timelines can receive hover */
+    .timeline-container[data-active="false"] .activity-block {
+        pointer-events: auto !important; /* Enable hover on activity blocks */
+    }
+
+    /* Optional: Make tooltip slightly more visible on inactive timelines */
+    .timeline-container[data-active="false"] .activity-block:hover::before {
+        background-color: rgba(80, 80, 80, 0.9); /* Darker background */
+    }
+}
