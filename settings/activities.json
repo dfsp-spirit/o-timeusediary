@@ -401,7 +401,7 @@
               },
               {
                 "name": "Other out of home activities (please specify)",
-                "code": 1147,
+                "code": 1173,
                 "label": "other",
                 "short": "other",
                 "vshort": "other",
@@ -956,7 +956,7 @@
               },
               {
                 "name": "Other out of home activities (please specify)",
-                "code": 2147,
+                "code": 2173,
                 "label": "other",
                 "short": "other",
                 "vshort": "other",
