@@ -84,6 +84,7 @@ import {
 
 
 // Add this after the imports and before other functions
+// This creates an activity block element from given activity data. such a block is what is visible on the timeline.
 function createActivityBlock(activityData, isFromTemplate = false) {
     const currentBlock = document.createElement('div');
     currentBlock.className = 'activity-block';
@@ -102,6 +103,14 @@ function createActivityBlock(activityData, isFromTemplate = false) {
     currentBlock.dataset.startMinutes = activityData.startMinutes;
     currentBlock.dataset.endMinutes = activityData.endMinutes;
     currentBlock.dataset.code = activityData.code;
+
+    if (activityData.parentName && activityData.parentName !== activityData.activity) {
+        currentBlock.dataset.tooltipText = activityData.parentName; // What's displayed
+    } else if (activityData.selections) {
+        currentBlock.dataset.tooltipText = activityData.selections.map(s => s.name).join(' | ');
+    } else {
+        currentBlock.dataset.tooltipText = activityData.activity;
+    }
 
     // Store parent name if this is a child activity
     if (activityData.parentName && activityData.parentName !== activityData.activity) {
