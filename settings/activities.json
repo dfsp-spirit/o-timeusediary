@@ -275,6 +275,24 @@
                 "childItems": []
               },
               {
+                "name": "Playing (indoor)",
+                "code": 1148,
+                "label": "playing indoor",
+                "short": "play indoor",
+                "vshort": "play",
+                "color": "#8A2BE6",
+                "childItems": []
+              },
+              {
+                "name": "Playing (outdoor)",
+                "code": 1149,
+                "label": "playing outdoor",
+                "short": "play outdoor",
+                "vshort": "play",
+                "color": "#8A2BE6",
+                "childItems": []
+              },
+              {
                 "name": "Other home activities (please specify)",
                 "code": 1147,
                 "label": "other",
@@ -398,6 +416,24 @@
                 "color": "#8A2BE2",
                 "childItems": [],
                 "is_custom_input": true
+              },
+              {
+                "name": "Playing (indoor)",
+                "code": 1174,
+                "label": "playing indoor",
+                "short": "play indoor",
+                "vshort": "play",
+                "color": "#8A2BE6",
+                "childItems": []
+              },
+              {
+                "name": "Playing (outdoor)",
+                "code": 1175,
+                "label": "playing outdoor",
+                "short": "play outdoor",
+                "vshort": "play",
+                "color": "#8A2BE6",
+                "childItems": []
               },
               {
                 "name": "Other out of home activities (please specify)",
