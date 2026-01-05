@@ -1070,6 +1070,21 @@ export function checkAndRequestPID() {
 
     console.log('PID modal disabled - generated random PID:', randomPid);
   }
+
+  const study_name = urlParams.get('study_name');
+  if (!study_name) {
+    const defaultStudyName = 'default';
+    urlParams.set('study_name', defaultStudyName);
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.replaceState({}, '', newUrl);
+    console.log('Study name not provided in URL parameters.');
+
+    // Update timelineManager.study with the default study name
+    if (!window.timelineManager.study) {
+      window.timelineManager.study = {};
+    }
+    window.timelineManager.study.study_name = defaultStudyName;
+  }
 }
 
 export function syncURLParamsToStudy() {
