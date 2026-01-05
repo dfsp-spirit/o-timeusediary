@@ -585,7 +585,7 @@
             "activities": [
               {
                 "name": "Other Activity (please specify)",
-                "code": 1148,
+                "code": 1248,
                 "color": "#C0C0C0",
                 "is_custom_input": true,
                 "childItems": []
@@ -593,7 +593,7 @@
               {
                 "name": "Forgot / Unspecified",
                 "label": "unspecified",
-                "code": 1149,
+                "code": 1249,
                 "color": "#C0C0C0",
                 "childItems": []
               }
