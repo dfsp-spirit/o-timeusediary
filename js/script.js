@@ -2615,9 +2615,15 @@ async function init() {
             throw new Error('Timelines wrapper not found');
         }
 
+
         // LOAD PRELOAD DATA HERE - after first timeline is created but before UI setup
         const urlParams = new URLSearchParams(window.location.search);
         const shouldPreload = urlParams.get('preload') === '1';
+
+        // Get participant and study info from URL parameters
+        const participantUid = urlParams.get('uid');
+        const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
+        const dayIndex = parseInt(urlParams.get('day_index')) || 0;
 
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
@@ -2629,13 +2635,77 @@ async function init() {
             await addNextTimeline(); // Only add first timeline initially, the others get added when user navigates.
         }
 
-
-
+        // Check if we have existing activities already loaded
         const hasExistingActivities = Object.keys(window.timelineManager.activities).some(
             key => window.timelineManager.activities[key].length > 0
         );
 
-        if (shouldPreload && !hasExistingActivities) {
+        // Load existing data if we have participant UID and study name
+        if (participantUid && studyName && !hasExistingActivities) {
+            console.log(`Attempting to load existing data for participant ${participantUid}, study ${studyName}, day index ${dayIndex}`);
+
+            try {
+                // Build the backend URL for fetching existing activities
+                const backendUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/participants/${participantUid}/day_label_index/${dayIndex}/activities`;
+
+                console.log(`Fetching existing activities from: ${backendUrl}`);
+
+                const response = await fetch(backendUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const backendData = await response.json();
+                    console.log('Successfully loaded existing activities from backend:', backendData);
+
+                    // Transform the backend response to frontend format
+                    const transformedData = transformBackendResponse(backendData);
+
+                    // Load the data into the timeline
+                    if (transformedData && transformedData.activities) {
+                        loadTimelineFromJSON(transformedData.activities);
+                        console.log(`Loaded ${transformedData.activities.length} existing activities`);
+
+                        // Store metadata about the loaded data
+                        window.timelineManager.loadedExistingData = {
+                            participantId: participantUid,
+                            studyName: studyName,
+                            dayIndex: dayIndex,
+                            dayLabel: transformedData.day_label,
+                            totalActivities: transformedData.total_activities || transformedData.activities.length
+                        };
+                    }
+                } else if (response.status === 404) {
+                    // No existing data found - this is normal for first-time participants
+                    console.log(`No existing data found for participant ${participantUid}, study ${studyName}, day index ${dayIndex}. Starting fresh.`);
+                } else {
+                    console.warn(`Backend returned ${response.status} for existing data request, continuing without preload`);
+                }
+            } catch (error) {
+                console.warn('Error fetching existing activities from backend, continuing without preload:', error.message);
+
+                // Fall back to local preload file if specified
+                if (shouldPreload) {
+                    console.log('Falling back to local my_entry.json...');
+                    try {
+                        const response = await fetch('my_entry.json');
+                        if (response.ok) {
+                            const externalData = await response.json();
+                            loadTimelineFromJSON(externalData);
+                            sessionStorage.setItem('preloadDataLoaded', 'true');
+                            console.log('Preload data loaded successfully from local file');
+                        } else {
+                            console.error('Failed to load my_entry.json:', response.status);
+                        }
+                    } catch (fileError) {
+                        console.error('Error loading local preload data:', fileError);
+                    }
+                }
+            }
+        } else if (shouldPreload && !hasExistingActivities) {
+            // Original preload behavior for development/testing
             console.log('Loading preload data from my_entry.json...');
             try {
                 const response = await fetch('my_entry.json');
@@ -2651,6 +2721,7 @@ async function init() {
                 console.error('Error loading preload data:', error);
             }
         }
+
 
         console.log('Timeline structure after initialization:', {
             keys: window.timelineManager.keys,
