@@ -2542,6 +2542,100 @@ export function loadTimelineFromJSON(jsonData) {
     console.log(`loadTimelineFromJSON: Loaded ${jsonData.length} total activities from JSON`);
 }
 
+
+/// Transform backend activities response to frontend format.
+/// This is for answer from endpoint like /studies/{study_name}/participants/{participant_uid}/day_label_index/{day_index}/activities/.
+/// The backend uses some different field names and formats (snake_case instead of CamelCase), so we need to convert them.
+function transformBackendActivitiesResponse(backendData) {
+    // For now, just return the input as-is
+    // TODO: Implement proper transformation logic here
+    // Example transformations needed:
+    // 1. Convert snake_case to camelCase
+    // 2. Map field names if they differ
+    // 3. Ensure required fields exist
+    // 4. Convert data types if needed
+
+    // This is what the frontend expects:
+    //{
+    //"timelineKey": "primary",
+    //"activity": "Sleeping",
+    //"category": "Personal",
+    //"startTime": "2025-11-06 06:30",
+    //"endTime": "2025-11-06 08:10",
+    //"blockLength": 100,
+    //"color": "#a2b4ee",
+    //"parentActivity": "Sleeping",
+    //"isCustomInput": false,
+    //"originalSelection": "Sleeping",
+    //"startMinutes": 390,
+    //"endMinutes": 490,
+    //"mode": "single-choice",
+    //"selections": null,
+    //"availableOptions": null,
+    //"count": 1,
+    //"id": "uojcwo2ic"
+    //},
+
+    // This is what we get from the backend:
+    //{
+    //activity: "Sleeping"
+    //activity_code: 1101
+    //activity_id: 1
+    //activity_path_frontend: "timeline:primary > category:General Activities > activity:Sleeping"
+    //created_at: "2026-01-12T12:25:21.455111"
+    //duration: 60
+    //end_minutes: 540
+    //parent_activity_code: null
+    //start_minutes: 480
+    //timeline_display_name: "Main Activity"
+    //timeline_key: "primary"
+    //timeline_mode: "single-choice"
+    //}
+
+    // What we need to fill out from knowledge of the activities.json structure and the activity_id (all the ones with || below):
+    // color
+    // parentActivity
+    // isCustomInput
+
+    console.log('Transforming backend response (placeholder)', backendData);
+
+    try {
+        const backendJson = backendData;
+        const backendActivities = backendJson.activities || [];
+        const transformedActivities = backendActivities.map(activity => {
+            return {
+                timelineKey: activity.timeline_key,
+                activity: activity.activity,
+                category: activity.category || null,
+                startTime: activity.start_minutes,
+                endTime: activity.end_minutes,
+                blockLength: activity.duration,
+                color: activity.color || '#cccccc',  // Default color if not provided
+                parentActivity: activity.parent_activity || null,
+                isCustomInput: activity.is_custom_input || false,
+                originalSelection: activity.original_selection || null, // only for isCustomInput = true
+                startMinutes: activity.start_minutes,
+                endMinutes: activity.end_minutes,
+                mode: activity.timeline_mode,
+                selections: activity.selections || null,  // null for timline_mode = single-choice
+                availableOptions: activity.available_options || null,
+                count: activity.selections ? activity.selections.length : 1, // len of selections or 1 for single choice
+                id: activity.activity_id
+
+            };
+        });
+
+        backendData.activities = transformedActivities;
+    } catch (error) {
+        console.error("Error transforming backend response, returning empty array. Error details:", error);
+        return [];
+    }
+
+
+    console.log("Returning transformed activities: ", backendData.activities);
+    return backendData.activities;
+}
+
 async function init() {
     console.log('==================== Initializing application... ====================');
     try {
@@ -2618,16 +2712,16 @@ async function init() {
 
         // LOAD PRELOAD DATA HERE - after first timeline is created but before UI setup
         const urlParams = new URLSearchParams(window.location.search);
-        const shouldPreload = urlParams.get('preload') === '1';
+        const shouldPreloadFromLocalFile = urlParams.get('preload') === '1';
 
         // Get participant and study info from URL parameters
-        const participantUid = urlParams.get('uid');
+        const participantId = urlParams.get('pid');
         const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
         const dayIndex = parseInt(urlParams.get('day_index')) || 0;
 
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
-        if(shouldPreload) {
+        if(shouldPreloadFromLocalFile) {
             for (let i = 0; i < window.timelineManager.keys.length; i++) {  // Add all timelines if preloading, so user can see all data.
                 await addNextTimeline();
             }
@@ -2641,12 +2735,12 @@ async function init() {
         );
 
         // Load existing data if we have participant UID and study name
-        if (participantUid && studyName && !hasExistingActivities) {
-            console.log(`Attempting to load existing data for participant ${participantUid}, study ${studyName}, day index ${dayIndex}`);
+        if (participantId && studyName && !hasExistingActivities) {
+            console.log(`Attempting to load existing data for participant ${participantId}, study ${studyName}, day index ${dayIndex}`);
 
             try {
                 // Build the backend URL for fetching existing activities
-                const backendUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/participants/${participantUid}/day_label_index/${dayIndex}/activities`;
+                const backendUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/participants/${participantId}/day_label_index/${dayIndex}/activities`;
 
                 console.log(`Fetching existing activities from: ${backendUrl}`);
 
@@ -2661,7 +2755,7 @@ async function init() {
                     console.log('Successfully loaded existing activities from backend:', backendData);
 
                     // Transform the backend response to frontend format
-                    const transformedData = transformBackendResponse(backendData);
+                    const transformedData = transformBackendActivitiesResponse(backendData);
 
                     // Load the data into the timeline
                     if (transformedData && transformedData.activities) {
@@ -2670,7 +2764,7 @@ async function init() {
 
                         // Store metadata about the loaded data
                         window.timelineManager.loadedExistingData = {
-                            participantId: participantUid,
+                            participantId: participantId,
                             studyName: studyName,
                             dayIndex: dayIndex,
                             dayLabel: transformedData.day_label,
@@ -2679,7 +2773,7 @@ async function init() {
                     }
                 } else if (response.status === 404) {
                     // No existing data found - this is normal for first-time participants
-                    console.log(`No existing data found for participant ${participantUid}, study ${studyName}, day index ${dayIndex}. Starting fresh.`);
+                    console.log(`No existing data found for participant ${participantId}, study ${studyName}, day index ${dayIndex}. Starting fresh.`);
                 } else {
                     console.warn(`Backend returned ${response.status} for existing data request, continuing without preload`);
                 }
@@ -2687,7 +2781,7 @@ async function init() {
                 console.warn('Error fetching existing activities from backend, continuing without preload:', error.message);
 
                 // Fall back to local preload file if specified
-                if (shouldPreload) {
+                if (shouldPreloadFromLocalFile) {
                     console.log('Falling back to local my_entry.json...');
                     try {
                         const response = await fetch('my_entry.json');
@@ -2704,7 +2798,7 @@ async function init() {
                     }
                 }
             }
-        } else if (shouldPreload && !hasExistingActivities) {
+        } else if (shouldPreloadFromLocalFile && !hasExistingActivities) {
             // Original preload behavior for development/testing
             console.log('Loading preload data from my_entry.json...');
             try {
