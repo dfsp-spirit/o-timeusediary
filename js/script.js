@@ -234,6 +234,136 @@ function createActivityBlock(activityData, isFromTemplate = false) {
     };
 }
 
+function initPastTimelineClickHandlers() {
+    const pastTimelinesWrapper = document.querySelector('.past-initialized-timelines-wrapper');
+    if (!pastTimelinesWrapper) return;
+
+    // Use a single event listener but check state at time of click
+    pastTimelinesWrapper.addEventListener('click', async function(event) {
+        // Find which timeline container was clicked
+        let element = event.target;
+        let timelineContainer = null;
+
+        // Walk up the DOM to find the timeline container
+        while (element && element !== this) {
+            if (element.classList && element.classList.contains('timeline-container')) {
+                timelineContainer = element;
+                break;
+            }
+            element = element.parentNode;
+        }
+
+        if (!timelineContainer) return;
+
+        // Check if it's still in the past wrapper (might have moved during async ops)
+        if (!pastTimelinesWrapper.contains(timelineContainer)) {
+            console.log('Timeline container moved during click, ignoring');
+            return;
+        }
+
+        // Check if it's inactive
+        if (timelineContainer.getAttribute('data-active') === 'true') {
+            console.log('Clicked active timeline, ignoring');
+            return;
+        }
+
+        const timelineElement = timelineContainer.querySelector('.timeline');
+        if (!timelineElement) return;
+
+        const clickedTimelineKey = timelineElement.id;
+        const currentTimelineKey = getCurrentTimelineKey();
+
+        // Quick check - if same, ignore
+        if (clickedTimelineKey === currentTimelineKey) {
+            console.log('Clicked current timeline');
+            return;
+        }
+
+        console.log(`Navigating to ${clickedTimelineKey} from ${currentTimelineKey}`);
+
+        // Find indices
+        const targetIndex = window.timelineManager.keys.indexOf(clickedTimelineKey);
+        const currentIndex = window.timelineManager.keys.indexOf(currentTimelineKey);
+
+        if (targetIndex === -1 || currentIndex === -1) return;
+
+        // Navigate
+        if (targetIndex < currentIndex) {
+            const stepsBack = currentIndex - targetIndex;
+            for (let i = 0; i < stepsBack; i++) {
+                await goToPreviousTimeline();
+            }
+        } else {
+            const stepsForward = targetIndex - currentIndex;
+            for (let i = 0; i < stepsForward; i++) {
+                await addNextTimeline();
+            }
+        }
+    });
+}
+
+
+function initPastTimelineClickHandlers2() {
+
+    console.log(">>>>>>>>>>>>>> Initializing timeline click handlers...");
+
+    const pastTimelinesWrapper = document.querySelector('.past-initialized-timelines-wrapper');
+    if (!pastTimelinesWrapper) return;
+
+    // Use event delegation for better performance
+    pastTimelinesWrapper.addEventListener('click', async (event) => {
+        // Find the clicked timeline container
+        const timelineContainer = event.target.closest('.timeline-container');
+        if (!timelineContainer) return;
+
+        // Only handle past (inactive) timelines
+        if (timelineContainer.getAttribute('data-active') === 'true') return;
+
+        const timelineElement = timelineContainer.querySelector('.timeline');
+        if (!timelineElement) return;
+
+        const timelineKey = timelineElement.id;
+        const targetIndex = window.timelineManager.keys.indexOf(timelineKey);
+
+        console.log('=== CLICK DEBUG ===');
+        console.log('Clicked timeline key:', timelineKey);
+        console.log('Clicked timeline element ID:', timelineElement.id);
+        console.log('All timeline keys:', window.timelineManager.keys);
+        console.log('Target index:', targetIndex);
+        console.log('Current index:', window.timelineManager.currentIndex);
+        console.log('Current timeline key:', getCurrentTimelineKey());
+        console.log('===================');
+
+        if (targetIndex === -1) {
+            console.error('Timeline key not found:', timelineKey);
+            return;
+        }
+
+        // If clicking the immediate previous timeline, use goToPreviousTimeline
+        if (targetIndex === window.timelineManager.currentIndex - 1) {
+            console.log('Navigating to previous timeline:', timelineKey);
+            await goToPreviousTimeline();
+            return;
+        }
+
+        // If clicking an earlier timeline, navigate back step by step
+        if (targetIndex < window.timelineManager.currentIndex) {
+
+            const stepsBack = window.timelineManager.currentIndex - targetIndex;
+            console.log(`Navigating back ${stepsBack} timelines to:`, timelineKey);
+            for (let i = 0; i < stepsBack; i++) {
+                await goToPreviousTimeline();
+            }
+            return;
+        }
+
+        // If clicking a future timeline (shouldn't happen since they're in past wrapper)
+        console.warn('Clicked timeline is ahead of current index');
+    });
+}
+
+
+
 function recreateActivityBlockFromTemplate(activityData) {
     console.log('=== RECREATE ACTIVITY BLOCK START ===');
     console.log('Input activityData:', activityData);
@@ -572,6 +702,7 @@ async function addNextTimeline() {
 
         // Update floating button position after timeline changes
         updateFloatingButtonPosition();
+        initPastTimelineClickHandlers();
 
     } catch (error) {
         console.error(`Error switching to ${nextTimelineKey} timeline:`, error);
@@ -748,6 +879,7 @@ async function goToPreviousTimeline() {
 
         // Update floating button position after timeline changes
         updateFloatingButtonPosition();
+        initPastTimelineClickHandlers();
 
     } catch (error) {
         console.error(`Error switching back to ${previousTimelineKey} timeline:`, error);
@@ -2560,7 +2692,8 @@ function transformBackendActivitiesResponse(backendData) {
     //"timelineKey": "primary",
     //"activity": "Sleeping",
     //"category": "Personal",
-    //"startTime": "2025-11-06 06:30",
+    //"startTime": "startTime": "2025-11-06 06:30",
+    //"endTime": "2025-11-06 08:10",,
     //"endTime": "2025-11-06 08:10",
     //"blockLength": 100,
     //"color": "#a2b4ee",
@@ -2606,9 +2739,9 @@ function transformBackendActivitiesResponse(backendData) {
             return {
                 timelineKey: activity.timeline_key,
                 activity: activity.activity,
-                category: activity.category || null,
-                startTime: activity.start_minutes,
-                endTime: activity.end_minutes,
+                category: activity.category || "Personal",
+                startTime: "2025-11-06 06:30",
+                endTime: "2025-11-06 08:30",
                 blockLength: activity.duration,
                 color: activity.color || '#cccccc',  // Default color if not provided
                 parentActivity: activity.parent_activity || null,
@@ -2815,6 +2948,9 @@ async function init() {
                 console.error('Error loading preload data:', error);
             }
         }
+
+        console.log(">>>>>> In init, about to init pastTimelineClickHandlers...");
+        initPastTimelineClickHandlers();
 
 
         console.log('Timeline structure after initialization:', {
