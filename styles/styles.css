@@ -2274,3 +2274,46 @@ body {
         background-color: rgba(80, 80, 80, 0.9); /* Darker background */
     }
 }
+
+
+.instruction-banner {
+    background-color: #1976d2; /* Strong blue background */
+    color: white;
+    padding: 12px 20px;
+    position: relative;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.banner-text {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.banner-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.banner-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}

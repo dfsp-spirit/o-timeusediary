@@ -83,6 +83,36 @@ import {
 } from './utils.js';
 
 
+function initInstructionBanner() {
+    const banner = document.getElementById('instructionBanner');
+    if (!banner) return;
+
+    // Check if user has already closed the banner (using localStorage)
+    const bannerClosed = localStorage.getItem('instructionBannerClosed');
+    if (bannerClosed === 'true') {
+        banner.remove();
+        return;
+    }
+
+    // Set up close button
+    const closeBtn = banner.querySelector('.banner-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            banner.style.display = 'none';
+            localStorage.setItem('instructionBannerClosed', 'true');
+        });
+    }
+
+    // Auto-close after 10 seconds
+    setTimeout(() => {
+        if (banner.parentNode) { // Check if banner still exists
+            banner.style.display = 'none';
+            localStorage.setItem('instructionBannerClosed', 'true');
+        }
+    }, 10000);
+}
+
+
 
 // Init keyboard shortcuts for deleting activity blocks.
 function initKeyboardShortcuts() {
@@ -3061,6 +3091,7 @@ async function init() {
 
         initButtons();
         initKeyboardShortcuts();
+        initInstructionBanner();
 
         // Initialize header and footer heights early
         updateHeaderHeight();
