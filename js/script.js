@@ -164,6 +164,122 @@ function deleteActivityBlock(activityBlock) {
 }
 
 
+
+function initMobileDelete() {
+    if (!getIsMobile()) return;
+
+    let touchStartTime = 0;
+    let touchTimer = null;
+    let touchedActivity = null;
+    let isMouseDown = false; // Track mouse state for desktop testing
+
+    // Handle BOTH mouse and touch events
+    document.addEventListener('mousedown', handlePressStart);
+    document.addEventListener('touchstart', handlePressStart, { passive: false });
+
+    document.addEventListener('mousemove', handlePressMove);
+    document.addEventListener('touchmove', handlePressMove, { passive: false });
+
+    document.addEventListener('mouseup', handlePressEnd);
+    document.addEventListener('touchend', handlePressEnd);
+    document.addEventListener('touchcancel', handlePressCancel);
+
+    function handlePressStart(e) {
+        // Find activity block
+        const activityBlock = e.target.closest('.activity-block');
+        if (!activityBlock) return;
+
+        // Prevent default for touch events
+        if (e.type === 'touchstart') {
+            e.preventDefault();
+        }
+
+        touchedActivity = activityBlock;
+        touchStartTime = Date.now();
+        isMouseDown = (e.type === 'mousedown');
+
+        // Add visual feedback immediately
+        activityBlock.style.transform = 'scale(0.98)';
+        activityBlock.style.boxShadow = '0 0 0 2px #f44336';
+
+        // Start long-press timer
+        touchTimer = setTimeout(() => {
+            // Add stronger visual feedback
+            activityBlock.style.transform = 'scale(0.95)';
+            activityBlock.style.opacity = '0.8';
+            activityBlock.style.boxShadow = '0 0 0 3px #f44336, 0 0 10px #f44336';
+
+            // Wait a moment for user feedback, then delete
+            setTimeout(() => {
+                if (activityBlock.parentNode) {
+                    deleteActivityBlock(activityBlock);
+                }
+            }, 150);
+        }, 800); // 800ms long press
+    }
+
+    function handlePressMove(e) {
+        // Cancel if user moves during long press
+        if (touchTimer) {
+            clearTimeout(touchTimer);
+            touchTimer = null;
+            cleanupPress();
+        }
+    }
+
+    function handlePressEnd(e) {
+        if (touchTimer) {
+            clearTimeout(touchTimer);
+            touchTimer = null;
+        }
+
+        // Check if it was a short press/tap (not long press)
+        const pressDuration = Date.now() - touchStartTime;
+        if (pressDuration < 300 && touchedActivity) {
+            // It was a short click/tap - let existing click handlers handle it
+            // But we need to reset our visual changes first
+            cleanupPress();
+
+            // For mouse, we might need to trigger the original click
+            if (e.type === 'mouseup' && isMouseDown) {
+                // Create and dispatch a click event at the same position
+                const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: e.clientX,
+                    clientY: e.clientY
+                });
+                e.target.dispatchEvent(clickEvent);
+            }
+        } else {
+            // Was a longer press or movement
+            cleanupPress();
+        }
+
+        isMouseDown = false;
+    }
+
+    function handlePressCancel() {
+        if (touchTimer) {
+            clearTimeout(touchTimer);
+            touchTimer = null;
+        }
+        cleanupPress();
+        isMouseDown = false;
+    }
+
+    function cleanupPress() {
+        if (touchedActivity) {
+            touchedActivity.style.transform = '';
+            touchedActivity.style.opacity = '';
+            touchedActivity.style.boxShadow = '';
+            touchedActivity = null;
+        }
+    }
+}
+
+
+
 // Add this after the imports and before other functions
 // This creates an activity block element from given activity data. such a block is what is visible on the timeline.
 function createActivityBlock(activityData, isFromTemplate = false) {
@@ -3090,8 +3206,9 @@ async function init() {
         scrollToActiveTimeline();
 
         initButtons();
-        initKeyboardShortcuts();
+        initKeyboardShortcuts();  // enable delete on desktop via 'd' keypress
         initInstructionBanner();
+        initMobileDelete(); // enable delete activity on mobile via long press
 
         // Initialize header and footer heights early
         updateHeaderHeight();
