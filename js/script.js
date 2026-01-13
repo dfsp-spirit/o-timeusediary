@@ -83,6 +83,57 @@ import {
 } from './utils.js';
 
 
+
+// Init keyboard shortcuts for deleting activity blocks.
+function initKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+        // Only handle 'd' key (case insensitive)
+        if (event.key.toLowerCase() !== 'd') return;
+
+        // Don't trigger if user is typing in an input field
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+
+        // Find the hovered activity block
+        const hoveredActivity = document.querySelector('.activity-block:hover');
+        if (!hoveredActivity) return;
+
+        // Delete the activity immediately
+        deleteActivityBlock(hoveredActivity);
+    });
+}
+
+// Delete activity block function, removes from DOM and timeline manager data.
+// Required for editing activities.
+function deleteActivityBlock(activityBlock) {
+    const activityId = activityBlock.dataset.id;
+    const timelineKey = activityBlock.dataset.timelineKey;
+
+    if (!activityId || !timelineKey) {
+        console.error('Missing activity data');
+        return;
+    }
+
+    // Remove from DOM
+    activityBlock.remove();
+
+    // Remove from timeline manager data
+    const timelineActivities = window.timelineManager.activities[timelineKey];
+    if (timelineActivities) {
+        const index = timelineActivities.findIndex(activity => activity.id === activityId);
+        if (index !== -1) {
+            timelineActivities.splice(index, 1);
+        }
+    }
+
+    // Update button states (coverage might have changed)
+    updateButtonStates();
+
+    console.log(`Deleted activity ${activityId} from timeline ${timelineKey}`);
+}
+
+
 // Add this after the imports and before other functions
 // This creates an activity block element from given activity data. such a block is what is visible on the timeline.
 function createActivityBlock(activityData, isFromTemplate = false) {
@@ -3009,6 +3060,7 @@ async function init() {
         scrollToActiveTimeline();
 
         initButtons();
+        initKeyboardShortcuts();
 
         // Initialize header and footer heights early
         updateHeaderHeight();
