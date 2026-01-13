@@ -2936,7 +2936,7 @@ function transformBackendActivitiesResponse(backendData) {
             return {
                 timelineKey: activity.timeline_key,
                 activity: activity.activity,
-                category: activity.category || "Personal",
+                category: activity.category || "Travel & Transit",
                 startTime: "2025-11-06 06:30",
                 endTime: "2025-11-06 08:30",
                 blockLength: activity.duration,
@@ -2950,8 +2950,8 @@ function transformBackendActivitiesResponse(backendData) {
                 selections: activity.selections || null,  // null for timline_mode = single-choice
                 availableOptions: activity.available_options || null,
                 count: activity.selections ? activity.selections.length : 1, // len of selections or 1 for single choice
-                id: activity.activity_id
-
+                id: activity.activity_id_backend,
+                code: activity.activity_code,
             };
         });
 
@@ -2963,7 +2963,7 @@ function transformBackendActivitiesResponse(backendData) {
 
 
     console.log("Returning transformed activities: ", backendData.activities);
-    return backendData.activities;
+    return backendData;
 }
 
 async function init() {
@@ -3100,6 +3100,8 @@ async function init() {
                             dayLabel: transformedData.day_label,
                             totalActivities: transformedData.total_activities || transformedData.activities.length
                         };
+                    } else {
+                        console.log("The transformedData did not contain activities to load, timeline will be empty.");
                     }
                 } else if (response.status === 404) {
                     // No existing data found - this is normal for first-time participants
