@@ -1077,7 +1077,7 @@ export function checkAndRequestPID() {
     urlParams.set('study_name', defaultStudyName);
     const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
     window.history.replaceState({}, '', newUrl);
-    console.log('Study name not provided in URL parameters.');
+    console.log('Study name not provided in URL parameters, setting default study name.');
 
     // Update timelineManager.study with the default study name
     if (!window.timelineManager.study) {
