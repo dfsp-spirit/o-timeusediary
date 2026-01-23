@@ -1085,6 +1085,21 @@ export function checkAndRequestPID() {
     }
     window.timelineManager.study.study_name = defaultStudyName;
   }
+
+  const day_label_index = urlParams.get('day_label_index');
+  if (!day_label_index) {
+    const defaultDayLabelIndex = 0;
+    urlParams.set('day_label_index', defaultDayLabelIndex);
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.replaceState({}, '', newUrl);
+    console.log('Day label index not provided in URL parameters, setting default day label index.');
+
+    // Update timelineManager.study with the default day label index
+    if (!window.timelineManager.study) {
+      window.timelineManager.study = {};
+    }
+    window.timelineManager.study.day_label_index = defaultDayLabelIndex;
+  }
 }
 
 export function syncURLParamsToStudy() {
