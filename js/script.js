@@ -3054,7 +3054,7 @@ async function init() {
 
             try {
                 // Build the backend URL for fetching existing activities
-                const backendUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/participants/${participantId}/day_label_index/${dayIndex}/activities`;
+                const backendUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/participants/${participantId}/activities?day_label_index=${dayIndex}`;
 
                 console.log(`Fetching existing activities from: ${backendUrl}`);
 
