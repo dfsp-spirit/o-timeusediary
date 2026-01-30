@@ -5,8 +5,8 @@
     "version": "1.0.0",
     "author": "John",
     "language": "en",
-    "instructions": false,
-    "primary_redirect_url": "pages/thank-you.html",
+    "instructions": "pages/instructions_default.html",
+    "primary_redirect_url": "pages/thank-you_default.html",
     "fallbackToCSV": true
   },
   "timeline": {

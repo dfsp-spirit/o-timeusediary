@@ -2941,26 +2941,74 @@ async function init() {
         // Apply translations to existing elements
         i18n.applyTranslations();
 
+
         // Handle instructions or redirection if needed.
-        if (data.general?.instructions && !new URLSearchParams(window.location.search).has('instructions')) {
+        const instructionsConfig = data.general?.instructions;
+
+        if (instructionsConfig && !new URLSearchParams(window.location.search).has('instructions')) {
             if (!window.location.pathname.includes('/instructions/')) {
                 const currentParams = new URLSearchParams(window.location.search);
-                const redirectUrl = new URL('pages/instructions.html', window.location.href);
+                let redirectPath;
+
+                // Determine the redirect path based on configuration type
+                if (typeof instructionsConfig === 'boolean') {
+                    // Boolean: true = default instructions, false = no instructions
+                    if (instructionsConfig === true) {
+                        redirectPath = 'pages/instructions.html'; // Default
+                    } else {
+                        redirectPath = null; // No redirection
+                    }
+                } else if (typeof instructionsConfig === 'string') {
+                    // String: could be URL or path
+                    const trimmed = instructionsConfig.trim();
+                    if (trimmed === '') {
+                        redirectPath = null;
+                    } else if (trimmed.startsWith('/') ||
+                            trimmed.startsWith('./') ||
+                            trimmed.startsWith('../') ||
+                            trimmed.endsWith('.html')) {
+                        // Relative path or HTML file
+                        redirectPath = trimmed;
+                    } else if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+                        // Full URL - redirect immediately
+                        const redirectUrl = new URL(trimmed);
+                        currentParams.forEach((value, key) => {
+                            redirectUrl.searchParams.append(key, value);
+                        });
+                        window.location.href = redirectUrl.toString();
+                        return;
+                    } else {
+                        // Assume relative path
+                        redirectPath = trimmed;
+                    }
+                }
+
+                if (redirectPath) {
+                    const redirectUrl = new URL(redirectPath, window.location.href);
+                    currentParams.forEach((value, key) => {
+                        redirectUrl.searchParams.append(key, value);
+                    });
+                    window.location.href = redirectUrl.toString();
+                    return;
+                }
+            }
+        } else if (window.location.pathname.includes('/instructions/')) {
+            // Check if we should redirect back from instructions page
+            const shouldStayOnInstructions = instructionsConfig &&
+                (typeof instructionsConfig === 'boolean' && instructionsConfig === true) ||
+                (typeof instructionsConfig === 'string' && instructionsConfig.trim() !== '');
+
+            if (!shouldStayOnInstructions) {
+                const currentParams = new URLSearchParams(window.location.search);
+                const redirectUrl = new URL('index.html', window.location.href);
                 currentParams.forEach((value, key) => {
                     redirectUrl.searchParams.append(key, value);
                 });
                 window.location.href = redirectUrl.toString();
                 return;
             }
-        } else if (window.location.pathname.includes('/instructions/')) {
-            const currentParams = new URLSearchParams(window.location.search);
-            const redirectUrl = new URL('index.html', window.location.href);
-            currentParams.forEach((value, key) => {
-                redirectUrl.searchParams.append(key, value);
-            });
-            window.location.href = redirectUrl.toString();
-            return;
         }
+
 
         // Initialize timeline management structure with timeline keys
         window.timelineManager.keys = Object.keys(data.timeline);
