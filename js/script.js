@@ -2822,7 +2822,8 @@ function transformBackendActivitiesResponse(backendData) {
             endTime: "2025-11-06 08:30",
             blockLength: activity.duration,
             color: activity.color || '#cccccc',
-            parentActivity: activity.parent_activity || null,
+            parentName: activity.parent_activity || null,
+            parentCode: activity.parent_activity_code || null,
             isCustomInput: activity.is_custom_input || false,
             originalSelection: activity.original_selection || null,
             startMinutes: activity.start_minutes,
@@ -3080,13 +3081,7 @@ async function init() {
 
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
-        if(shouldPreloadFromLocalFile) {
-            for (let i = 0; i < window.timelineManager.keys.length; i++) {  // Add all timelines if preloading, so user can see all data.
-                await addNextTimeline();
-            }
-        } else {
-            await addNextTimeline(); // Only add first timeline initially, the others get added when user navigates.
-        }
+        await addNextTimeline(); // Only add first timeline initially, the others get added when user navigates, or when we load existing data.
 
         // Check if we have existing activities already loaded
         const hasExistingActivities = Object.keys(window.timelineManager.activities).some(
@@ -3117,20 +3112,66 @@ async function init() {
                     const transformedData = transformBackendActivitiesResponse(backendData);
 
                     // Load the data into the timeline
-                    if (transformedData && transformedData.activities) {
+                    if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
+
+                        // Add timelines as needed based on loaded data
+                        const numRequiredTimelines = backendData.total_timelines || 1;
+                        let numTimelinesAdded = 0;
+                        while (window.timelineManager.keys.length < numRequiredTimelines) {
+                            console.log('Adding additional timeline to match required timelines from backend existing data');
+                            await addNextTimeline();
+                            numTimelinesAdded++;
+                        }
+                        console.log(`Added ${numTimelinesAdded} additional timelines to match backend existing data (requires ${numRequiredTimelines} timelines)`);
+
                         loadTimelineFromJSON(transformedData.activities);
-                        console.log(`Loaded ${transformedData.activities.length} existing activities from backend into timeline`);
+                        console.log(`Loaded ${transformedData.activities.length} existing activities (${backendData.total_timelines} timelines) from backend into timeline`);
 
                         // Store metadata about the loaded data
                         window.timelineManager.loadedExistingData = {
                             participantId: participantId,
                             studyName: studyName,
+                            studyDaysCount: backendData.study_days_count,
                             dayIndex: dayIndex,
                             dayLabel: transformedData.day_label,
-                            totalActivities: transformedData.total_activities || transformedData.activities.length
+                            totalActivities: transformedData.activities.length,
+                            totalTimelines: backendData.total_timelines,
+                            isFromTemplate: false
                         };
+
+
+                    } else if (transformedData && transformedData.template_activities && transformedData.template_activities.length > 0) {
+
+                        // Add timelines as needed based on loaded data
+                        const numRequiredTimelines = backendData.total_timelines || 1;
+                        let numTimelinesAdded = 0;
+                        while (window.timelineManager.keys.length < numRequiredTimelines) {
+                            console.log('Adding additional timeline to match required timelines from backend template data');
+                            await addNextTimeline();
+                            numTimelinesAdded++;
+                        }
+                        console.log(`Added ${numTimelinesAdded} additional timelines to match backend template data (requires ${numRequiredTimelines} timelines)`);
+
+                        loadTimelineFromJSON(transformedData.template_activities);
+                        console.log(`Loaded ${transformedData.template_activities.length} template activities (${backendData.total_timelines} timelines) from backend into timeline`);
+
+                        // Store metadata about the loaded template data
+                        window.timelineManager.loadedExistingData = {
+                            participantId: participantId,
+                            studyName: studyName,
+                            studyDaysCount: backendData.study_days_count,
+                            dayIndex: dayIndex,
+                            dayLabel: transformedData.day_label,
+                            totalActivities: transformedData.template_activities.length,
+                            totalTimelines: backendData.total_timelines,
+                            isFromTemplate: true
+                        };
+
+                        // Show banner indicating template data was loaded
+                        showTemplateBanner(transformedData.template_source_day || 'a previous day');
+
                     } else {
-                        console.log("The transformedData did not contain activities to load, timeline will be empty.");
+                        console.log("The transformedData did not contain activities or template_activities to load, timeline will be empty.");
                     }
                 } else if (response.status === 404) {
                     // No existing data found - this is normal for first-time participants
@@ -3141,39 +3182,6 @@ async function init() {
             } catch (error) {
                 console.warn('Error fetching existing activities from backend, continuing without preload:', error.message);
 
-                // Fall back to local preload file if specified
-                if (shouldPreloadFromLocalFile) {
-                    console.log('Falling back to local my_entry.json...');
-                    try {
-                        const response = await fetch('my_entry.json');
-                        if (response.ok) {
-                            const externalData = await response.json();
-                            loadTimelineFromJSON(externalData);
-                            sessionStorage.setItem('preloadDataLoaded', 'true');
-                            console.log('Preload data loaded successfully from local file');
-                        } else {
-                            console.error('Failed to load my_entry.json:', response.status);
-                        }
-                    } catch (fileError) {
-                        console.error('Error loading local preload data:', fileError);
-                    }
-                }
-            }
-        } else if (shouldPreloadFromLocalFile && !hasExistingActivities) {
-            // Original preload behavior for development/testing
-            console.log('Loading preload data from my_entry.json...');
-            try {
-                const response = await fetch('my_entry.json');
-                if (response.ok) {
-                    const externalData = await response.json();
-                    loadTimelineFromJSON(externalData);
-                    sessionStorage.setItem('preloadDataLoaded', 'true');
-                    console.log('Preload data loaded successfully');
-                } else {
-                    console.error('Failed to load my_entry.json:', response.status);
-                }
-            } catch (error) {
-                console.error('Error loading preload data:', error);
             }
         }
 
