@@ -2761,6 +2761,97 @@ function initTimelineInteraction(timeline) {
 }
 
 export function loadTimelineFromJSON(jsonData) {
+    console.log('loadTimelineFromJSON: Loading data for', jsonData.length, 'activities');
+
+    // Group activities by timelineKey
+    const activitiesByTimeline = {};
+    jsonData.forEach(activity => {
+        if (!activitiesByTimeline[activity.timelineKey]) {
+            activitiesByTimeline[activity.timelineKey] = [];
+        }
+        activitiesByTimeline[activity.timelineKey].push(activity);
+    });
+
+    // Process each timeline
+    Object.keys(activitiesByTimeline).forEach(timelineKey => {
+        console.log(`Loading ${activitiesByTimeline[timelineKey].length} activities for timeline "${timelineKey}"`);
+
+        // Check if this timeline exists
+        if (!window.timelineManager.metadata[timelineKey]) {
+            console.warn(`Timeline "${timelineKey}" not found in metadata`);
+            return;
+        }
+
+        // Switch to this timeline if it's not the current one
+        const currentKey = getCurrentTimelineKey();
+        if (currentKey !== timelineKey) {
+            // Find the timeline index
+            const targetIndex = window.timelineManager.keys.indexOf(timelineKey);
+            if (targetIndex !== -1 && targetIndex !== window.timelineManager.currentIndex) {
+                console.log(`Switching to timeline "${timelineKey}" (index ${targetIndex})`);
+
+                // Update current index and active timeline
+                window.timelineManager.currentIndex = targetIndex;
+                const timelineElement = document.getElementById(timelineKey);
+                if (timelineElement) {
+                    window.timelineManager.activeTimeline = timelineElement;
+
+                    // Update UI to reflect the switch
+                    const timeline = window.timelineManager.metadata[timelineKey];
+                    const timelineTitle = document.querySelector('.timeline-title');
+                    const timelineDescription = document.querySelector('.timeline-description');
+
+                    if (timelineTitle) timelineTitle.textContent = timeline.name;
+                    if (timelineDescription) timelineDescription.textContent = timeline.description;
+
+                    // Update activities container mode
+                    const activitiesContainer = document.querySelector("#activitiesContainer");
+                    if (activitiesContainer) {
+                        activitiesContainer.setAttribute('data-mode', timeline.mode);
+                    }
+                }
+            }
+        }
+
+        // Clear existing activities for this timeline
+        window.timelineManager.activities[timelineKey] = [];
+
+        // Load activities in sorted order
+        const sortedActivities = activitiesByTimeline[timelineKey].sort((a, b) => a.startMinutes - b.startMinutes);
+        sortedActivities.forEach(activityData => {
+            recreateActivityBlockFromTemplate(activityData);
+        });
+    });
+
+    // Switch back to first timeline for better UX
+    if (window.timelineManager.currentIndex !== 0) {
+        window.timelineManager.currentIndex = 0;
+        const firstTimelineKey = window.timelineManager.keys[0];
+        const firstTimelineElement = document.getElementById(firstTimelineKey);
+        if (firstTimelineElement) {
+            window.timelineManager.activeTimeline = firstTimelineElement;
+
+            // Update UI
+            const timeline = window.timelineManager.metadata[firstTimelineKey];
+            const timelineTitle = document.querySelector('.timeline-title');
+            const timelineDescription = document.querySelector('.timeline-description');
+
+            if (timelineTitle) timelineTitle.textContent = timeline.name;
+            if (timelineDescription) timelineDescription.textContent = timeline.description;
+
+            // Update activities container
+            const activitiesContainer = document.querySelector("#activitiesContainer");
+            if (activitiesContainer) {
+                activitiesContainer.setAttribute('data-mode', timeline.mode);
+            }
+        }
+    }
+
+    updateButtonStates();
+    console.log('Finished loading timeline data');
+}
+
+export function loadTimelineFromJSONOldAndCurrentlyUnused(jsonData) {
     console.log('loadTimelineFromJSON: Loading timeline data from JSON...');
     console.trace('loadTimelineFromJSON called from:');
 
@@ -3123,6 +3214,7 @@ async function init() {
                             numTimelinesAdded++;
                         }
                         console.log(`Added ${numTimelinesAdded} additional timelines to match backend existing data (requires ${numRequiredTimelines} timelines)`);
+                        console.log('Timeline names:', window.timelineManager.keys);
 
                         loadTimelineFromJSON(transformedData.activities);
                         console.log(`Loaded ${transformedData.activities.length} existing activities (${backendData.total_timelines} timelines) from backend into timeline`);
@@ -3151,6 +3243,7 @@ async function init() {
                             numTimelinesAdded++;
                         }
                         console.log(`Added ${numTimelinesAdded} additional timelines to match backend template data (requires ${numRequiredTimelines} timelines)`);
+                        console.log('Timeline names:', window.timelineManager.keys);
 
                         loadTimelineFromJSON(transformedData.template_activities);
                         console.log(`Loaded ${transformedData.template_activities.length} template activities (${backendData.total_timelines} timelines) from backend into timeline`);
