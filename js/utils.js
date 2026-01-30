@@ -997,14 +997,15 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
 
         const { pid, studyData } = createCombinedData();
         const study_name_short = studyData.study_name || TUD_SETTINGS.STUDY_NAME;
-        console.log('Participant ID (pid):', pid, 'Study Name:', study_name_short);
+        const day_label_index = studyData.day_label_index || 0;
+        console.log('Participant ID (pid):', pid, 'Study Name:', study_name_short, 'Day Label Index:', day_label_index);
 
         const study_data = window.timelineManager.study || {}; // This contains all URL parameters synced earlier. So if you use ?study_name=XYZ, it will be included here.
 
         // We only extract some relevant fields to send to backend.
 
-        const daily_entry_index = study_data.dailyEntryIndex || 0; // For future multi-day studies, index into TUD_SETTINGS.DAILY_ENTRY_NAMES or the names we get from backend once that is implemented.
-        const daily_entry_name = TUD_SETTINGS.DAILY_ENTRY_NAMES && TUD_SETTINGS.DAILY_ENTRY_NAMES[daily_entry_index] ? TUD_SETTINGS.DAILY_ENTRY_NAMES[daily_entry_index] : `day_${daily_entry_index + 1}`;
+
+        const daily_entry_name = TUD_SETTINGS.DAILY_ENTRY_NAMES && TUD_SETTINGS.DAILY_ENTRY_NAMES[day_label_index] ? TUD_SETTINGS.DAILY_ENTRY_NAMES[day_label_index] : `day_${day_label_index + 1}`;
 
         const jsonString = JSON.stringify(activitiesDataJSON, null, 2);
 
