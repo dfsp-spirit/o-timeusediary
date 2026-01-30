@@ -2812,95 +2812,140 @@ export function loadTimelineFromJSON(jsonData) {
 /// This is for answer from endpoint like /studies/{study_name}/participants/{participant_uid}/day_label_index/{day_index}/activities/.
 /// The backend uses some different field names and formats (snake_case instead of CamelCase), so we need to convert them.
 function transformBackendActivitiesResponse(backendData) {
-    // For now, just return the input as-is
-    // TODO: Implement proper transformation logic here
-    // Example transformations needed:
-    // 1. Convert snake_case to camelCase
-    // 2. Map field names if they differ
-    // 3. Ensure required fields exist
-    // 4. Convert data types if needed
-
-    // This is what the frontend expects:
-    //{
-    //"timelineKey": "primary",
-    //"activity": "Sleeping",
-    //"category": "Personal",
-    //"startTime": "startTime": "2025-11-06 06:30",
-    //"endTime": "2025-11-06 08:10",,
-    //"endTime": "2025-11-06 08:10",
-    //"blockLength": 100,
-    //"color": "#a2b4ee",
-    //"parentActivity": "Sleeping",
-    //"isCustomInput": false,
-    //"originalSelection": "Sleeping",
-    //"startMinutes": 390,
-    //"endMinutes": 490,
-    //"mode": "single-choice",
-    //"selections": null,
-    //"availableOptions": null,
-    //"count": 1,
-    //"id": "uojcwo2ic"
-    //},
-
-    // This is what we get from the backend:
-    //{
-    //activity: "Sleeping"
-    //activity_code: 1101
-    //activity_id: 1
-    //activity_path_frontend: "timeline:primary > category:General Activities > activity:Sleeping"
-    //created_at: "2026-01-12T12:25:21.455111"
-    //duration: 60
-    //end_minutes: 540
-    //parent_activity_code: null
-    //start_minutes: 480
-    //timeline_display_name: "Main Activity"
-    //timeline_key: "primary"
-    //timeline_mode: "single-choice"
-    //}
-
-    // What we need to fill out from knowledge of the activities.json structure and the activity_id (all the ones with || below):
-    // color
-    // parentActivity
-    // isCustomInput
-
-    console.log('Transforming backend response (placeholder)', backendData);
-
     try {
-        const backendJson = backendData;
-        const backendActivities = backendJson.activities || [];
-        const transformedActivities = backendActivities.map(activity => {
-            return {
-                timelineKey: activity.timeline_key,
-                activity: activity.activity,
-                category: activity.category || "Travel & Transit",
-                startTime: "2025-11-06 06:30",
-                endTime: "2025-11-06 08:30",
-                blockLength: activity.duration,
-                color: activity.color || '#cccccc',  // Default color if not provided
-                parentActivity: activity.parent_activity || null,
-                isCustomInput: activity.is_custom_input || false,
-                originalSelection: activity.original_selection || null, // only for isCustomInput = true
-                startMinutes: activity.start_minutes,
-                endMinutes: activity.end_minutes,
-                mode: activity.timeline_mode,
-                selections: activity.selections || null,  // null for timline_mode = single-choice
-                availableOptions: activity.available_options || null,
-                count: activity.selections ? activity.selections.length : 1, // len of selections or 1 for single choice
-                id: activity.activity_id_backend,
-                code: activity.activity_code,
-            };
+        // Extract mapping logic into separate function
+        const mapActivityItem = (activity) => ({
+            timelineKey: activity.timeline_key,
+            activity: activity.activity,
+            category: activity.category || "Travel & Transit",
+            startTime: "2025-11-06 06:30",
+            endTime: "2025-11-06 08:30",
+            blockLength: activity.duration,
+            color: activity.color || '#cccccc',
+            parentActivity: activity.parent_activity || null,
+            isCustomInput: activity.is_custom_input || false,
+            originalSelection: activity.original_selection || null,
+            startMinutes: activity.start_minutes,
+            endMinutes: activity.end_minutes,
+            mode: activity.timeline_mode,
+            selections: activity.selections || null,
+            availableOptions: activity.available_options || null,
+            count: activity.selections ? activity.selections.length : 1,
+            id: activity.activity_id_backend,
+            code: activity.activity_code,
         });
 
-        backendData.activities = transformedActivities;
+        const backendJson = backendData;
+
+        // Apply mapping to both activities arrays separately
+        // Keep them separate as they are different things
+        backendData.activities = backendJson.activities
+            ? backendJson.activities.map(mapActivityItem)
+            : [];
+
+        backendData.template_activities = backendJson.template_activities
+            ? backendJson.template_activities.map(mapActivityItem)
+            : [];
+
     } catch (error) {
         console.error("Error transforming backend response, returning empty array. Error details:", error);
         return [];
     }
 
-
     console.log("Returning transformed activities: ", backendData.activities);
+    console.log("Transformed template activities: ", backendData.template_activities);
     return backendData;
 }
+
+
+function showTemplateBanner(templateSourceDay) {
+    // Check if banner already exists
+    const existingBanner = document.getElementById('templateBanner');
+    if (existingBanner) {
+        existingBanner.remove();
+    }
+
+    // Create banner element
+    const banner = document.createElement('div');
+    banner.id = 'templateBanner';
+    banner.className = 'template-banner';
+    banner.style.cssText = `
+        background-color: #4CAF50; /* Green for positive/helpful message */
+        color: white;
+        padding: 12px 20px;
+        position: relative;
+        z-index: 999;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 15px;
+        line-height: 1.4;
+    `;
+
+    const content = document.createElement('div');
+    content.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+    `;
+
+    const text = document.createElement('span');
+    text.innerHTML = `We loaded your activities from <strong>${templateSourceDay}</strong> as a starting point. ` +
+                     `Click <strong>'Empty row'</strong> to start fresh or edit the activities below.`;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.title = 'Close';
+    closeBtn.style.cssText = `
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+        flex-shrink: 0;
+        margin-left: 15px;
+    `;
+
+    closeBtn.addEventListener('mouseenter', () => {
+        closeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+    });
+    closeBtn.addEventListener('mouseleave', () => {
+        closeBtn.style.backgroundColor = 'transparent';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        banner.style.display = 'none';
+    });
+
+    content.appendChild(text);
+    content.appendChild(closeBtn);
+    banner.appendChild(content);
+
+    // Insert after any existing instruction banner, or at top of body
+    const instructionBanner = document.getElementById('instructionBanner');
+    if (instructionBanner && instructionBanner.parentNode) {
+        instructionBanner.parentNode.insertBefore(banner, instructionBanner.nextSibling);
+    } else {
+        document.body.insertBefore(banner, document.body.firstChild);
+    }
+
+    // Auto-close after 15 seconds
+    setTimeout(() => {
+        if (banner.parentNode) {
+            banner.style.display = 'none';
+        }
+    }, 15000);
+}
+
+
 
 async function init() {
     console.log('==================== Initializing application... ====================');
@@ -3074,7 +3119,7 @@ async function init() {
                     // Load the data into the timeline
                     if (transformedData && transformedData.activities) {
                         loadTimelineFromJSON(transformedData.activities);
-                        console.log(`Loaded ${transformedData.activities.length} existing activities`);
+                        console.log(`Loaded ${transformedData.activities.length} existing activities from backend into timeline`);
 
                         // Store metadata about the loaded data
                         window.timelineManager.loadedExistingData = {
