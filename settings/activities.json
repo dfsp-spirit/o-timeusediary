@@ -611,11 +611,11 @@
             "name": "Social, Leisure & Hobbies",
             "activities": [
               {
-                "name": "Socialising at Home",
+                "name": "Socialising",
                 "examples": "Meeting family, friends, phone call",
                 "code": 2140,
-                "label": "socialising at home with family, friends, phone call",
-                "short": "socialise home",
+                "label": "socialising with family, friends, phone call",
+                "short": "socialise",
                 "vshort": "soc",
                 "color": "#DDA0DD",
                 "childItems": []
@@ -630,14 +630,6 @@
                 "childItems": []
               },
               {
-                "name": "Playing instrument / Creating music",
-                "code": 2142,
-                "label": "playing instrument or creating music",
-                "short": "play music",
-                "vshort": "music",
-                "color": "#EE82EE"
-              },
-              {
                 "name": "Religious / Spiritual Practice, Meditation",
                 "code": 2143,
                 "label": "religious or spiritual practice, meditation",
@@ -646,26 +638,7 @@
                 "color": "#D8BFD8"
               },
               {
-                "name": "Sports / Exercise at Home (please specify)",
-                "code": 2144,
-                "label": "playing sports, exercise",
-                "short": "exercise",
-                "vshort": "ex",
-                "color": "#BA55D3",
-                "childItems": [],
-                "is_custom_input": true
-              },
-              {
-                "name": "Cooking",
-                "code": 2146,
-                "label": "cooking",
-                "short": "cooking",
-                "vshort": "cook",
-                "color": "#8A2BE2",
-                "childItems": []
-              },
-              {
-                "name": "Other home activities (please specify)",
+                "name": "Other activities (please specify)",
                 "code": 2147,
                 "label": "other",
                 "short": "other",
