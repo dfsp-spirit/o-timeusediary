@@ -493,7 +493,7 @@ export function createTimelineJSON(stringify = false) {
                 //start_time: activity.startTime,
                 //end_time: activity.endTime,
                 //block_length: activity.blockLength,
-                //color: activity.color,
+                color: activity.color,
 
                 // Enhanced context for recreation
                 parent_activity_name: activity.parentName || null,
