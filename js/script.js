@@ -3163,12 +3163,51 @@ async function init() {
 
         // LOAD PRELOAD DATA HERE - after first timeline is created but before UI setup
         const urlParams = new URLSearchParams(window.location.search);
-        const shouldPreloadFromLocalFile = urlParams.get('preload') === '1';
 
         // Get participant and study info from URL parameters
         const participantId = urlParams.get('pid');
         const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
         const dayIndex = parseInt(urlParams.get('day_index')) || 0;
+
+        // FETCH STUDY CONFIG from backend, to get number of study days
+        let studyDaysCount = 1; // default. could get this from config file later.
+        try {
+            const studyConfigUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/study-config${participantId ? `?participant_id=${participantId}` : ''}`;
+            console.log(`Fetching study config from: ${studyConfigUrl}`);
+
+            const response = await fetch(studyConfigUrl, {
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const studyConfig = await response.json();
+                studyDaysCount = studyConfig.study_days_count || 1;
+                console.log(`Study has ${studyDaysCount} days`);
+
+                // Store in timelineManager for later use
+                window.timelineManager.studyConfig = studyConfig;
+                window.timelineManager.studyDaysCount = studyDaysCount;
+
+                // Also store day labels for reference
+                window.timelineManager.dayLabels = studyConfig.day_labels || [];
+
+                // Update current day label in URL if needed
+                if (dayIndex >= studyDaysCount) {
+                    console.warn(`Day index ${dayIndex} is out of range. Adjusting to last day (${studyDaysCount - 1})`);
+                    urlParams.set('day_label_index', studyDaysCount - 1);
+                    window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+                }
+            } else {
+                console.warn(`Could not fetch study config, using default (1 day). Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.warn('Error fetching study config, using default (1 day):', error.message);
+        }
+
+        // Store study days count globally
+        window.timelineManager.studyDaysCount = studyDaysCount;
 
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
@@ -3203,61 +3242,62 @@ async function init() {
                     const transformedData = transformBackendActivitiesResponse(backendData);
 
                     // Load the data into the timeline
-                    // In init(), after loading data:
-if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
-    // Find all unique timeline keys in loaded data
-    const loadedTimelineKeys = [...new Set(transformedData.activities.map(a => a.timelineKey))];
+                    if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
+                        // Find all unique timeline keys in loaded data
+                        const loadedTimelineKeys = [...new Set(transformedData.activities.map(a => a.timelineKey))];
 
-    // Create timelines for each loaded timeline
-    for (let i = 0; i < loadedTimelineKeys.length; i++) {
-        const timelineKey = loadedTimelineKeys[i];
+                        // Create timelines for each loaded timeline
+                        for (let i = 0; i < loadedTimelineKeys.length; i++) {
+                            const timelineKey = loadedTimelineKeys[i];
 
-        // First timeline is already created
-        if (i === 0) {
-            // Load activities into existing timeline
-            const firstTimelineActivities = transformedData.activities.filter(
-                a => a.timelineKey === timelineKey
-            );
-            window.timelineManager.activities[timelineKey] = firstTimelineActivities;
+                            // First timeline is already created
+                            if (i === 0) {
+                                // Load activities into existing timeline
+                                const firstTimelineActivities = transformedData.activities.filter(
+                                    a => a.timelineKey === timelineKey
+                                );
+                                window.timelineManager.activities[timelineKey] = firstTimelineActivities;
 
-            firstTimelineActivities.forEach(activityData => {
-                recreateActivityBlockFromTemplate(activityData);
-            });
-        } else {
-            // For additional timelines, force create them
-            console.log(`Forcing creation of timeline ${timelineKey} (${i + 1}/${loadedTimelineKeys.length})`);
+                                firstTimelineActivities.forEach(activityData => {
+                                    recreateActivityBlockFromTemplate(activityData);
+                                });
+                            } else {
+                                // For additional timelines, force create them
+                                console.log(`Forcing creation of timeline ${timelineKey} (${i + 1}/${loadedTimelineKeys.length})`);
 
-            // Temporarily set current index to create this timeline
-            const originalIndex = window.timelineManager.currentIndex;
-            const targetIndex = window.timelineManager.keys.indexOf(timelineKey);
+                                // Temporarily set current index to create this timeline
+                                const originalIndex = window.timelineManager.currentIndex;
+                                const targetIndex = window.timelineManager.keys.indexOf(timelineKey);
 
-            if (targetIndex > originalIndex) {
-                // Create all timelines up to target
-                while (window.timelineManager.currentIndex < targetIndex) {
-                    await addNextTimeline();
-                }
+                                if (targetIndex > originalIndex) {
+                                    // Create all timelines up to target
+                                    while (window.timelineManager.currentIndex < targetIndex) {
+                                        await addNextTimeline();
+                                    }
 
-                // Load activities for this timeline
-                const timelineActivities = transformedData.activities.filter(
-                    a => a.timelineKey === timelineKey
-                );
+                                    // Load activities for this timeline
+                                    const timelineActivities = transformedData.activities.filter(
+                                        a => a.timelineKey === timelineKey
+                                    );
 
-                if (timelineActivities.length > 0) {
-                    window.timelineManager.activities[timelineKey] = timelineActivities;
+                                    if (timelineActivities.length > 0) {
+                                        window.timelineManager.activities[timelineKey] = timelineActivities;
 
-                    timelineActivities.forEach(activityData => {
-                        recreateActivityBlockFromTemplate(activityData);
-                    });
-                }
+                                        timelineActivities.forEach(activityData => {
+                                            recreateActivityBlockFromTemplate(activityData);
+                                        });
+                                    }
 
-                // Switch back to first timeline
-                while (window.timelineManager.currentIndex > 0) {
-                    await goToPreviousTimeline();
-                }
-            }
-        }
-    }
-}               } else if (response.status === 404) {
+                                    // Switch back to first timeline
+                                    while (window.timelineManager.currentIndex > 0) {
+                                        await goToPreviousTimeline();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                } else if (response.status === 404) {
                     // No existing data found - this is normal for first-time participants
                     console.log(`No existing data found for participant ${participantId}, study ${studyName}, day index ${dayIndex}. Starting fresh.`);
                 } else {
