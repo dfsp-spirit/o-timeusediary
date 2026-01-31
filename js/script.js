@@ -3203,70 +3203,61 @@ async function init() {
                     const transformedData = transformBackendActivitiesResponse(backendData);
 
                     // Load the data into the timeline
-                    if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
+                    // In init(), after loading data:
+if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
+    // Find all unique timeline keys in loaded data
+    const loadedTimelineKeys = [...new Set(transformedData.activities.map(a => a.timelineKey))];
 
-                        // Add timelines as needed based on loaded data
-                        const numRequiredTimelines = backendData.total_timelines || 1;
-                        let numTimelinesAdded = 0;
-                        while (window.timelineManager.keys.length < numRequiredTimelines) {
-                            console.log('Adding additional timeline to match required timelines from backend existing data');
-                            await addNextTimeline();
-                            numTimelinesAdded++;
-                        }
-                        console.log(`Added ${numTimelinesAdded} additional timelines to match backend existing data (requires ${numRequiredTimelines} timelines)`);
-                        console.log('Timeline names:', window.timelineManager.keys);
+    // Create timelines for each loaded timeline
+    for (let i = 0; i < loadedTimelineKeys.length; i++) {
+        const timelineKey = loadedTimelineKeys[i];
 
-                        loadTimelineFromJSON(transformedData.activities);
-                        console.log(`Loaded ${transformedData.activities.length} existing activities (${backendData.total_timelines} timelines) from backend into timeline`);
+        // First timeline is already created
+        if (i === 0) {
+            // Load activities into existing timeline
+            const firstTimelineActivities = transformedData.activities.filter(
+                a => a.timelineKey === timelineKey
+            );
+            window.timelineManager.activities[timelineKey] = firstTimelineActivities;
 
-                        // Store metadata about the loaded data
-                        window.timelineManager.loadedExistingData = {
-                            participantId: participantId,
-                            studyName: studyName,
-                            studyDaysCount: backendData.study_days_count,
-                            dayIndex: dayIndex,
-                            dayLabel: transformedData.day_label,
-                            totalActivities: transformedData.activities.length,
-                            totalTimelines: backendData.total_timelines,
-                            isFromTemplate: false
-                        };
+            firstTimelineActivities.forEach(activityData => {
+                recreateActivityBlockFromTemplate(activityData);
+            });
+        } else {
+            // For additional timelines, force create them
+            console.log(`Forcing creation of timeline ${timelineKey} (${i + 1}/${loadedTimelineKeys.length})`);
 
+            // Temporarily set current index to create this timeline
+            const originalIndex = window.timelineManager.currentIndex;
+            const targetIndex = window.timelineManager.keys.indexOf(timelineKey);
 
-                    } else if (transformedData && transformedData.template_activities && transformedData.template_activities.length > 0) {
+            if (targetIndex > originalIndex) {
+                // Create all timelines up to target
+                while (window.timelineManager.currentIndex < targetIndex) {
+                    await addNextTimeline();
+                }
 
-                        // Add timelines as needed based on loaded data
-                        const numRequiredTimelines = backendData.total_timelines || 1;
-                        let numTimelinesAdded = 0;
-                        while (window.timelineManager.keys.length < numRequiredTimelines) {
-                            console.log('Adding additional timeline to match required timelines from backend template data');
-                            await addNextTimeline();
-                            numTimelinesAdded++;
-                        }
-                        console.log(`Added ${numTimelinesAdded} additional timelines to match backend template data (requires ${numRequiredTimelines} timelines)`);
-                        console.log('Timeline names:', window.timelineManager.keys);
+                // Load activities for this timeline
+                const timelineActivities = transformedData.activities.filter(
+                    a => a.timelineKey === timelineKey
+                );
 
-                        loadTimelineFromJSON(transformedData.template_activities);
-                        console.log(`Loaded ${transformedData.template_activities.length} template activities (${backendData.total_timelines} timelines) from backend into timeline`);
+                if (timelineActivities.length > 0) {
+                    window.timelineManager.activities[timelineKey] = timelineActivities;
 
-                        // Store metadata about the loaded template data
-                        window.timelineManager.loadedExistingData = {
-                            participantId: participantId,
-                            studyName: studyName,
-                            studyDaysCount: backendData.study_days_count,
-                            dayIndex: dayIndex,
-                            dayLabel: transformedData.day_label,
-                            totalActivities: transformedData.template_activities.length,
-                            totalTimelines: backendData.total_timelines,
-                            isFromTemplate: true
-                        };
+                    timelineActivities.forEach(activityData => {
+                        recreateActivityBlockFromTemplate(activityData);
+                    });
+                }
 
-                        // Show banner indicating template data was loaded
-                        showTemplateBanner(transformedData.template_source_day || 'a previous day');
-
-                    } else {
-                        console.log("The transformedData did not contain activities or template_activities to load, timeline will be empty.");
-                    }
-                } else if (response.status === 404) {
+                // Switch back to first timeline
+                while (window.timelineManager.currentIndex > 0) {
+                    await goToPreviousTimeline();
+                }
+            }
+        }
+    }
+}               } else if (response.status === 404) {
                     // No existing data found - this is normal for first-time participants
                     console.log(`No existing data found for participant ${participantId}, study ${studyName}, day index ${dayIndex}. Starting fresh.`);
                 } else {
