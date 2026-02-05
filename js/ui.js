@@ -265,11 +265,11 @@ function createModal() {
     confirmationModal.innerHTML = `
         <div class="modal">
             <div class="modal-content">
-                <h3 data-i18n="modals.confirmSubmit.title">Are you sure?</h3>
-                <p data-i18n="modals.confirmSubmit.message">You will not be able to change your responses.</p>
+                <h3 data-i18n="modals.confirmSubmit.title">Submit this day?</h3>
+                <p data-i18n="modals.confirmSubmit.message">You will not be able to change your responses for this day.</p>
                 <div class="button-container">
                     <button id="confirmCancel" class="btn btn-secondary" data-i18n="buttons.cancel">Cancel</button>
-                    <button id="confirmOk" class="btn save-btn" data-i18n="buttons.ok">OK</button>
+                    <button id="confirmOk" class="btn save-btn" data-i18n="buttons.ok">Submit Day</button>
                 </div>
             </div>
         </div>
@@ -469,8 +469,8 @@ function updateButtonStates() {
     console.log('Is last timeline:', isLastTimeline);
 
     // Get text values for buttons
-    const nextText = window.i18n ? window.i18n.t('buttons.next') : 'Next';
-    const submitText = window.i18n ? window.i18n.t('buttons.submit') : 'Submit';
+    const nextText = 'Next Timeline'; //window.i18n ? window.i18n.t('buttons.next') : 'Next Timeline';
+    const submitText = 'Submit Day'; //window.i18n ? window.i18n.t('buttons.submit') : 'Submit Day';
 
     console.log('Button texts - Next:', nextText, 'Submit:', submitText);
 
@@ -499,6 +499,7 @@ function updateButtonStates() {
         navSubmitBtn.disabled = !meetsMinCoverage;
 
         // Find the span element inside navSubmitBtn
+        const navSubmitIcon = navSubmitBtn.querySelector('i');
         const navSubmitSpan = navSubmitBtn.querySelector('span');
 
         if (isLastTimeline) {
@@ -506,12 +507,18 @@ function updateButtonStates() {
             if (navSubmitSpan) {
                 navSubmitSpan.textContent = submitText;
             }
+            if (navSubmitIcon) {
+                navSubmitIcon.className = 'fas fa-check'; // Check icon for submit
+            }
             navSubmitBtn.classList.add('submit-mode');
             console.log('Setting Nav button to SUBMIT mode');
         } else {
             // For other timelines, show Next with blue color
             if (navSubmitSpan) {
                 navSubmitSpan.textContent = nextText;
+            }
+            if (navSubmitIcon) {
+                navSubmitIcon.className = 'fas fa-arrow-right'; // Arrow icon for next
             }
             navSubmitBtn.classList.remove('submit-mode');
             console.log('Setting Nav button to NEXT mode');

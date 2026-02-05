@@ -2977,6 +2977,11 @@ function showTemplateBanner(templateSourceDay) {
     }, 15000);
 }
 
+function getCurrentDayIndex() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return parseInt(urlParams.get('day_label_index')) || 0;
+}
+
 
 
 async function init() {
@@ -3126,13 +3131,15 @@ async function init() {
         // Get participant and study info from URL parameters
         const participantId = urlParams.get('pid');
         const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
-        const dayIndex = parseInt(urlParams.get('day_index')) || 0;
+        const dayIndex = getCurrentDayIndex();
         const maxDayIndex = window.studyConfigManager.getStudyDaysCount() - 1;
 
         if (dayIndex > maxDayIndex) {
             console.warn(`Day index ${dayIndex} is out of range. Adjusting to last day (${maxDayIndex})`);
             urlParams.set('day_label_index', maxDayIndex);
             window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+        } else {
+            console.log(`Current day index from URL: ${dayIndex}`);
         }
 
         // FETCH STUDY CONFIG from backend, to get number of study days
@@ -3204,13 +3211,32 @@ async function init() {
                     const backendData = await response.json();
                     console.log('Successfully loaded existing activities from backend:', backendData);
 
+                    console.log('Backend activities response:', {
+                        dayIndex: dayIndex,
+                        hasActivities: backendData.activities?.length > 0,
+                        activitiesCount: backendData.activities?.length || 0,
+                        hasTemplate: backendData.has_template,
+                        templateCount: backendData.template_activities?.length || 0,
+                        templateSource: backendData.template_source_day_label
+                    });
+
                     // Transform the backend response to frontend format
                     const transformedData = transformBackendActivitiesResponse(backendData);
+
+                    let loadedTimelineKeys = [];
 
                     // Load the data into the timeline
                     if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
                         // Find all unique timeline keys in loaded data
-                        const loadedTimelineKeys = [...new Set(transformedData.activities.map(a => a.timelineKey))];
+                        loadedTimelineKeys = [...new Set(transformedData.activities.map(a => a.timelineKey))];
+                    } else {
+                        // Use template activities if no existing activities, and template exists
+                        if (transformedData.template_activities && transformedData.template_activities.length > 0) {
+                            console.log('No existing activities found, but template activities are available. Will load template activities.');
+
+                            loadedTimelineKeys = [...new Set(transformedData.template_activities.map(a => a.timelineKey))];
+                        }
+                    }
 
                         // Create timelines for each loaded timeline
                         for (let i = 0; i < loadedTimelineKeys.length; i++) {
@@ -3261,7 +3287,7 @@ async function init() {
                                 }
                             }
                         }
-                    }
+
 
                 } else if (response.status === 404) {
                     // No existing data found - this is normal for first-time participants
