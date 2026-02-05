@@ -1004,8 +1004,23 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
 
         // We only extract some relevant fields to send to backend.
 
+        console.log('=== DEBUG getDayLabel ===');
+        console.log('day_label_index:', day_label_index, 'type:', typeof day_label_index);
+        console.log('studyConfigManager exists:', !!window.studyConfigManager);
+        console.log('getDayLabel function exists:', !!window.studyConfigManager?.getDayLabel);
 
-        const daily_entry_name = TUD_SETTINGS.DAILY_ENTRY_NAMES && TUD_SETTINGS.DAILY_ENTRY_NAMES[day_label_index] ? TUD_SETTINGS.DAILY_ENTRY_NAMES[day_label_index] : `day_${day_label_index + 1}`;
+        const dayLabelTest = window.studyConfigManager?.getDayLabel(day_label_index);
+        console.log('dayLabelTest result:', dayLabelTest, 'type:', typeof dayLabelTest);
+
+        const dayLabel = window.studyConfigManager?.getDayLabel(day_label_index) || `day_${day_label_index + 1}`;
+        console.log('dayLabel final:', dayLabel, 'type:', typeof dayLabel);
+
+        // Also check what's in the study config:
+        const currentStudy = window.studyConfigManager?.getCurrentStudy();
+        console.log('Current study:', currentStudy);
+        console.log('Day labels:', currentStudy?.day_labels);
+
+
 
         const jsonString = JSON.stringify(activitiesDataJSON, null, 2);
 
@@ -1013,7 +1028,7 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
 
         const api_url = TUD_SETTINGS.API_BASE_URL; // includes the "/api" part
 
-        const api_submit_url = `${api_url}/studies/${study_name_short}/participants/${pid}/day_labels/${daily_entry_name}/activities`;
+        const api_submit_url = `${api_url}/studies/${study_name_short}/participants/${pid}/day_labels/${dayLabel}/activities`;
 
         console.log('=== DATA FRAME FOR JSON ===');
         console.log('Full data structure we send to backend at ' + api_submit_url + ':', jsonString);

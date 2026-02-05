@@ -500,66 +500,6 @@ function initPastTimelineClickHandlers() {
 }
 
 
-function initPastTimelineClickHandlers2() {
-
-    console.log(">>>>>>>>>>>>>> Initializing timeline click handlers...");
-
-    const pastTimelinesWrapper = document.querySelector('.past-initialized-timelines-wrapper');
-    if (!pastTimelinesWrapper) return;
-
-    // Use event delegation for better performance
-    pastTimelinesWrapper.addEventListener('click', async (event) => {
-        // Find the clicked timeline container
-        const timelineContainer = event.target.closest('.timeline-container');
-        if (!timelineContainer) return;
-
-        // Only handle past (inactive) timelines
-        if (timelineContainer.getAttribute('data-active') === 'true') return;
-
-        const timelineElement = timelineContainer.querySelector('.timeline');
-        if (!timelineElement) return;
-
-        const timelineKey = timelineElement.id;
-        const targetIndex = window.timelineManager.keys.indexOf(timelineKey);
-
-        console.log('=== CLICK DEBUG ===');
-        console.log('Clicked timeline key:', timelineKey);
-        console.log('Clicked timeline element ID:', timelineElement.id);
-        console.log('All timeline keys:', window.timelineManager.keys);
-        console.log('Target index:', targetIndex);
-        console.log('Current index:', window.timelineManager.currentIndex);
-        console.log('Current timeline key:', getCurrentTimelineKey());
-        console.log('===================');
-
-        if (targetIndex === -1) {
-            console.error('Timeline key not found:', timelineKey);
-            return;
-        }
-
-        // If clicking the immediate previous timeline, use goToPreviousTimeline
-        if (targetIndex === window.timelineManager.currentIndex - 1) {
-            console.log('Navigating to previous timeline:', timelineKey);
-            await goToPreviousTimeline();
-            return;
-        }
-
-        // If clicking an earlier timeline, navigate back step by step
-        if (targetIndex < window.timelineManager.currentIndex) {
-
-            const stepsBack = window.timelineManager.currentIndex - targetIndex;
-            console.log(`Navigating back ${stepsBack} timelines to:`, timelineKey);
-            for (let i = 0; i < stepsBack; i++) {
-                await goToPreviousTimeline();
-            }
-            return;
-        }
-
-        // If clicking a future timeline (shouldn't happen since they're in past wrapper)
-        console.warn('Clicked timeline is ahead of current index');
-    });
-}
-
-
 
 function recreateActivityBlockFromTemplate(activityData) {
     console.log('=== RECREATE ACTIVITY BLOCK START ===');
@@ -1118,7 +1058,7 @@ async function fetchActivities(key) {
             }
         }
 
-        // Timeline management structure should already be initialized in init()
+        // Timeline management structure should already be initialized in init function
         // This function only loads categories for the specific timeline
 
         const timeline = data.timeline[key];
@@ -3040,8 +2980,20 @@ function showTemplateBanner(templateSourceDay) {
 
 
 async function init() {
-    console.log('==================== Initializing application... ====================');
+    console.log('==================== Initializing TUD frontend application... ====================');
     try {
+        await window.studyConfigManager?.initializeStudyConfig();
+
+        const currentStudy = window.studyConfigManager?.getCurrentStudy();
+        if (!currentStudy) {
+            throw new Error('Failed to load study configuration');
+        }
+
+        console.log(`Study: ${currentStudy.name} (${currentStudy.name_short})`);
+        console.log(`Days: ${window.studyConfigManager.getStudyDaysCount()}`);
+        console.log(`Source: ${currentStudy.source || 'file'}`);
+
+
         // Reinitialize timelineManager with an empty study object
         window.timelineManager = {
             metadata: {},
@@ -3053,6 +3005,13 @@ async function init() {
             study: {},
             general: {}
         };
+
+
+        // Store study info in timelineManager for easy access
+        window.timelineManager.studyConfig = currentStudy;
+        window.timelineManager.studyDaysCount = window.studyConfigManager.getStudyDaysCount();
+        window.timelineManager.dayLabels = currentStudy.day_labels;
+
 
         // Now sync URL parameters so they are stored in timelineManager.study
         syncURLParamsToStudy();
@@ -3168,9 +3127,16 @@ async function init() {
         const participantId = urlParams.get('pid');
         const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
         const dayIndex = parseInt(urlParams.get('day_index')) || 0;
+        const maxDayIndex = window.studyConfigManager.getStudyDaysCount() - 1;
+
+        if (dayIndex > maxDayIndex) {
+            console.warn(`Day index ${dayIndex} is out of range. Adjusting to last day (${maxDayIndex})`);
+            urlParams.set('day_label_index', maxDayIndex);
+            window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+        }
 
         // FETCH STUDY CONFIG from backend, to get number of study days
-        let studyDaysCount = 1; // default. could get this from config file later.
+        let studyDaysCount = window.timelineManager.studyDaysCount; // default
         try {
             const studyConfigUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/study-config${participantId ? `?participant_id=${participantId}` : ''}`;
             console.log(`Fetching study config from: ${studyConfigUrl}`);
