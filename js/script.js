@@ -3228,22 +3228,30 @@ async function init() {
                     console.log('Transformed backend activities data:', transformedData);
 
                     let loadedTimelineKeys = [];
+                    let activitiesToLoad = null;
+                    let isUsingTemplate = false;
 
                     // Load the data into the timeline
                     if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
                         // Find all unique timeline keys in loaded data
                         console.log('Existing activities found in backend data, will load these. Extracting timeline keys from activities.');
-                        loadedTimelineKeys = [...new Set(transformedData.activities.map(a => a.timelineKey))];
+                        activitiesToLoad = transformedData.activities;
+                        isUsingTemplate = false;
+
                     } else {
                         // Use template activities if no existing activities, and template exists
                         if (transformedData.template_activities && transformedData.template_activities.length > 0) {
                             console.log('No existing activities found, but template activities are available. Will load template activities.');
+                            activitiesToLoad = transformedData.template_activities;
+                            isUsingTemplate = true;
 
-                            loadedTimelineKeys = [...new Set(transformedData.template_activities.map(a => a.timelineKey))];
                         } else {
                             console.log('No existing activities or template activities found in backend data, starting with empty timeline');
                         }
                     }
+
+                    if (activitiesToLoad && activitiesToLoad.length > 0) {
+                        loadedTimelineKeys = [...new Set(activitiesToLoad.map(a => a.timelineKey))];
 
                         // Create timelines for each loaded timeline
                         for (let i = 0; i < loadedTimelineKeys.length; i++) {
@@ -3252,7 +3260,7 @@ async function init() {
                             // First timeline is already created
                             if (i === 0) {
                                 // Load activities into existing timeline
-                                const firstTimelineActivities = transformedData.activities.filter(
+                                const firstTimelineActivities = activitiesToLoad.filter(
                                     a => a.timelineKey === timelineKey
                                 );
                                 window.timelineManager.activities[timelineKey] = firstTimelineActivities;
@@ -3275,7 +3283,7 @@ async function init() {
                                     }
 
                                     // Load activities for this timeline
-                                    const timelineActivities = transformedData.activities.filter(
+                                    const timelineActivities = activitiesToLoad.filter(
                                         a => a.timelineKey === timelineKey
                                     );
 
@@ -3294,6 +3302,7 @@ async function init() {
                                 }
                             }
                         }
+                    }
 
 
                 } else if (response.status === 404) {
