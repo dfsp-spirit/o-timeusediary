@@ -1058,7 +1058,7 @@ async function fetchActivities(key) {
             }
         }
 
-        // Timeline management structure should already be initialized in init()
+        // Timeline management structure should already be initialized in init function
         // This function only loads categories for the specific timeline
 
         const timeline = data.timeline[key];
@@ -2980,8 +2980,20 @@ function showTemplateBanner(templateSourceDay) {
 
 
 async function init() {
-    console.log('==================== Initializing application... ====================');
+    console.log('==================== Initializing TUD frontend application... ====================');
     try {
+        await window.studyConfigManager?.initializeStudyConfig();
+
+        const currentStudy = window.studyConfigManager?.getCurrentStudy();
+        if (!currentStudy) {
+            throw new Error('Failed to load study configuration');
+        }
+
+        console.log(`Study: ${currentStudy.name} (${currentStudy.name_short})`);
+        console.log(`Days: ${window.studyConfigManager.getStudyDaysCount()}`);
+        console.log(`Source: ${currentStudy.source || 'file'}`);
+
+
         // Reinitialize timelineManager with an empty study object
         window.timelineManager = {
             metadata: {},
@@ -2993,6 +3005,13 @@ async function init() {
             study: {},
             general: {}
         };
+
+
+        // Store study info in timelineManager for easy access
+        window.timelineManager.studyConfig = currentStudy;
+        window.timelineManager.studyDaysCount = window.studyConfigManager.getStudyDaysCount();
+        window.timelineManager.dayLabels = currentStudy.day_labels;
+
 
         // Now sync URL parameters so they are stored in timelineManager.study
         syncURLParamsToStudy();
@@ -3108,9 +3127,16 @@ async function init() {
         const participantId = urlParams.get('pid');
         const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
         const dayIndex = parseInt(urlParams.get('day_index')) || 0;
+        const maxDayIndex = window.studyConfigManager.getStudyDaysCount() - 1;
+
+        if (dayIndex > maxDayIndex) {
+            console.warn(`Day index ${dayIndex} is out of range. Adjusting to last day (${maxDayIndex})`);
+            urlParams.set('day_label_index', maxDayIndex);
+            window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+        }
 
         // FETCH STUDY CONFIG from backend, to get number of study days
-        let studyDaysCount = 1; // default. could get this from config file later.
+        let studyDaysCount = window.timelineManager.studyDaysCount; // default
         try {
             const studyConfigUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/study-config${participantId ? `?participant_id=${participantId}` : ''}`;
             console.log(`Fetching study config from: ${studyConfigUrl}`);

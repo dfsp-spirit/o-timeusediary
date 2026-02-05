@@ -397,7 +397,120 @@ function updateFloatingButtonPosition() {
     }
 }
 
+
 function updateButtonStates() {
+    console.log('=== updateButtonStates START ===');
+    console.log('Current index:', window.timelineManager.currentIndex);
+    console.log('Total keys:', window.timelineManager.keys);
+    console.log('Keys length:', window.timelineManager.keys.length);
+
+    const undoButton = document.getElementById('undoBtn');
+    const cleanRowButton = document.getElementById('cleanRowBtn');
+    const nextButton = document.getElementById('nextBtn');
+    const backButton = document.getElementById('backBtn');
+    const navSubmitBtn = document.getElementById('navSubmitBtn');
+
+    const currentData = getCurrentTimelineData();
+    const isEmpty = currentData.length === 0;
+
+    console.log('Current data length:', currentData.length);
+    console.log('Is empty:', isEmpty);
+
+    // Check if there's an active timeline with activities
+    const activeTimeline = window.timelineManager.activeTimeline;
+    const hasActivities = activeTimeline && activeTimeline.querySelector('.activity-block');
+
+    console.log('Has activities DOM:', hasActivities);
+
+    if (undoButton) undoButton.disabled = isEmpty;
+    if (cleanRowButton) cleanRowButton.disabled = !hasActivities;
+
+    // Update Back button state - enable if not on first timeline
+    if (backButton) {
+        backButton.disabled = window.timelineManager.currentIndex <= 0;
+        console.log('Back button disabled:', backButton.disabled);
+    }
+
+    // Get current timeline coverage
+    const currentKey = getCurrentTimelineKey();
+    console.log('Current key:', currentKey);
+
+    const currentTimeline = window.timelineManager.metadata[currentKey];
+    console.log('Current timeline metadata:', currentTimeline);
+
+    const currentCoverage = window.getTimelineCoverage();
+    console.log('Current coverage:', currentCoverage);
+
+    // Get minimum coverage requirement for current timeline
+    const minCoverage = parseInt(currentTimeline?.minCoverage) || 0;
+    const meetsMinCoverage = currentCoverage >= minCoverage;
+
+    console.log('Min coverage:', minCoverage, 'Meets min:', meetsMinCoverage);
+
+    // Check if we're on the last timeline
+    const totalTimelines = window.timelineManager.keys.length;
+    const isLastTimeline = window.timelineManager.currentIndex === totalTimelines - 1;
+
+    console.log('Total timelines:', totalTimelines);
+    console.log('Is last timeline:', isLastTimeline);
+
+    // Get text values for buttons
+    const nextText = window.i18n ? window.i18n.t('buttons.next') : 'Next';
+    const submitText = window.i18n ? window.i18n.t('buttons.submit') : 'Submit';
+
+    console.log('Button texts - Next:', nextText, 'Submit:', submitText);
+
+    if (nextButton) {
+        console.log('Next button before update - disabled:', nextButton.disabled, 'innerHTML:', nextButton.innerHTML);
+
+        nextButton.disabled = !meetsMinCoverage;
+
+        if (isLastTimeline) {
+            // On last timeline, show Submit
+            nextButton.innerHTML = `<i class="fas fa-check"></i> ${submitText}`;
+            console.log('Setting Next button to SUBMIT mode');
+        } else {
+            // For other timelines, show Next
+            nextButton.innerHTML = `${nextText} <i class="fas fa-arrow-right"></i>`;
+            console.log('Setting Next button to NEXT mode');
+        }
+
+        console.log('Next button after update - disabled:', nextButton.disabled, 'innerHTML:', nextButton.innerHTML);
+    }
+
+    // Update navSubmitBtn to mirror nextButton exactly
+    if (navSubmitBtn) {
+        console.log('Nav button before update - disabled:', navSubmitBtn.disabled);
+
+        navSubmitBtn.disabled = !meetsMinCoverage;
+
+        // Find the span element inside navSubmitBtn
+        const navSubmitSpan = navSubmitBtn.querySelector('span');
+
+        if (isLastTimeline) {
+            // On last timeline, show Submit with green color
+            if (navSubmitSpan) {
+                navSubmitSpan.textContent = submitText;
+            }
+            navSubmitBtn.classList.add('submit-mode');
+            console.log('Setting Nav button to SUBMIT mode');
+        } else {
+            // For other timelines, show Next with blue color
+            if (navSubmitSpan) {
+                navSubmitSpan.textContent = nextText;
+            }
+            navSubmitBtn.classList.remove('submit-mode');
+            console.log('Setting Nav button to NEXT mode');
+        }
+
+        console.log('Nav button after update - disabled:', navSubmitBtn.disabled);
+    }
+
+    console.log('=== updateButtonStates END ===');
+}
+
+
+function updateButtonStates2() {
     const undoButton = document.getElementById('undoBtn');
     const cleanRowButton = document.getElementById('cleanRowBtn');
     const nextButton = document.getElementById('nextBtn');
