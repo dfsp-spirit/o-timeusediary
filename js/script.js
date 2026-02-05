@@ -500,66 +500,6 @@ function initPastTimelineClickHandlers() {
 }
 
 
-function initPastTimelineClickHandlers2() {
-
-    console.log(">>>>>>>>>>>>>> Initializing timeline click handlers...");
-
-    const pastTimelinesWrapper = document.querySelector('.past-initialized-timelines-wrapper');
-    if (!pastTimelinesWrapper) return;
-
-    // Use event delegation for better performance
-    pastTimelinesWrapper.addEventListener('click', async (event) => {
-        // Find the clicked timeline container
-        const timelineContainer = event.target.closest('.timeline-container');
-        if (!timelineContainer) return;
-
-        // Only handle past (inactive) timelines
-        if (timelineContainer.getAttribute('data-active') === 'true') return;
-
-        const timelineElement = timelineContainer.querySelector('.timeline');
-        if (!timelineElement) return;
-
-        const timelineKey = timelineElement.id;
-        const targetIndex = window.timelineManager.keys.indexOf(timelineKey);
-
-        console.log('=== CLICK DEBUG ===');
-        console.log('Clicked timeline key:', timelineKey);
-        console.log('Clicked timeline element ID:', timelineElement.id);
-        console.log('All timeline keys:', window.timelineManager.keys);
-        console.log('Target index:', targetIndex);
-        console.log('Current index:', window.timelineManager.currentIndex);
-        console.log('Current timeline key:', getCurrentTimelineKey());
-        console.log('===================');
-
-        if (targetIndex === -1) {
-            console.error('Timeline key not found:', timelineKey);
-            return;
-        }
-
-        // If clicking the immediate previous timeline, use goToPreviousTimeline
-        if (targetIndex === window.timelineManager.currentIndex - 1) {
-            console.log('Navigating to previous timeline:', timelineKey);
-            await goToPreviousTimeline();
-            return;
-        }
-
-        // If clicking an earlier timeline, navigate back step by step
-        if (targetIndex < window.timelineManager.currentIndex) {
-
-            const stepsBack = window.timelineManager.currentIndex - targetIndex;
-            console.log(`Navigating back ${stepsBack} timelines to:`, timelineKey);
-            for (let i = 0; i < stepsBack; i++) {
-                await goToPreviousTimeline();
-            }
-            return;
-        }
-
-        // If clicking a future timeline (shouldn't happen since they're in past wrapper)
-        console.warn('Clicked timeline is ahead of current index');
-    });
-}
-
-
 
 function recreateActivityBlockFromTemplate(activityData) {
     console.log('=== RECREATE ACTIVITY BLOCK START ===');
