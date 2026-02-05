@@ -282,7 +282,21 @@ function createModal() {
     confirmationModal.querySelector('#confirmOk').addEventListener('click', () => {
         confirmationModal.style.cssText = 'display: none !important';
         showLoadingModal();
-        sendData();
+
+        // Get current day index
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentDayIndex = parseInt(urlParams.get('day_label_index')) || 0;
+        const totalDays = window.studyConfigManager?.getStudyDaysCount() || 1;
+        const isLastDay = currentDayIndex >= totalDays - 1;
+
+        // Send data with redirect flag
+        sendData({
+            mode: 'json',
+            shouldRedirect: true,
+            isLastDay: isLastDay,
+            currentDayIndex: currentDayIndex
+        });
+
         document.getElementById('nextBtn').disabled = true;
     });
 
@@ -510,78 +524,6 @@ function updateButtonStates() {
 }
 
 
-function updateButtonStates2() {
-    const undoButton = document.getElementById('undoBtn');
-    const cleanRowButton = document.getElementById('cleanRowBtn');
-    const nextButton = document.getElementById('nextBtn');
-    const backButton = document.getElementById('backBtn');
-    const navSubmitBtn = document.getElementById('navSubmitBtn');
-
-    const currentData = getCurrentTimelineData();
-    const isEmpty = currentData.length === 0;
-
-    // Check if there's an active timeline with activities
-    const activeTimeline = window.timelineManager.activeTimeline;
-    const hasActivities = activeTimeline && activeTimeline.querySelector('.activity-block');
-
-    if (undoButton) undoButton.disabled = isEmpty;
-    if (cleanRowButton) cleanRowButton.disabled = !hasActivities;
-
-    // Update Back button state - enable if not on first timeline
-    if (backButton) {
-        backButton.disabled = window.timelineManager.currentIndex <= 0;
-    }
-
-    // Get current timeline coverage
-    const currentKey = getCurrentTimelineKey();
-    const currentTimeline = window.timelineManager.metadata[currentKey];
-    const currentCoverage = window.getTimelineCoverage();
-
-    // Get minimum coverage requirement for current timeline
-    const minCoverage = parseInt(currentTimeline.minCoverage) || 0;
-    const meetsMinCoverage = currentCoverage >= minCoverage;
-
-    // Check if we're on the last timeline
-    const isLastTimeline = window.timelineManager.currentIndex === window.timelineManager.keys.length - 1;
-
-    // Get text values for buttons
-    const nextText = window.i18n ? window.i18n.t('buttons.next') : 'Next';
-    const submitText = window.i18n ? window.i18n.t('buttons.submit') : 'Submit';
-
-    if (nextButton) {
-        nextButton.disabled = !meetsMinCoverage;
-
-        if (isLastTimeline) {
-            // On last timeline, show Submit
-            nextButton.innerHTML = `<i class="fas fa-check"></i> ${submitText}`;
-        } else {
-            // For other timelines, show Next
-            nextButton.innerHTML = `${nextText} <i class="fas fa-arrow-right"></i>`;
-        }
-    }
-
-    // Update navSubmitBtn to mirror nextButton exactly
-    if (navSubmitBtn) {
-        navSubmitBtn.disabled = !meetsMinCoverage;
-
-        // Find the span element inside navSubmitBtn
-        const navSubmitSpan = navSubmitBtn.querySelector('span');
-
-        if (isLastTimeline) {
-            // On last timeline, show Submit with green color
-            if (navSubmitSpan) {
-                navSubmitSpan.textContent = submitText;
-            }
-            navSubmitBtn.classList.add('submit-mode');
-        } else {
-            // For other timelines, show Next with blue color
-            if (navSubmitSpan) {
-                navSubmitSpan.textContent = nextText;
-            }
-            navSubmitBtn.classList.remove('submit-mode');
-        }
-    }
-}
 
 // Shared debounce variables for both Next button and navigation submit button
 let nextButtonLastClick = 0;
