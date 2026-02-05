@@ -23,11 +23,11 @@
     "customActivityHelp": "Activity not listed? Add a custom activity"
   },
   "buttons": {
-    "submit": "Submit",
+    "submit": "Submit Day",
     "start": "Start",
     "undo": "Undo",
     "cleanRow": "Clean Row",
-    "next": "Next",
+    "next": "Next Timeline",
     "back": "Back",
     "backToInstructions": "Back to Instructions",
     "ok": "OK",
@@ -52,8 +52,8 @@
       "titleFor": "Select an option for \"{activityName}\""
     },
     "confirmSubmit": {
-      "title": "Are you sure?",
-      "message": "You will not be able to change your responses."
+      "title": "Submit this day?",
+      "message": "You will not be able to change your responses for this day."
     },
     "loading": {
       "title": "Submitting your diary...",
