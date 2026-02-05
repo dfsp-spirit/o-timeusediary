@@ -3220,14 +3220,19 @@ async function init() {
                         templateSource: backendData.template_source_day_label
                     });
 
+                    console.log('Raw backend response:', backendData);
+
                     // Transform the backend response to frontend format
                     const transformedData = transformBackendActivitiesResponse(backendData);
+
+                    console.log('Transformed backend activities data:', transformedData);
 
                     let loadedTimelineKeys = [];
 
                     // Load the data into the timeline
                     if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
                         // Find all unique timeline keys in loaded data
+                        console.log('Existing activities found in backend data, will load these. Extracting timeline keys from activities.');
                         loadedTimelineKeys = [...new Set(transformedData.activities.map(a => a.timelineKey))];
                     } else {
                         // Use template activities if no existing activities, and template exists
@@ -3235,6 +3240,8 @@ async function init() {
                             console.log('No existing activities found, but template activities are available. Will load template activities.');
 
                             loadedTimelineKeys = [...new Set(transformedData.template_activities.map(a => a.timelineKey))];
+                        } else {
+                            console.log('No existing activities or template activities found in backend data, starting with empty timeline');
                         }
                     }
 
