@@ -964,7 +964,7 @@ function downloadCSV(csvString, filename) {
  *   or { mode: 'csv' } to trigger a CSV file download.
  *   During development, the default is 'datapipe' mode.
  */
-export async function sendData(options = { mode: 'json' }) {  // TODO: change default back to 'datapipe'. options: 'datapipe', 'csv', 'json'
+export async function sendData(options = { mode: 'json', shouldRedirect: false, isLastDay: false, currentDayIndex: 0 }) {  // TODO: change default back to 'datapipe'. options: 'datapipe', 'csv', 'json'
     // Sync URL parameters before sending data, so that URL params are included in study data
     syncURLParamsToStudy();
 
@@ -1053,10 +1053,16 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
 
             const responseData = await response.json();
             console.log('Data sent to backend API successfully:', responseData);
-        } catch (error) {
-            console.log('Error sending data to backend API, did not receive any response:', String(error));
-            console.log('Is the backend running and accessible at', api_submit_url, '?');
-        }
+
+            // Handle redirect if needed
+            if (options.shouldRedirect) {
+                console.log('Handling day navigation after successful data submission. isLastDay:', options.isLastDay, 'currentDayIndex:', options.currentDayIndex);
+                await handleDayNavigation(options.isLastDay, options.currentDayIndex);
+            }
+            } catch (error) {
+                console.log('Error sending data to backend API, did not receive any response:', String(error));
+                console.log('Is the backend running and accessible at', api_submit_url, '?');
+            }
 
         hideLoadingModal();
 
@@ -1064,6 +1070,40 @@ export async function sendData(options = { mode: 'json' }) {  // TODO: change de
         throw new Error(`Unsupported send mode: ${options.mode}`);
     }
 }
+
+// New function to handle day navigation
+async function handleDayNavigation(isLastDay, currentDayIndex) {
+    console.log('handleDayNavigation:', { isLastDay, currentDayIndex });
+
+    if (isLastDay) {
+        // Redirect to thank you page
+        const redirectUrl = window.timelineManager?.general?.primary_redirect_url || 'thank-you.html';
+        console.log('Last day completed, redirecting to:', redirectUrl);
+
+        // Preserve URL parameters if needed
+        const currentParams = new URLSearchParams(window.location.search);
+        const separator = redirectUrl.includes('?') ? '&' : '?';
+        const finalUrl = redirectUrl + (currentParams.toString() ? separator + currentParams.toString() : '');
+
+        window.location.href = finalUrl;
+    } else {
+        // Go to next day
+        const nextDayIndex = currentDayIndex + 1;
+        console.log('Moving to next day with index:', nextDayIndex);
+
+        // Update URL with next day index
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set('day_label_index', nextDayIndex);
+
+        // Option 1: Reload same page with new day index
+        window.location.search = currentParams.toString();
+
+        // Option 2: If you want to clear timeline data for new day:
+        // window.location.href = window.location.pathname + '?' + currentParams.toString();
+    }
+}
+
+
 
 export function checkAndRequestPID() {
   const urlParams = new URLSearchParams(window.location.search);
