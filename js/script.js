@@ -113,12 +113,14 @@ function initInstructionBanner() {
 }
 
 
-
 // Init keyboard shortcuts for deleting activity blocks.
 function initKeyboardShortcuts() {
     document.addEventListener('keydown', (event) => {
-        // Only handle 'd' key (case insensitive)
-        if (event.key.toLowerCase() !== 'd') return;
+        // Handle both 'd' key (case insensitive) and 'Delete' key
+        const isDKey = event.key.toLowerCase() === 'd';
+        const isDeleteKey = event.key === 'Delete' || event.key === 'Del';
+
+        if (!isDKey && !isDeleteKey) return;
 
         // Don't trigger if user is typing in an input field
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
@@ -129,10 +131,16 @@ function initKeyboardShortcuts() {
         const hoveredActivity = document.querySelector('.activity-block:hover');
         if (!hoveredActivity) return;
 
+        // Prevent browser default behavior for Delete key (like navigating back in some browsers)
+        if (isDeleteKey) {
+            event.preventDefault();
+        }
+
         // Delete the activity immediately
         deleteActivityBlock(hoveredActivity);
     });
 }
+
 
 // Delete activity block function, removes from DOM and timeline manager data.
 // Required for editing activities.
