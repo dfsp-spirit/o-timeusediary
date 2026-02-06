@@ -3404,6 +3404,7 @@ async function init() {
         // Initialize debug overlay
         initDebugOverlay();
 
+
         if (DEBUG_MODE) {
             console.log('Initialized timeline structure:', window.timelineManager);
         }

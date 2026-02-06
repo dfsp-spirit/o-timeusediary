@@ -412,11 +412,136 @@ function updateFloatingButtonPosition() {
 }
 
 
+// Add this function to update the day display
+export function updateCurrentDayDisplay() {
+    console.log('Updating current day display...');
+    // Get current day index from URL or default
+    const urlParams = new URLSearchParams(window.location.search);
+    const dayIndex = parseInt(urlParams.get('day_label_index')) || 0;
+
+    // Get day labels from study config or timelineManager
+    const dayLabels = window.timelineManager?.dayLabels ||
+                     window.studyConfigManager?.getDayLabels() ||
+                     [];
+
+    // Get study days count
+    const studyDaysCount = window.timelineManager?.studyDaysCount ||
+                          window.studyConfigManager?.getStudyDaysCount() ||
+                          1;
+
+    // Determine day name
+    let dayName = "Day";
+    if (dayLabels.length > dayIndex) {
+        dayName = dayLabels[dayIndex].name || `Day ${dayIndex + 1}`;
+    } else {
+        dayName = `Day ${dayIndex + 1}`;
+    }
+
+    console.log('############################ Current day index:', dayIndex, " Current Day Name:", dayName, 'Total study days:', studyDaysCount);
+
+    // Create or update the display element
+    let dayDisplay = document.getElementById('currentDayDisplay');
+
+    if (!dayDisplay) {
+        //console.log('Creating current day display element...');
+        // Create the element if it doesn't exist
+        dayDisplay = document.createElement('div');
+        dayDisplay.id = 'currentDayDisplay';
+        dayDisplay.className = 'current-day-display';
+
+        // Add CSS styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .current-day-display {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 5px;
+                font-weight: 600;
+                font-size: 14px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                margin: 0 10px;
+                min-width: 120px;
+                text-align: center;
+                border: 2px solid rgba(255,255,255,0.2);
+            }
+
+            .current-day-display .day-name {
+                font-size: 16px;
+                margin-right: 4px;
+                margin-left: 4px;
+            }
+
+            .current-day-display .day-index {
+                font-size: 12px;
+                opacity: 0.9;
+                background: rgba(255,255,255,0.2);
+                padding: 2px 6px;
+                border-radius: 10px;
+                margin-left: 4px;
+            }
+
+            /* For mobile responsiveness */
+            @media (max-width: 768px) {
+                .current-day-display {
+                    padding: 6px 12px;
+                    font-size: 12px;
+                    min-width: 100px;
+                    margin: 5px auto;
+                    order: 2; /* Adjust order if needed */
+                }
+
+                .current-day-display .day-name {
+                    font-size: 14px;
+                }
+
+                .current-day-display .day-index {
+                    font-size: 10px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Find a good place to insert it - perhaps in the timeline-header
+        const timelineHeader = document.querySelector('.timeline-header');
+        if (timelineHeader) {
+            timelineHeader.appendChild(dayDisplay);
+        } else {
+            // Fallback to header or create a container
+            const header = document.querySelector('header');
+            if (header) {
+                header.appendChild(dayDisplay);
+            } else {
+                // Insert at the beginning of body
+                document.body.insertBefore(dayDisplay, document.body.firstChild);
+            }
+        }
+    }
+
+    // Update the content
+    dayDisplay.innerHTML = `
+        <span>Reporting for day: </span>${' '}
+        <span class="day-name"> ${dayName} </span>
+        <span class="day-index">Study Day ${dayIndex + 1} of ${studyDaysCount}</span>
+    `;
+
+    // Add title for hover/tap info
+    dayDisplay.title = `Current: ${dayName} (Day ${dayIndex + 1} of ${studyDaysCount})`;
+
+    return dayDisplay;
+}
+
+
 function updateButtonStates() {
     console.log('=== updateButtonStates START ===');
     console.log('Current index:', window.timelineManager.currentIndex);
     console.log('Total keys:', window.timelineManager.keys);
     console.log('Keys length:', window.timelineManager.keys.length);
+
+    updateCurrentDayDisplay();
 
     const undoButton = document.getElementById('undoBtn');
     const cleanRowButton = document.getElementById('cleanRowBtn');
