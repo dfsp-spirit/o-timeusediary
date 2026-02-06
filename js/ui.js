@@ -535,6 +535,8 @@ export function updateCurrentDayDisplay() {
 }
 
 
+
+
 function updateButtonStates() {
     console.log('=== updateButtonStates START ===');
     console.log('Current index:', window.timelineManager.currentIndex);
@@ -545,9 +547,9 @@ function updateButtonStates() {
 
     const undoButton = document.getElementById('undoBtn');
     const cleanRowButton = document.getElementById('cleanRowBtn');
-    const nextButton = document.getElementById('nextBtn');
+    const nextButtonInTopBar = document.getElementById('nextBtn');
     const backButton = document.getElementById('backBtn');
-    const navSubmitBtn = document.getElementById('navSubmitBtn');
+    const lowerNavSubmitBtn = document.getElementById('navSubmitBtn');
 
     const currentData = getCurrentTimelineData();
     const isEmpty = currentData.length === 0;
@@ -594,38 +596,39 @@ function updateButtonStates() {
     console.log('Is last timeline:', isLastTimeline);
 
     // Get text values for buttons
-    const nextText = 'Next Timeline'; //window.i18n ? window.i18n.t('buttons.next') : 'Next Timeline';
+    const nextTextTopBarButton = 'Next'; //window.i18n ? window.i18n.t('buttons.next') : 'Next Timeline';
+    const nextTextLowerSubmitButton = 'Next Timeline'; //window.i18n ? window.i18n.t('buttons.next') : 'Next Timeline';
     const submitText = 'Submit Day'; //window.i18n ? window.i18n.t('buttons.submit') : 'Submit Day';
 
-    console.log('Button texts - Next:', nextText, 'Submit:', submitText);
+    console.log('Button texts - Next:', nextTextTopBarButton, 'Submit:', submitText);
 
-    if (nextButton) {
-        console.log('Next button before update - disabled:', nextButton.disabled, 'innerHTML:', nextButton.innerHTML);
+    if (nextButtonInTopBar) {
+        console.log('Next button before update - disabled:', nextButtonInTopBar.disabled, 'innerHTML:', nextButtonInTopBar.innerHTML);
 
-        nextButton.disabled = !meetsMinCoverage;
+        nextButtonInTopBar.disabled = !meetsMinCoverage;
 
         if (isLastTimeline) {
             // On last timeline, show Submit
-            nextButton.innerHTML = `<i class="fas fa-check"></i> ${submitText}`;
+            nextButtonInTopBar.innerHTML = `<i class="fas fa-check"></i> ${submitText}`;
             console.log('Setting Next button to SUBMIT mode');
         } else {
             // For other timelines, show Next
-            nextButton.innerHTML = `${nextText} <i class="fas fa-arrow-right"></i>`;
+            nextButtonInTopBar.innerHTML = `${nextTextTopBarButton} <i class="fas fa-arrow-right"></i>`;
             console.log('Setting Next button to NEXT mode');
         }
 
-        console.log('Next button after update - disabled:', nextButton.disabled, 'innerHTML:', nextButton.innerHTML);
+        console.log('Next button after update - disabled:', nextButtonInTopBar.disabled, 'innerHTML:', nextButtonInTopBar.innerHTML);
     }
 
     // Update navSubmitBtn to mirror nextButton exactly
-    if (navSubmitBtn) {
-        console.log('Nav button before update - disabled:', navSubmitBtn.disabled);
+    if (lowerNavSubmitBtn) {
+        console.log('Nav button before update - disabled:', lowerNavSubmitBtn.disabled);
 
-        navSubmitBtn.disabled = !meetsMinCoverage;
+        lowerNavSubmitBtn.disabled = !meetsMinCoverage;
 
         // Find the span element inside navSubmitBtn
-        const navSubmitIcon = navSubmitBtn.querySelector('i');
-        const navSubmitSpan = navSubmitBtn.querySelector('span');
+        const navSubmitIcon = lowerNavSubmitBtn.querySelector('i');
+        const navSubmitSpan = lowerNavSubmitBtn.querySelector('span');
 
         if (isLastTimeline) {
             // On last timeline, show Submit with green color
@@ -635,21 +638,21 @@ function updateButtonStates() {
             if (navSubmitIcon) {
                 navSubmitIcon.className = 'fas fa-check'; // Check icon for submit
             }
-            navSubmitBtn.classList.add('submit-mode');
-            console.log('Setting Nav button to SUBMIT mode');
+            lowerNavSubmitBtn.classList.add('submit-mode');
+            console.log('Setting lower Nav button to SUBMIT mode');
         } else {
             // For other timelines, show Next with blue color
             if (navSubmitSpan) {
-                navSubmitSpan.textContent = nextText;
+                navSubmitSpan.textContent = nextTextLowerSubmitButton;
             }
             if (navSubmitIcon) {
                 navSubmitIcon.className = 'fas fa-arrow-right'; // Arrow icon for next
             }
-            navSubmitBtn.classList.remove('submit-mode');
-            console.log('Setting Nav button to NEXT mode');
+            lowerNavSubmitBtn.classList.remove('submit-mode');
+            console.log('Setting lower Nav button to NEXT mode');
         }
 
-        console.log('Nav button after update - disabled:', navSubmitBtn.disabled);
+        console.log('Nav button after update - disabled:', lowerNavSubmitBtn.disabled);
     }
 
     console.log('=== updateButtonStates END ===');
