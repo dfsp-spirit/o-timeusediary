@@ -432,7 +432,7 @@ export function updateCurrentDayDisplay() {
     // Determine day name
     let dayName = "Day";
     if (dayLabels.length > dayIndex) {
-        dayName = dayLabels[dayIndex].name || `Day ${dayIndex + 1}`;
+        dayName = dayLabels[dayIndex].display_name || dayLabels[dayIndex].name || `Day ${dayIndex + 1}`;
     } else {
         dayName = `Day ${dayIndex + 1}`;
     }
