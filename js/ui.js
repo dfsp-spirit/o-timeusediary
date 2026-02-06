@@ -659,11 +659,11 @@ function updateButtonStates() {
 
 // Shared debounce variables for both Next button and navigation submit button
 let nextButtonLastClick = 0;
-const NEXT_BUTTON_COOLDOWN = 2500; // 2.5 second cooldown
+const NEXT_BUTTON_COOLDOWN = 1000; // 1 second cooldown
 
 // Debounce variables for Back button
 let backButtonLastClick = 0;
-const BACK_BUTTON_COOLDOWN = 1500; // 1.5 second cooldown (shorter than Next)
+const BACK_BUTTON_COOLDOWN = 1000; // 1 second cooldown (shorter than Next)
 
 // Debounce variables for Undo button
 let undoButtonLastClick = 0;
