@@ -992,7 +992,7 @@ export async function sendData(options = { mode: 'json', shouldRedirect: false, 
         const activitiesDataJSON = createTimelineJSON(false);
 
         if (typeof TUD_SETTINGS === 'undefined') {
-           console.error('TUD_SETTINGS variable not available, please include js/app_settings.js before using this function.');
+           console.error('TUD_SETTINGS variable not available, please include settings/tud_settings.js before using this function.');
         }
 
         const { pid, studyData } = createCombinedData();
