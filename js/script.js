@@ -2847,6 +2847,13 @@ export function loadTimelineFromJSONOldAndCurrentlyUnused(jsonData) {
 }
 
 
+/// Construct a time String like "2025-11-06 06:30" or "06:30" from minutes since midnight, with optional prefix for date. This is used to convert backend times (which are in minutes since midnight) to the format we use in the frontend.
+function minutesSinceMidnightToHHMM(minutes, prefix="2025-11-06 ") {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${prefix}${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+}
+
 /// Transform backend activities response to frontend format.
 /// This is for answer from endpoint like /studies/{study_name}/participants/{participant_uid}/day_label_index/{day_index}/activities/.
 /// The backend uses some different field names and formats (snake_case instead of CamelCase), so we need to convert them.
@@ -2857,8 +2864,8 @@ function transformBackendActivitiesResponse(backendData) {
             timelineKey: activity.timeline_key,
             activity: activity.activity,
             category: activity.category || "Travel & Transit",
-            startTime: "2025-11-06 06:30",
-            endTime: "2025-11-06 08:30",
+            startTime: minutesSinceMidnightToHHMM(activity.start_minutes),
+            endTime: minutesSinceMidnightToHHMM(activity.end_minutes),
             blockLength: activity.duration,
             color: activity.color || '#cccccc',
             parentName: activity.parent_activity || null,
@@ -2871,7 +2878,7 @@ function transformBackendActivitiesResponse(backendData) {
             selections: activity.selections || null,
             availableOptions: activity.available_options || null,
             count: activity.selections ? activity.selections.length : 1,
-            id: activity.activity_id_backend,
+            id: activity.activity_id_backend || generateUniqueId(),
             code: activity.activity_code,
         });
 
