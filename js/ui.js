@@ -262,14 +262,24 @@ function createModal() {
     const confirmationModal = document.createElement('div');
     confirmationModal.className = 'modal-overlay';
     confirmationModal.id = 'confirmationModal';
+    const numStudyDaysCount = window.studyConfigManager?.getStudyDaysCount() || 1;
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentDayIndex = parseInt(urlParams.get('day_label_index')) || 0;
+    const dayLabel = window.studyConfigManager?.getDayLabel(currentDayIndex) || `day_${currentDayIndex + 1}`;
+    const isLastStudyDay = currentDayIndex >= numStudyDaysCount - 1;
+
+    const studyEndInfo = isLastStudyDay ? ' This submission concludes the study.' : '';
+    const infoOnTemplateDate = isLastStudyDay ? studyEndInfo : 'For the next day, you will see the data you entered for today as a template to help you report more easily. Please adapt it as needed.<br /><br/> Remember that you can delete data by long-pressing or hovering over the activity in the timeline with the mouse cursor and pressing \'d\' or DEL.';
+    const buttonSubmitText = isLastStudyDay ? `Submit Day ${dayLabel} and Finish Study` : `Submit Day ${dayLabel}`;
     confirmationModal.innerHTML = `
         <div class="modal">
             <div class="modal-content">
-                <h3 data-i18n="modals.confirmSubmit.title">Submit this day?</h3>
-                <p data-i18n="modals.confirmSubmit.message">You will not be able to change your responses for this day.</p>
+                <h3 data-i18n-disabled="modals.confirmSubmit.title">Submit data for ${dayLabel} (day ${currentDayIndex + 1} of ${numStudyDaysCount})?</h3>
+                <p data-i18n-disabled="modals.confirmSubmit.message">You will not be able to change your responses for day ${dayLabel}.</p>
+                <p data-i18n-disabled="modals.confirmSubmit.infoOnTemplate" data-i18n-options='{"dayLabel": "${dayLabel}"}'>${infoOnTemplateDate}</p>
                 <div class="button-container">
                     <button id="confirmCancel" class="btn btn-secondary" data-i18n="buttons.cancel">Cancel</button>
-                    <button id="confirmOk" class="btn save-btn" data-i18n="buttons.ok">Submit Day</button>
+                    <button id="confirmOk" class="btn save-btn" data-i18n-disabled="buttons.ok">${buttonSubmitText}</button>
                 </div>
             </div>
         </div>
