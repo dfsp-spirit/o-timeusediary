@@ -1,6 +1,18 @@
 o-timeusediary MPIAE Changes
 ============================
 
+Version 0.7.0 -- Restructure repo
+---------------------------------
+* Move all source files to new src/ sub directory
+* Remove outdated and unused files
+*
+
+Version 0.6.2 -- Fix duplicate activity IDs
+--------------------------------------------
+* FIX: do not copy ID when copying an existing activity as a new template activity in backend
+* FIX: generate new activity ID in frontend if backend ID is None
+
+
 Version 0.6.1 -- Show current day, improve template usage
 ---------------------------------------------------------
 * Display current study day in UI
