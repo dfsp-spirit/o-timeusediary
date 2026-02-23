@@ -6,10 +6,11 @@ A web-based tool for collecting and visualizing daily activities in a timeline f
 
 This fork is an adaptation of the tool to our needs at MPIAE/Karolinska, see branch 'mpiae_adapt'.
 
+We adapted many things to support a custom backend running on our own servers, mainly fetching everything the frontend uses via a RESTful API from the backend, and sending data there. We took care to still keep the frontend functional (for testing purposes) if there is no backend server. It will use a default study configuration that comes with the frontend then.
+
 ## 🚀 Quick Start
 
 - **[Live Demo](https://dfsp-spirit.github.io/o-timeusediary/index.html)** - Try the application
-- **[Documentation](https://dfsp-spirit.github.io/o-timeusediary/docs/index.html)** - Complete setup and configuration guides
 
 
 ## Features
@@ -21,24 +22,15 @@ This fork is an adaptation of the tool to our needs at MPIAE/Karolinska, see bra
     - **Mobile Layout:** Compact vertical layout with touch-friendly controls, optimized for finger navigation and thumb interaction
 *   **Data Export Functionality:**  Export your collected data in common formats like CSV and JSON. This allows for easy integration with other analysis tools and research workflows.
 
-## Screenshots
-
-### Desktop Layout
-The desktop version provides a comprehensive view with full-width timeline and horizontal navigation controls, designed for detailed data entry and analysis.
-
-![Desktop Layout](docs/images/desktop-layout.png)
-
-### Mobile Layout
-The mobile version features a compact, touch-friendly interface with vertical controls optimized for smartphone usage and on-the-go data collection.
-
-![Mobile Layout](docs/images/mobile-layout.png)
 
 ## Technology Stack
 
-*   HTML
-*   CSS
-*   JavaScript
+* HTML
+* CSS
+* JavaScript
 
+
+Note: We use Python/FastAPI for the backend, which is in a separate repo.
 
 ## Usage
 
