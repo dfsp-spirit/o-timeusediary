@@ -141,7 +141,6 @@ function initKeyboardShortcuts() {
     });
 }
 
-
 // Delete activity block function, removes from DOM and timeline manager data.
 // Required for editing activities.
 function deleteActivityBlock(activityBlock) {
@@ -153,7 +152,13 @@ function deleteActivityBlock(activityBlock) {
         return;
     }
 
-    // Remove from DOM
+    console.log(`=== DELETING ACTIVITY ${activityId} FROM TIMELINE ${timelineKey} ===`);
+    console.log('Before deletion - activities:', window.timelineManager.activities[timelineKey]?.map(a => ({id: a.id, activity: a.activity})));
+
+    // Store reference to the timeline
+    const timeline = activityBlock.closest('.timeline');
+
+    // Remove from DOM first
     activityBlock.remove();
 
     // Remove from timeline manager data
@@ -162,16 +167,67 @@ function deleteActivityBlock(activityBlock) {
         const index = timelineActivities.findIndex(activity => activity.id === activityId);
         if (index !== -1) {
             timelineActivities.splice(index, 1);
+
+            console.log('After deletion (before reassign) - activities:', window.timelineManager.activities[timelineKey]?.map(a => ({id: a.id, activity: a.activity})));
+
+            // CRITICAL: Ensure the array is properly updated by reassigning
+            window.timelineManager.activities[timelineKey] = [...timelineActivities];
+
+            console.log('After deletion (after reassign) - activities:', window.timelineManager.activities[timelineKey]?.map(a => ({id: a.id, activity: a.activity})));
+            console.log('Number of remaining activities:', window.timelineManager.activities[timelineKey].length);
+
+            // Force a re-render of the timeline's activities container to ensure clean state
+            if (timeline) {
+                const activitiesContainer = timeline.querySelector('.activities');
+                if (activitiesContainer) {
+                    console.log('Re-rendering all remaining activities...');
+
+                    // Get remaining activities
+                    const remainingActivities = window.timelineManager.activities[timelineKey];
+                    console.log('Remaining activities to render (', remainingActivities.length, "):", remainingActivities.map(a => ({id: a.id, activity: a.activity})));
+
+                    // Clear the container
+                    activitiesContainer.innerHTML = '';
+                    console.log('Activities container cleared');
+
+                    // Recreate all remaining activity blocks
+                    remainingActivities.forEach((activityData, idx) => {
+                        console.log(`Rendering activity ${idx + 1}/${remainingActivities.length}:`, activityData.id, activityData.activity);
+
+                        // Make sure the activityData has all required fields
+                        if (!activityData.startMinutes || !activityData.endMinutes) {
+                            console.error('Activity missing minutes:', activityData);
+                            return;
+                        }
+
+                        // Use your existing function to recreate blocks
+                        const result = recreateActivityBlockFromTemplate(activityData);
+                        console.log(`Activity ${idx + 1} rendered, block:`, result.block);
+                    });
+
+                    console.log('All ', remainingActivities.length, ' activities re-rendered, container children:', activitiesContainer.children.length);
+
+                    // Re-initialize interact.js for the new blocks
+                    initTimelineInteraction(timeline);
+                    console.log('Timeline interaction re-initialized');
+                } else {
+                    console.error('Activities container not found in timeline');
+                }
+            } else {
+                console.error('Timeline element not found');
+            }
+        } else {
+            console.error('Activity not found in timelineActivities array');
         }
+    } else {
+        console.error('timelineActivities not found for key:', timelineKey);
     }
 
     // Update button states (coverage might have changed)
     updateButtonStates();
 
-    console.log(`Deleted activity ${activityId} from timeline ${timelineKey}`);
+    console.log(`=== DELETION COMPLETE ===`);
 }
-
-
 
 function initMobileDelete() {
     if (!getIsMobile()) return;
@@ -293,7 +349,20 @@ function initMobileDelete() {
 function createActivityBlock(activityData, isFromTemplate = false) {
     const currentBlock = document.createElement('div');
     currentBlock.className = 'activity-block';
-    currentBlock.dataset.timelineKey = getCurrentTimelineKey();
+    currentBlock.dataset.timelineKey = activityData.timelineKey; //getCurrentTimelineKey();
+
+        // CRITICAL: Every activity MUST have a timelineKey
+    if (!activityData.timelineKey) {
+        console.error('CRITICAL BUG: Cannot create activity block without timelineKey in supplied activityData.', {
+            activityData: activityData,
+            stack: new Error().stack
+        });
+        throw new Error(`Cannot create activity block: missing timelineKey for activity "${activityData.activity || 'unknown'}"`);
+    }
+
+    const timelineKey = activityData.timelineKey;
+    currentBlock.dataset.timelineKey = timelineKey;
+
 
     // Use existing ID or generate new one
     currentBlock.dataset.id = activityData.id || generateUniqueId();
@@ -434,7 +503,8 @@ function createActivityBlock(activityData, isFromTemplate = false) {
             mode: activityData.mode || 'single-choice',
             count: activityData.count || 1,
             selections: activityData.selections || null,
-            availableOptions: activityData.availableOptions || null
+            availableOptions: activityData.availableOptions || null,
+            timelineKey: timelineKey
         }
     };
 }
@@ -508,10 +578,14 @@ function initPastTimelineClickHandlers() {
 }
 
 
-
 function recreateActivityBlockFromTemplate(activityData) {
     console.log('=== RECREATE ACTIVITY BLOCK START ===');
     console.log('Input activityData:', activityData);
+
+    // Make sure we have an ID
+    if (!activityData.id) {
+        activityData.id = generateUniqueId();
+    }
 
     const result = createActivityBlock(activityData, true);
     const currentBlock = result.block;
@@ -519,39 +593,42 @@ function recreateActivityBlockFromTemplate(activityData) {
     console.log('Activity block created:', currentBlock);
     console.log('Activity data result:', result.activityData);
 
-    // Add to DOM
-    const activitiesContainer = window.timelineManager.activeTimeline.querySelector('.activities') || (() => {
+    // Get or create activities container
+    let activitiesContainer = window.timelineManager.activeTimeline.querySelector('.activities');
+    if (!activitiesContainer) {
         console.log('Creating new activities container');
-        const container = document.createElement('div');
-        container.className = 'activities';
-        window.timelineManager.activeTimeline.appendChild(container);
-        return container;
-    })();
+        activitiesContainer = document.createElement('div');
+        activitiesContainer.className = 'activities';
+        window.timelineManager.activeTimeline.appendChild(activitiesContainer);
+    }
 
     console.log('Activities container:', activitiesContainer);
+    console.log('Appending block to container...');
     activitiesContainer.appendChild(currentBlock);
-    console.log('Block appended to DOM');
+    console.log('Block appended, container children count:', activitiesContainer.children.length);
 
     // Create time label
     const timeLabel = createTimeLabel(currentBlock);
     updateTimeLabel(timeLabel, activityData.startTime, activityData.endTime, currentBlock);
 
-    // Store in timeline manager
+    // Ensure the activity data in the manager matches
     const currentKey = getCurrentTimelineKey();
     console.log('Current timeline key:', currentKey);
-    console.log('Before push - activities for this timeline:', window.timelineManager.activities[currentKey]);
 
-    getCurrentTimelineData().push(result.activityData);
+    // Check if this activity already exists in the manager
+    const existingIndex = window.timelineManager.activities[currentKey].findIndex(a => a.id === activityData.id);
+    if (existingIndex === -1) {
+        console.log('Adding activity to manager');
+        window.timelineManager.activities[currentKey].push(result.activityData);
+    } else {
+        console.log('Activity already exists in manager at index', existingIndex);
+    }
 
-    console.log('After push - activities for this timeline:', window.timelineManager.activities[currentKey]);
+    console.log('Activities in manager:', window.timelineManager.activities[currentKey].map(a => a.id));
     console.log('=== RECREATE ACTIVITY BLOCK END ===');
-
-    // Re-initialize interact.js for the new block
-    initTimelineInteraction(window.timelineManager.activeTimeline);
 
     return result;
 }
-
 
 // NEW: Helper functions to format timeline times based on our 04:00 (240 minutes) rule
 function formatTimelineStart(minutes) {
@@ -649,6 +726,8 @@ async function restoreNextTimeline(nextTimelineIndex, nextTimelineKey) {
         if (DEBUG_MODE) {
             console.log(`Restored ${nextTimelineKey} timeline from past wrapper`);
             console.log('Timeline data structure:', window.timelineManager.activities);
+            // Give short info with number of activities per timeline
+            console.log('Activities per timeline:', Object.fromEntries(Object.entries(window.timelineManager.activities).map(([key, activities]) => [key, activities.length])));
         }
 
         // Update Back button state
@@ -831,6 +910,7 @@ async function addNextTimeline() {
         if (DEBUG_MODE) {
             console.log(`Switched to ${nextTimelineKey} timeline`);
             console.log('Timeline data structure:', window.timelineManager.activities);
+            console.log('Activities per timeline:', Object.fromEntries(Object.entries(window.timelineManager.activities).map(([key, activities]) => [key, activities.length])));
         }
 
         // Update Back button state
@@ -1014,6 +1094,7 @@ async function goToPreviousTimeline() {
         if (DEBUG_MODE) {
             console.log(`Switched back to ${previousTimelineKey} timeline`);
             console.log('Timeline data structure:', window.timelineManager.activities);
+            console.log('Activities per timeline:', Object.fromEntries(Object.entries(window.timelineManager.activities).map(([key, activities]) => [key, activities.length])));
         }
 
         // Update activities container data-mode
@@ -1161,7 +1242,7 @@ function renderChildItems(activity, categoryName) {
     // Clear previous content
     container.innerHTML = '';
 
-    console.log(`>>>>Rendering child items for activity "${activity.name}" in category "${categoryName}"`);
+    //console.log(`>>>>Rendering child items for activity "${activity.name}" in category "${categoryName}"`);
 
     // Create buttons for each child item
     if (activity.childItems && activity.childItems.length > 0) {
@@ -1169,7 +1250,7 @@ function renderChildItems(activity, categoryName) {
         buttonsContainer.className = 'child-item-buttons';
 
         activity.childItems.forEach(childItem => {
-            console.log(`>>Adding child item button: "${childItem.name}" with color "${childItem.color || activity.color}"`);
+            //console.log(`>>Adding child item button: "${childItem.name}" with color "${childItem.color || activity.color}"`);
             const button = document.createElement('button');
             button.className = 'child-item-button';
 
@@ -1206,12 +1287,12 @@ function renderChildItems(activity, categoryName) {
             button.addEventListener('click', () => {
                 // Check if this is a custom input child item
                 if (is_custom_input) {
-                    console.log('>>>>[CHILD ITEM] Custom input child item clicked, showing custom activity modal');
+                    //console.log('>>>>[CHILD ITEM] Custom input child item clicked, showing custom activity modal');
                     // ... existing custom input handling
                     return;
                 }
 
-                console.log(`>>[CHILD ITEM] non-custom Selected child item: "${childItem.name}"`);
+                //console.log(`>>[CHILD ITEM] non-custom Selected child item: "${childItem.name}"`);
 
                 // Regular child item selection (not custom)
                 window.selectedActivity = {
@@ -1281,7 +1362,7 @@ function renderActivities(categories, container = document.getElementById('activ
             activityButtonsDiv.className = 'activity-buttons';
 
             category.activities.forEach(activity => {
-                console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "in accordion (mobile modal)");
+                //console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "in accordion (mobile modal)");
                 const activityButton = document.createElement('button');
                 const isMultipleChoice = container.getAttribute('data-mode') === 'multiple-choice';
                 const is_custom_input = activity.is_custom_input || false;
@@ -1571,10 +1652,10 @@ function renderActivities(categories, container = document.getElementById('activ
             activityButtonsDiv.className = 'activity-buttons';
 
             category.activities.forEach(activity => {
-                console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "(not on mobile modal)");
+                //console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "(not on mobile modal)");
                 const activityButton = document.createElement('button');
                 const is_custom_input = activity.is_custom_input || false;
-                console.log(">>> is_custom_input for activity", activity.name, "is", is_custom_input);
+                //console.log(">>> is_custom_input for activity", activity.name, "is", is_custom_input);
                 const isMultipleChoice = container.getAttribute('data-mode') === 'multiple-choice';
                 activityButton.className = `activity-button ${isMultipleChoice ? 'checkbox-style' : ''}`;
                 // Add indicator class if activity has child items
@@ -2596,7 +2677,8 @@ function initTimelineInteraction(timeline) {
             mode: window.selectedActivity.selections ? 'multiple-choice' : 'single-choice',
             count: window.selectedActivity.selections ? window.selectedActivity.selections.length : 1,
             selections: window.selectedActivity.selections || undefined,
-            availableOptions: window.selectedActivity.availableOptions || undefined
+            availableOptions: window.selectedActivity.availableOptions || undefined,
+            timelineKey: currentKey
         };
 
         const result = createActivityBlock(activityData);

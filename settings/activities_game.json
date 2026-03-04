@@ -12,7 +12,7 @@
         "name": "Yesterday's Activities",
         "description": "Please fill in the full timeline with the activities you did yesterday.",
         "mode": "single-choice",
-        "min_coverage": "1400",
+        "min_coverage": 1400,
         "categories": [
           {
             "name": "Activities",
@@ -77,4 +77,4 @@
         ]
       }
     }
-  } 
+  }

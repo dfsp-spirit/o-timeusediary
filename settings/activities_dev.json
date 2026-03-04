@@ -14,7 +14,7 @@
         "name": "Main Activity",
         "description": "",
         "mode": "single-choice",
-        "min_coverage": "10",
+        "min_coverage": 10,
         "categories": [
           {
             "name": "General Activities",
@@ -447,7 +447,7 @@
         "name": "Secondary Activity",
         "description": "",
         "mode": "single-choice",
-        "min_coverage": "10",
+        "min_coverage": 10,
         "categories": [
           {
             "name": "General Activities",
@@ -880,7 +880,7 @@
       "name": "Digital Media Use",
       "description": "Digital media use during all activites listed above.",
       "mode": "single-choice",
-      "min_coverage": "10",
+      "min_coverage": 10,
       "categories": [
         {
           "name": "Media Types",
@@ -1020,7 +1020,7 @@
       "name": "Device",
       "description": "Were you using a computer/tablet/smartphone?",
       "mode": "multiple-choice",
-      "min_coverage": "0",
+      "min_coverage": 0,
       "categories": [
         {
           "name": " ",
