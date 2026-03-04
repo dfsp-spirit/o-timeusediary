@@ -351,6 +351,19 @@ function createActivityBlock(activityData, isFromTemplate = false) {
     currentBlock.className = 'activity-block';
     currentBlock.dataset.timelineKey = activityData.timelineKey; //getCurrentTimelineKey();
 
+        // CRITICAL: Every activity MUST have a timelineKey
+    if (!activityData.timelineKey) {
+        console.error('CRITICAL BUG: Cannot create activity block without timelineKey in supplied activityData.', {
+            activityData: activityData,
+            stack: new Error().stack
+        });
+        throw new Error(`Cannot create activity block: missing timelineKey for activity "${activityData.activity || 'unknown'}"`);
+    }
+
+    const timelineKey = activityData.timelineKey;
+    currentBlock.dataset.timelineKey = timelineKey;
+
+
     // Use existing ID or generate new one
     currentBlock.dataset.id = activityData.id || generateUniqueId();
 
@@ -490,7 +503,8 @@ function createActivityBlock(activityData, isFromTemplate = false) {
             mode: activityData.mode || 'single-choice',
             count: activityData.count || 1,
             selections: activityData.selections || null,
-            availableOptions: activityData.availableOptions || null
+            availableOptions: activityData.availableOptions || null,
+            timelineKey: timelineKey
         }
     };
 }
@@ -712,6 +726,8 @@ async function restoreNextTimeline(nextTimelineIndex, nextTimelineKey) {
         if (DEBUG_MODE) {
             console.log(`Restored ${nextTimelineKey} timeline from past wrapper`);
             console.log('Timeline data structure:', window.timelineManager.activities);
+            // Give short info with number of activities per timeline
+            console.log('Activities per timeline:', Object.fromEntries(Object.entries(window.timelineManager.activities).map(([key, activities]) => [key, activities.length])));
         }
 
         // Update Back button state
@@ -894,6 +910,7 @@ async function addNextTimeline() {
         if (DEBUG_MODE) {
             console.log(`Switched to ${nextTimelineKey} timeline`);
             console.log('Timeline data structure:', window.timelineManager.activities);
+            console.log('Activities per timeline:', Object.fromEntries(Object.entries(window.timelineManager.activities).map(([key, activities]) => [key, activities.length])));
         }
 
         // Update Back button state
@@ -1077,6 +1094,7 @@ async function goToPreviousTimeline() {
         if (DEBUG_MODE) {
             console.log(`Switched back to ${previousTimelineKey} timeline`);
             console.log('Timeline data structure:', window.timelineManager.activities);
+            console.log('Activities per timeline:', Object.fromEntries(Object.entries(window.timelineManager.activities).map(([key, activities]) => [key, activities.length])));
         }
 
         // Update activities container data-mode
@@ -1224,7 +1242,7 @@ function renderChildItems(activity, categoryName) {
     // Clear previous content
     container.innerHTML = '';
 
-    console.log(`>>>>Rendering child items for activity "${activity.name}" in category "${categoryName}"`);
+    //console.log(`>>>>Rendering child items for activity "${activity.name}" in category "${categoryName}"`);
 
     // Create buttons for each child item
     if (activity.childItems && activity.childItems.length > 0) {
@@ -1232,7 +1250,7 @@ function renderChildItems(activity, categoryName) {
         buttonsContainer.className = 'child-item-buttons';
 
         activity.childItems.forEach(childItem => {
-            console.log(`>>Adding child item button: "${childItem.name}" with color "${childItem.color || activity.color}"`);
+            //console.log(`>>Adding child item button: "${childItem.name}" with color "${childItem.color || activity.color}"`);
             const button = document.createElement('button');
             button.className = 'child-item-button';
 
@@ -1269,12 +1287,12 @@ function renderChildItems(activity, categoryName) {
             button.addEventListener('click', () => {
                 // Check if this is a custom input child item
                 if (is_custom_input) {
-                    console.log('>>>>[CHILD ITEM] Custom input child item clicked, showing custom activity modal');
+                    //console.log('>>>>[CHILD ITEM] Custom input child item clicked, showing custom activity modal');
                     // ... existing custom input handling
                     return;
                 }
 
-                console.log(`>>[CHILD ITEM] non-custom Selected child item: "${childItem.name}"`);
+                //console.log(`>>[CHILD ITEM] non-custom Selected child item: "${childItem.name}"`);
 
                 // Regular child item selection (not custom)
                 window.selectedActivity = {
@@ -1344,7 +1362,7 @@ function renderActivities(categories, container = document.getElementById('activ
             activityButtonsDiv.className = 'activity-buttons';
 
             category.activities.forEach(activity => {
-                console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "in accordion (mobile modal)");
+                //console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "in accordion (mobile modal)");
                 const activityButton = document.createElement('button');
                 const isMultipleChoice = container.getAttribute('data-mode') === 'multiple-choice';
                 const is_custom_input = activity.is_custom_input || false;
@@ -1634,10 +1652,10 @@ function renderActivities(categories, container = document.getElementById('activ
             activityButtonsDiv.className = 'activity-buttons';
 
             category.activities.forEach(activity => {
-                console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "(not on mobile modal)");
+                //console.log(">>>Rendering activity:", activity.name, " of category:", category.name, "(not on mobile modal)");
                 const activityButton = document.createElement('button');
                 const is_custom_input = activity.is_custom_input || false;
-                console.log(">>> is_custom_input for activity", activity.name, "is", is_custom_input);
+                //console.log(">>> is_custom_input for activity", activity.name, "is", is_custom_input);
                 const isMultipleChoice = container.getAttribute('data-mode') === 'multiple-choice';
                 activityButton.className = `activity-button ${isMultipleChoice ? 'checkbox-style' : ''}`;
                 // Add indicator class if activity has child items
@@ -2659,7 +2677,8 @@ function initTimelineInteraction(timeline) {
             mode: window.selectedActivity.selections ? 'multiple-choice' : 'single-choice',
             count: window.selectedActivity.selections ? window.selectedActivity.selections.length : 1,
             selections: window.selectedActivity.selections || undefined,
-            availableOptions: window.selectedActivity.availableOptions || undefined
+            availableOptions: window.selectedActivity.availableOptions || undefined,
+            timelineKey: currentKey
         };
 
         const result = createActivityBlock(activityData);

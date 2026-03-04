@@ -10,7 +10,7 @@ export function getCurrentTimelineKey() {
 export function getCurrentTimelineData() {
     const currentKey = getCurrentTimelineKey();
     const result = window.timelineManager.activities[currentKey] || [];
-    console.log('getCurrentTimelineData called, returning:', result);
+    console.log('getCurrentTimelineData called, current timeline key is', currentKey, ', returning:', result, 'with length:', result.length);
     return result;
 }
 

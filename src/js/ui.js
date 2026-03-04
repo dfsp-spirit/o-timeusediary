@@ -548,10 +548,10 @@ export function updateCurrentDayDisplay() {
 
 
 function updateButtonStates() {
-    console.log('=== updateButtonStates START ===');
-    console.log('Current index:', window.timelineManager.currentIndex);
-    console.log('Total keys:', window.timelineManager.keys);
-    console.log('Keys length:', window.timelineManager.keys.length);
+    //console.log('=== updateButtonStates START ===');
+    //console.log('Current index:', window.timelineManager.currentIndex);
+    //console.log('Total keys:', window.timelineManager.keys);
+    //console.log('Keys length:', window.timelineManager.keys.length);
 
     updateCurrentDayDisplay();
 
@@ -564,14 +564,14 @@ function updateButtonStates() {
     const currentData = getCurrentTimelineData();
     const isEmpty = currentData.length === 0;
 
-    console.log('Current data length:', currentData.length);
-    console.log('Is empty:', isEmpty);
+    //console.log('Current data length:', currentData.length);
+    //console.log('Is empty:', isEmpty);
 
     // Check if there's an active timeline with activities
     const activeTimeline = window.timelineManager.activeTimeline;
     const hasActivities = activeTimeline && activeTimeline.querySelector('.activity-block');
 
-    console.log('Has activities DOM:', hasActivities);
+    //console.log('Has activities DOM:', hasActivities);
 
     if (undoButton) undoButton.disabled = isEmpty;
     if (cleanRowButton) cleanRowButton.disabled = !hasActivities;
@@ -579,60 +579,60 @@ function updateButtonStates() {
     // Update Back button state - enable if not on first timeline
     if (backButton) {
         backButton.disabled = window.timelineManager.currentIndex <= 0;
-        console.log('Back button disabled:', backButton.disabled);
+        //console.log('Back button disabled:', backButton.disabled);
     }
 
     // Get current timeline coverage
     const currentKey = getCurrentTimelineKey();
-    console.log('Current key:', currentKey);
+    // console.log('Current key:', currentKey);
 
     const currentTimeline = window.timelineManager.metadata[currentKey];
-    console.log('Current timeline metadata:', currentTimeline);
+    //console.log('Current timeline metadata:', currentTimeline);
 
     const currentCoverage = window.getTimelineCoverage();
-    console.log('Current coverage:', currentCoverage);
+    //console.log('Current coverage:', currentCoverage);
 
     // Get minimum coverage requirement for current timeline
     const minCoverage = parseInt(currentTimeline?.minCoverage) || 0;
     const meetsMinCoverage = currentCoverage >= minCoverage;
 
-    console.log('Min coverage:', minCoverage, 'Meets min:', meetsMinCoverage);
+    //console.log('Min coverage:', minCoverage, 'Meets min:', meetsMinCoverage);
 
     // Check if we're on the last timeline
     const totalTimelines = window.timelineManager.keys.length;
     const isLastTimeline = window.timelineManager.currentIndex === totalTimelines - 1;
 
-    console.log('Total timelines:', totalTimelines);
-    console.log('Is last timeline:', isLastTimeline);
+    //console.log('Total timelines:', totalTimelines);
+    //console.log('Is last timeline:', isLastTimeline);
 
     // Get text values for buttons
     const nextTextTopBarButton = 'Next'; //window.i18n ? window.i18n.t('buttons.next') : 'Next Timeline';
     const nextTextLowerSubmitButton = 'Next Timeline'; //window.i18n ? window.i18n.t('buttons.next') : 'Next Timeline';
     const submitText = 'Submit Day'; //window.i18n ? window.i18n.t('buttons.submit') : 'Submit Day';
 
-    console.log('Button texts - Next:', nextTextTopBarButton, 'Submit:', submitText);
+    //console.log('Button texts - Next:', nextTextTopBarButton, 'Submit:', submitText);
 
     if (nextButtonInTopBar) {
-        console.log('Next button before update - disabled:', nextButtonInTopBar.disabled, 'innerHTML:', nextButtonInTopBar.innerHTML);
+        //console.log('Next button before update - disabled:', nextButtonInTopBar.disabled, 'innerHTML:', nextButtonInTopBar.innerHTML);
 
         nextButtonInTopBar.disabled = !meetsMinCoverage;
 
         if (isLastTimeline) {
             // On last timeline, show Submit
             nextButtonInTopBar.innerHTML = `<i class="fas fa-check"></i> ${submitText}`;
-            console.log('Setting Next button to SUBMIT mode');
+            //console.log('Setting Next button to SUBMIT mode');
         } else {
             // For other timelines, show Next
             nextButtonInTopBar.innerHTML = `${nextTextTopBarButton} <i class="fas fa-arrow-right"></i>`;
-            console.log('Setting Next button to NEXT mode');
+            //console.log('Setting Next button to NEXT mode');
         }
 
-        console.log('Next button after update - disabled:', nextButtonInTopBar.disabled, 'innerHTML:', nextButtonInTopBar.innerHTML);
+        //console.log('Next button after update - disabled:', nextButtonInTopBar.disabled, 'innerHTML:', nextButtonInTopBar.innerHTML);
     }
 
     // Update navSubmitBtn to mirror nextButton exactly
     if (lowerNavSubmitBtn) {
-        console.log('Nav button before update - disabled:', lowerNavSubmitBtn.disabled);
+        //console.log('Nav button before update - disabled:', lowerNavSubmitBtn.disabled);
 
         lowerNavSubmitBtn.disabled = !meetsMinCoverage;
 
