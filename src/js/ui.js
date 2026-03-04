@@ -589,14 +589,14 @@ function updateButtonStates() {
     const currentTimeline = window.timelineManager.metadata[currentKey];
     //console.log('Current timeline metadata:', currentTimeline);
 
-    const currentCoverage = window.getTimelineCoverage();
-    //console.log('Current coverage:', currentCoverage);
+    const currentCoverage = window.getTimelineCoverage() || 0;
+    console.log('Current coverage:', currentCoverage, " from window.getTimelineCoverage:", window.getTimelineCoverage());
 
     // Get minimum coverage requirement for current timeline
     const minCoverage = parseInt(currentTimeline?.minCoverage) || 0;
     const meetsMinCoverage = currentCoverage >= minCoverage;
 
-    //console.log('Min coverage:', minCoverage, 'Meets min:', meetsMinCoverage);
+    console.log('Min coverage:', minCoverage, 'Meets min:', meetsMinCoverage);
 
     // Check if we're on the last timeline
     const totalTimelines = window.timelineManager.keys.length;
@@ -649,7 +649,7 @@ function updateButtonStates() {
                 navSubmitIcon.className = 'fas fa-check'; // Check icon for submit
             }
             lowerNavSubmitBtn.classList.add('submit-mode');
-            console.log('Setting lower Nav button to SUBMIT mode');
+            //console.log('Setting lower Nav button to SUBMIT mode');
         } else {
             // For other timelines, show Next with blue color
             if (navSubmitSpan) {
@@ -659,13 +659,11 @@ function updateButtonStates() {
                 navSubmitIcon.className = 'fas fa-arrow-right'; // Arrow icon for next
             }
             lowerNavSubmitBtn.classList.remove('submit-mode');
-            console.log('Setting lower Nav button to NEXT mode');
+            //console.log('Setting lower Nav button to NEXT mode');
         }
 
-        console.log('Nav button after update - disabled:', lowerNavSubmitBtn.disabled);
+        //console.log('Nav button after update - disabled:', lowerNavSubmitBtn.disabled);
     }
-
-    console.log('=== updateButtonStates END ===');
 }
 
 
