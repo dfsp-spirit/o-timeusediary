@@ -1273,7 +1273,6 @@ function renderChildItems(activity, categoryName) {
             nameSpan.textContent = childItem.name;
             buttonContent.appendChild(nameSpan);
 
-            // ✅ ADD EXAMPLES IF THEY EXIST
             if (childItem.examples) {
                 const examplesSpan = document.createElement('span');
                 examplesSpan.className = 'child-item-examples';
@@ -1287,8 +1286,93 @@ function renderChildItems(activity, categoryName) {
             button.addEventListener('click', () => {
                 // Check if this is a custom input child item
                 if (is_custom_input) {
-                    //console.log('>>>>[CHILD ITEM] Custom input child item clicked, showing custom activity modal');
-                    // ... existing custom input handling
+                    console.log('>>>>[CHILD ITEM] Custom input child item clicked, showing custom activity modal');
+
+                    // Set context for custom input
+                    window.customInputContext = {
+                        type: 'childItem',
+                        parentActivity: activity,
+                        categoryName: categoryName,
+                        childItem: childItem
+                    };
+
+                    // Close child items modal
+                    modal.style.display = 'none';
+
+                    // Show custom activity modal with appropriate title
+                    const customActivityModal = document.getElementById('customActivityModal');
+                    const customActivityInput = document.getElementById('customActivityInput');
+                    const modalTitle = customActivityModal.querySelector('h3');
+                    const activitiesModal = document.getElementById('activitiesModal');
+
+                    // Update modal title for child item context
+                    if (window.i18n && window.i18n.isReady()) {
+                        const template = window.i18n.t('modals.customActivity.childItemTitle');
+                        modalTitle.textContent = template.replace(/\{parentActivity\}/g, activity.name);
+                    } else {
+                        modalTitle.textContent = `Enter custom value for: ${activity.name}`;
+                    }
+
+                    customActivityInput.value = ''; // Clear previous input
+                    customActivityModal.style.display = 'block';
+                    customActivityInput.focus();
+
+                    // SET UP EVENT LISTENERS FOR CUSTOM ACTIVITY MODAL (CHILD ITEM VERSION)
+                    const confirmBtn = document.getElementById('confirmCustomActivity');
+                    const inputField = document.getElementById('customActivityInput');
+
+                    if (confirmBtn && inputField) {
+                        // Remove any existing listeners
+                        const newConfirmBtn = confirmBtn.cloneNode(true);
+                        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+                        const newInputField = inputField.cloneNode(true);
+                        inputField.parentNode.replaceChild(newInputField, inputField);
+
+                        // Handle custom activity submission for child items
+                        const handleChildItemCustomActivity = () => {
+                            const customText = newInputField.value.trim();
+                            if (customText) {
+                                // Create child item structure with custom text
+                                window.selectedActivity = {
+                                    name: customText,
+                                    parentName: activity.name,
+                                    parentCode: activity.code,
+                                    color: childItem.color || activity.color,
+                                    category: categoryName,
+                                    selected: customText,
+                                    originalSelection: childItem.name, // Store what was originally clicked
+                                    isCustomInput: true,
+                                    code: childItem.code,
+                                };
+
+                                // Close modals
+                                console.log('>>>>Closing modals after custom child item input');
+                                customActivityModal.style.cssText = 'display: none !important';
+                                const childItemsModal = document.getElementById('childItemsModal');
+                                if (childItemsModal) {
+                                    childItemsModal.style.cssText = 'display: none !important';
+                                }
+                                if (activitiesModal) {
+                                    activitiesModal.style.cssText = 'display: none !important';
+                                }
+
+                                newInputField.value = '';
+
+                                // Reset context
+                                window.customInputContext = { type: null, parentActivity: null, categoryName: null };
+                            }
+                        };
+
+                        // Add new listeners
+                        newConfirmBtn.addEventListener('click', handleChildItemCustomActivity);
+                        newInputField.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                handleChildItemCustomActivity();
+                            }
+                        });
+                    }
+
                     return;
                 }
 
