@@ -1120,6 +1120,7 @@ function logDebugInfo() {
 }
 
 async function fetchActivities(key) {
+    console.log(`TODO: Ensure this does not break remote activities!!! Fetching activities for timeline key: ${key} from local JSON file...`);
     try {
         const response = await fetch('settings/activities.json');
         if (!response.ok) {
@@ -3217,7 +3218,7 @@ async function init() {
         window.timelineManager.general = data.general;
 
         // Initialize i18n (internationalization) system
-        const language = data.general.language || 'en';
+        let language = data.general.language || 'en';
         await i18n.init(language);
 
         // Apply translations to existing elements
@@ -3353,6 +3354,15 @@ async function init() {
                     urlParams.set('day_label_index', studyDaysCount - 1);
                     window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
                 }
+
+                // Set the language for i18n based on the default_langugage field in the study config
+                if (studyConfig.default_language) {
+                    language = studyConfig.default_language;
+                    await i18n.init(language);
+                    console.log(`Set language to ${language} based on server-side study config of study ${studyName}`);
+                    i18n.applyTranslations();
+                }
+
             } else {
                 console.warn(`Could not fetch study config, using default (1 day). Status: ${response.status}`);
             }

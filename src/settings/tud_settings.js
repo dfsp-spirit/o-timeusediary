@@ -1,4 +1,4 @@
-// Application settings for TUD frontend.
+// Application settings for Time Used Diary (TUD) frontend.
 
 const TUD_SETTINGS = {
     API_BASE_URL: 'http://localhost:8000/api',
@@ -7,7 +7,7 @@ const TUD_SETTINGS = {
     DEFAULT_STUDIES_FILE: 'settings/studies_config.json'
 };
 
-// CRITICAL: Make it available globally
+
 window.TUD_SETTINGS = TUD_SETTINGS;
 
 console.log('tud_settings.js loaded, TUD_SETTINGS:', TUD_SETTINGS);
