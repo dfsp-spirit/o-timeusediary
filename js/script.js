@@ -3573,6 +3573,7 @@ async function init() {
             '<strong>Error loading activities configuration:</strong><br>' + error.message + '<br><br>' +
             'The application requires a valid backend connection to load the appropriate activities for your study.</p>';
     }
+    updateButtonStates();
 }
 
 init().catch(error => {
