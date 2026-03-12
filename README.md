@@ -8,6 +8,8 @@ This fork is an adaptation of the tool to our needs at MPIAE/Karolinska, see bra
 
 We adapted many things to support a custom backend running on our own servers, mainly fetching everything the frontend uses via a RESTful API from the backend, and sending data there. We took care to still keep the frontend functional (for testing purposes) if there is no backend server. It will use a default study configuration that comes with the frontend then.
 
+The backend can be found [here](https://github.com/dfsp-spirit/o-timeusediary-backend). Compatible versions of the frontend abnd backend are tagged with identical versions in git.
+
 ## 🚀 Quick Start
 
 - **[Live Demo](https://dfsp-spirit.github.io/o-timeusediary/index.html)** - Try the application
