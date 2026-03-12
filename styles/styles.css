@@ -192,7 +192,7 @@ body {
 
     .timeline-container[data-active="false"] {
         opacity: 0.6;
-        pointer-events: none;
+        /*pointer-events: none;  we need to allow pointer events to allow switching timelines */
     }
 
     .gradient-bar {
@@ -312,6 +312,16 @@ body {
     }
 }
 
+.past-initialized-timelines-wrapper .timeline-container[data-active="false"] {
+    cursor: pointer;
+}
+
+.past-initialized-timelines-wrapper .timeline-container[data-active="false"]:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+    transition: all 0.1s ease;
+}
+
 /* Mobile vertical layout */
 @media (max-width: 1439.98px) {
     .timeline {
@@ -372,7 +382,7 @@ body {
 
     .timeline-container[data-active="false"] {
         opacity: 0.6;
-        pointer-events: none;
+        /*pointer-events: none;*/
     }
 
     .gradient-bar {
