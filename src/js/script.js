@@ -1119,59 +1119,55 @@ function logDebugInfo() {
     }
 }
 
+
+// Add a cache for fetched timelines
+const timelineFetchCache = new Map();
+
+
 async function fetchActivities(key) {
-    console.log(`TODO: Ensure this does not break remote activities!!! Fetching activities for timeline key: ${key} from local JSON file...`);
-    try {
-        const response = await fetch('settings/activities.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (!data || !data.timeline || !data.general) {
-            throw new Error('Invalid JSON structure');
-        }
+    console.log(`Fetching activities configuration for timeline key: ${key}`);
 
-        // Set app name in document title once
-        document.title = data.general.app_name;
-
-        // Validate min_coverage
-        if (data.timeline[key]) {
-            try {
-                validateMinCoverage(data.timeline[key].min_coverage);
-            } catch (error) {
-                const errorMessage = `Timeline "${key}": ${error.message}`;
-                document.getElementById('activitiesContainer').innerHTML =
-                    `<p style="color: red; padding: 10px; background: #ffebee; border: 1px solid #ef9a9a; border-radius: 4px;">
-                        ${errorMessage}
-                    </p>`;
-                throw new Error(errorMessage);
-            }
-        }
-
-        // Timeline management structure should already be initialized in init function
-        // This function only loads categories for the specific timeline
-
-        const timeline = data.timeline[key];
-        if (!timeline || !timeline.categories) {
-            throw new Error(`Invalid timeline data for key: ${key}`);
-        }
-
-        // Mark timeline as initialized
-        window.timelineManager.initialized.add(key);
-
-        if (DEBUG_MODE) {
-            console.log(`Loaded timeline metadata for ${key}:`, window.timelineManager.metadata[key]);
-            console.log('All available timelines in activities.json:', Object.keys(data));
-            console.log('Full timeline data:', data);
-            console.log('Initialized timelines:', Array.from(window.timelineManager.initialized));
-        }
-
-        return data.timeline[key].categories;
-    } catch (error) {
-        console.error('Error loading activities:', error);
-        throw error;
+    // Check if we have cached config
+    if (!window.activitiesConfigCache) {
+        // This should never happen if init succeeded
+        throw new Error('Activities configuration cache is empty. Application was not properly initialized.');
     }
+
+    const configData = window.activitiesConfigCache;
+
+    // Validate the timeline exists
+    if (!configData.timeline || !configData.timeline[key]) {
+        throw new Error(`Timeline "${key}" not found in activities config from backend`);
+    }
+
+    // Validate min_coverage
+    try {
+        validateMinCoverage(configData.timeline[key].min_coverage);
+    } catch (error) {
+        const errorMessage = `Timeline "${key}": ${error.message}`;
+        document.getElementById('activitiesContainer').innerHTML =
+            `<p style="color: red; padding: 10px; background: #ffebee; border: 1px solid #ef9a9a; border-radius: 4px;">
+                ${errorMessage}
+            </p>`;
+        throw new Error(errorMessage);
+    }
+
+    const timeline = configData.timeline[key];
+    if (!timeline || !timeline.categories) {
+        throw new Error(`Invalid timeline data for key: ${key} in backend config`);
+    }
+
+    // Mark timeline as initialized
+    window.timelineManager.initialized.add(key);
+
+    if (DEBUG_MODE) {
+        console.log(`Returning cached activities for ${key} with ${timeline.categories.length} categories`);
+    }
+
+    return timeline.categories;
 }
+
+
 
 // Create a child items modal for activity selection
 function createChildItemsModal() {
@@ -3165,7 +3161,6 @@ function getCurrentDayIndex() {
 }
 
 
-
 async function init() {
     console.log('==================== Initializing TUD frontend application... ====================');
     try {
@@ -3180,54 +3175,88 @@ async function init() {
         console.log(`Days: ${window.studyConfigManager.getStudyDaysCount()}`);
         console.log(`Source: ${currentStudy.source || 'file'}`);
 
-
         // Reinitialize timelineManager with an empty study object
         window.timelineManager = {
             metadata: {},
             activities: {},
             initialized: new Set(),
-            activeTimeline: null, // Will be set when first timeline is created
+            activeTimeline: null,
             keys: [],
             currentIndex: 0,
             study: {},
             general: {}
         };
 
-
         // Store study info in timelineManager for easy access
         window.timelineManager.studyConfig = currentStudy;
         window.timelineManager.studyDaysCount = window.studyConfigManager.getStudyDaysCount();
         window.timelineManager.dayLabels = currentStudy.day_labels;
 
-
         // Now sync URL parameters so they are stored in timelineManager.study
         syncURLParamsToStudy();
 
-        // (Rest of your initialization code...)
         checkAndRequestPID();
         preventPullToRefresh();
 
-        // Load initial timeline data from local frontend file first and do the rest of the setup.
-        // We will try to replace this with backend data later.
-        const response = await fetch('settings/activities.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const participantId = urlParams.get('pid');
+        const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
+        const dayIndex = getCurrentDayIndex();
+
+        // ===== FETCH ACTIVITIES CONFIG FROM BACKEND =====
+        let configData = null;
+
+        if (!participantId || !studyName) {
+            throw new Error('Missing participant ID or study name in URL parameters');
         }
-        const data = await response.json();
+
+        try {
+            // Fetch the activities configuration from backend
+            // This endpoint should return the full activities.json structure
+            // with proper language for this study
+            const configUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/activities-config?participant_id=${participantId}`;
+            console.log(`Fetching activities config from backend: ${configUrl}`);
+
+            const response = await fetch(configUrl, {
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Backend returned ${response.status} for activities config`);
+            }
+
+            configData = await response.json();
+            console.log('Successfully loaded activities config from backend');
+            document.title = configData.general.app_name || 'Time Use Diary';
+
+        } catch (error) {
+            console.error('Failed to load activities config from backend:', error);
+            document.title = 'Time Use Diary';
+            throw new Error(`Cannot load activities configuration: ${error.message}. The application requires backend configuration to run.`);
+        }
+
+        // ===== STORE THE CONFIG IN CACHE =====
+        window.activitiesConfigCache = configData;
 
         // Save global configuration
-        window.timelineManager.general = data.general;
+        window.timelineManager.general = configData.general;
 
         // Initialize i18n (internationalization) system
-        let language = data.general.language || 'en';
-        await i18n.init(language);
+        let language = configData.general.language || 'en';
 
-        // Apply translations to existing elements
+        // Override with study config language if available
+        if (currentStudy.default_language) {
+            language = currentStudy.default_language;
+        }
+
+        await i18n.init(language);
         i18n.applyTranslations();
 
-
-        // Handle instructions or redirection if needed.
-        const instructionsConfig = data.general?.instructions;
+        // Handle instructions or redirection if needed
+        const instructionsConfig = configData.general?.instructions;
 
         if (instructionsConfig && !new URLSearchParams(window.location.search).has('instructions')) {
             if (!window.location.pathname.includes('/instructions/')) {
@@ -3293,11 +3322,10 @@ async function init() {
             }
         }
 
-
         // Initialize timeline management structure with timeline keys
-        window.timelineManager.keys = Object.keys(data.timeline);
+        window.timelineManager.keys = Object.keys(configData.timeline);
         window.timelineManager.keys.forEach(timelineKey => {
-            window.timelineManager.metadata[timelineKey] = new Timeline(timelineKey, data.timeline[timelineKey]);
+            window.timelineManager.metadata[timelineKey] = new Timeline(timelineKey, configData.timeline[timelineKey]);
             window.timelineManager.activities[timelineKey] = [];
         });
 
@@ -3307,14 +3335,7 @@ async function init() {
             throw new Error('Timelines wrapper not found');
         }
 
-
-        // LOAD PRELOAD DATA HERE - after first timeline is created but before UI setup
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // Get participant and study info from URL parameters
-        const participantId = urlParams.get('pid');
-        const studyName = urlParams.get('study_name') || TUD_SETTINGS.STUDY_NAME;
-        const dayIndex = getCurrentDayIndex();
+        // Get max day index from study config
         const maxDayIndex = window.studyConfigManager.getStudyDaysCount() - 1;
 
         if (dayIndex > maxDayIndex) {
@@ -3325,67 +3346,13 @@ async function init() {
             console.log(`Current day index from URL: ${dayIndex}`);
         }
 
-        // FETCH STUDY CONFIG from backend, to get number of study days
-        let studyDaysCount = window.timelineManager.studyDaysCount; // default
-        try {
-            const studyConfigUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/study-config${participantId ? `?participant_id=${participantId}` : ''}`;
-            console.log(`Fetching study config for study ${studyName} from: ${studyConfigUrl}`);
-
-            const response = await fetch(studyConfigUrl, {
-                headers: {
-                    'Accept': 'application/json',
-                }
-            });
-
-            if (response.ok) {
-                const studyConfig = await response.json();
-                studyDaysCount = studyConfig.study_days_count || 1;
-                console.log(`Study has ${studyDaysCount} days`);
-
-                // Store in timelineManager for later use
-                window.timelineManager.studyConfig = studyConfig;
-                window.timelineManager.studyDaysCount = studyDaysCount;
-
-                // Also store day labels for reference
-                window.timelineManager.dayLabels = studyConfig.day_labels || [];
-
-                // Update current day label in URL if needed
-                if (dayIndex >= studyDaysCount) {
-                    console.warn(`Day index ${dayIndex} is out of range. Adjusting to last day (${studyDaysCount - 1})`);
-                    urlParams.set('day_label_index', studyDaysCount - 1);
-                    window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
-                }
-
-                // Set the language for i18n based on the default_langugage field in the study config
-                if (studyConfig.default_language) {
-                    language = studyConfig.default_language;
-                    await i18n.setLanguage(language);
-
-                    console.log(`Set language to ${language} based on server-side study config of study ${studyName}`);
-                }
-
-            } else {
-                console.warn(`Could not fetch study config, using default (1 day). Status: ${response.status}`);
-            }
-        } catch (error) {
-            console.warn('Error fetching study config, using default (1 day):', error.message);
-        }
-
-        // Store study days count globally
-        window.timelineManager.studyDaysCount = studyDaysCount;
-
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
-        await addNextTimeline(); // Only add first timeline initially, the others get added when user navigates, or when we load existing data.
+        await addNextTimeline(); // Only add first timeline initially
 
-        // Check if we have existing activities already loaded
-        const hasExistingActivities = Object.keys(window.timelineManager.activities).some(
-            key => window.timelineManager.activities[key].length > 0
-        );
-
-        // Load existing data if we have participant UID and study name
-        if (participantId && studyName && !hasExistingActivities) {
-            console.log(`Attempting to load existing data for participant ${participantId}, study ${studyName}, day index ${dayIndex}`);
+        // Load existing activities from backend if available
+        if (participantId && studyName) {
+            console.log(`Attempting to load existing activities for participant ${participantId}, study ${studyName}, day index ${dayIndex}`);
 
             try {
                 // Build the backend URL for fetching existing activities
@@ -3403,47 +3370,32 @@ async function init() {
                     const backendData = await response.json();
                     console.log('Successfully loaded existing activities from backend:', backendData);
 
-                    console.log('Backend activities response:', {
-                        dayIndex: dayIndex,
-                        hasActivities: backendData.activities?.length > 0,
-                        activitiesCount: backendData.activities?.length || 0,
-                        hasTemplate: backendData.has_template,
-                        templateCount: backendData.template_activities?.length || 0,
-                        templateSource: backendData.template_source_day_label
-                    });
-
-                    console.log('Raw backend response:', backendData);
-
                     // Transform the backend response to frontend format
                     const transformedData = transformBackendActivitiesResponse(backendData);
 
                     console.log('Transformed backend activities data:', transformedData);
 
-                    let loadedTimelineKeys = [];
                     let activitiesToLoad = null;
                     let isUsingTemplate = false;
 
                     // Load the data into the timeline
                     if (transformedData && transformedData.activities && transformedData.activities.length > 0) {
-                        // Find all unique timeline keys in loaded data
-                        console.log('Existing activities found in backend data, will load these. Extracting timeline keys from activities.');
+                        console.log('Existing activities found in backend data, will load these.');
                         activitiesToLoad = transformedData.activities;
                         isUsingTemplate = false;
+                    } else if (transformedData.template_activities && transformedData.template_activities.length > 0) {
+                        console.log('No existing activities found, but template activities are available. Will load template activities.');
+                        activitiesToLoad = transformedData.template_activities;
+                        isUsingTemplate = true;
 
-                    } else {
-                        // Use template activities if no existing activities, and template exists
-                        if (transformedData.template_activities && transformedData.template_activities.length > 0) {
-                            console.log('No existing activities found, but template activities are available. Will load template activities.');
-                            activitiesToLoad = transformedData.template_activities;
-                            isUsingTemplate = true;
-
-                        } else {
-                            console.log('No existing activities or template activities found in backend data, starting with empty timeline');
+                        // Show template banner if using template
+                        if (transformedData.template_source_day_label) {
+                            showTemplateBanner(transformedData.template_source_day_label);
                         }
                     }
 
                     if (activitiesToLoad && activitiesToLoad.length > 0) {
-                        loadedTimelineKeys = [...new Set(activitiesToLoad.map(a => a.timelineKey))];
+                        const loadedTimelineKeys = [...new Set(activitiesToLoad.map(a => a.timelineKey))];
 
                         // Create timelines for each loaded timeline
                         for (let i = 0; i < loadedTimelineKeys.length; i++) {
@@ -3462,7 +3414,7 @@ async function init() {
                                 });
                             } else {
                                 // For additional timelines, force create them
-                                console.log(`Forcing creation of timeline ${timelineKey} (${i + 1}/${loadedTimelineKeys.length})`);
+                                console.log(`Creating timeline ${timelineKey} (${i + 1}/${loadedTimelineKeys.length})`);
 
                                 // Temporarily set current index to create this timeline
                                 const originalIndex = window.timelineManager.currentIndex;
@@ -3496,7 +3448,6 @@ async function init() {
                         }
                     }
 
-
                 } else if (response.status === 404) {
                     // No existing data found - this is normal for first-time participants
                     console.log(`No existing data found for participant ${participantId}, study ${studyName}, day index ${dayIndex}. Starting fresh.`);
@@ -3505,17 +3456,16 @@ async function init() {
                 }
             } catch (error) {
                 console.warn('Error fetching existing activities from backend, continuing without preload:', error.message);
-
             }
         }
 
-        console.log(">>>>>> In init, about to init pastTimelineClickHandlers...");
+        console.log("Initializing past timeline click handlers...");
         initPastTimelineClickHandlers();
-
 
         console.log('Timeline structure after initialization:', {
             keys: window.timelineManager.keys,
             currentIndex: window.timelineManager.currentIndex,
+            configSource: 'backend',
             activities: Object.keys(window.timelineManager.activities).reduce((acc, key) => {
                 acc[key] = window.timelineManager.activities[key].length + ' activities';
                 return acc;
@@ -3569,9 +3519,9 @@ async function init() {
         scrollToActiveTimeline();
 
         initButtons();
-        initKeyboardShortcuts();  // enable delete on desktop via 'd' keypress
+        initKeyboardShortcuts();
         initInstructionBanner();
-        initMobileDelete(); // enable delete activity on mobile via long press
+        initMobileDelete();
 
         // Initialize header and footer heights early
         updateHeaderHeight();
@@ -3596,14 +3546,15 @@ async function init() {
         // Initialize debug overlay
         initDebugOverlay();
 
-
         if (DEBUG_MODE) {
             console.log('Initialized timeline structure:', window.timelineManager);
         }
     } catch (error) {
         console.error('Failed to initialize application:', error);
         document.getElementById('activitiesContainer').innerHTML =
-            '<p style="color: red;">Error loading activities. Please refresh the page to try again. Error: ' + error.message + '</p>';
+            '<p style="color: red; padding: 20px; background: #ffebee; border: 2px solid #ef9a9a; border-radius: 8px; margin: 20px;">' +
+            '<strong>Error loading activities configuration:</strong><br>' + error.message + '<br><br>' +
+            'The application requires a valid backend connection to load the appropriate activities for your study.</p>';
     }
 }
 
