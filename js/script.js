@@ -458,7 +458,7 @@ function createActivityBlock(activityData, isFromTemplate = false) {
         currentBlock.setAttribute('title', `${activityData.parentName}: ${activityData.activity}`);
     }
 
-    // Positioning logic (SAME AS EXISTING)
+    // Positioning logic
     const startPositionPercent = minutesToPercentage(activityData.startMinutes);
     const blockSize = ((activityData.endMinutes - activityData.startMinutes) / MINUTES_PER_DAY) * 100;
 
@@ -3207,7 +3207,8 @@ async function init() {
         checkAndRequestPID();
         preventPullToRefresh();
 
-        // Load initial timeline data and do the rest of the setup.
+        // Load initial timeline data from local frontend file first and do the rest of the setup.
+        // We will try to replace this with backend data later.
         const response = await fetch('settings/activities.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -3328,7 +3329,7 @@ async function init() {
         let studyDaysCount = window.timelineManager.studyDaysCount; // default
         try {
             const studyConfigUrl = `${TUD_SETTINGS.API_BASE_URL}/studies/${studyName}/study-config${participantId ? `?participant_id=${participantId}` : ''}`;
-            console.log(`Fetching study config from: ${studyConfigUrl}`);
+            console.log(`Fetching study config for study ${studyName} from: ${studyConfigUrl}`);
 
             const response = await fetch(studyConfigUrl, {
                 headers: {
@@ -3358,9 +3359,9 @@ async function init() {
                 // Set the language for i18n based on the default_langugage field in the study config
                 if (studyConfig.default_language) {
                     language = studyConfig.default_language;
-                    await i18n.init(language);
+                    await i18n.setLanguage(language);
+
                     console.log(`Set language to ${language} based on server-side study config of study ${studyName}`);
-                    i18n.applyTranslations();
                 }
 
             } else {
