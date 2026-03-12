@@ -115,15 +115,19 @@ function getStudyByShortName(nameShort) {
     return null;
 }
 
-// Initialize - load from file first, then try to sync with backend
+
+// Initialize - load from file first, then sync with backend
 async function initializeStudyConfig() {
     // First load from file
     await loadStudiesConfigFromFile();
 
-    // Then try to sync with backend (async, in background)
-    syncWithBackendConfig().catch(error => {
+    // Then sync with backend (wait for it to complete)
+    try {
+        await syncWithBackendConfig();
+        console.log('Backend sync completed in initializeStudyConfig');
+    } catch (error) {
         console.log('Background sync failed:', error.message);
-    });
+    }
 
     return CURRENT_STUDY_CACHE;
 }
