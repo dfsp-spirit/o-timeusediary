@@ -3462,6 +3462,7 @@ async function init() {
                                 }
                             }
                         }
+                        updateButtonStates();
                     }
 
                 } else if (response.status === 404) {
