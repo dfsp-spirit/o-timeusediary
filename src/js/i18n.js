@@ -8,6 +8,7 @@ class I18n {
         this.currentLanguage = 'en';
         this.translations = {};
         this.isLoaded = false;
+        this.loadPromise = null; // Track ongoing load operations
     }
 
     /**
@@ -16,26 +17,64 @@ class I18n {
      * @returns {Promise<void>}
      */
     async init(language = 'en') {
+        return this.setLanguage(language);
+    }
+
+    /**
+     * Change the current language
+     * @param {string} language - Language code (e.g., 'es', 'en', 'fr')
+     * @returns {Promise<void>}
+     */
+    async setLanguage(language) {
+        // Don't reload if it's the same language and already loaded
+        if (language === this.currentLanguage && this.isLoaded) {
+            console.log(`Language ${language} is already loaded`);
+            return;
+        }
+
+        // Cancel any ongoing load operation
+        if (this.loadPromise) {
+            // We can't actually cancel a fetch, but we can track the latest request
+            console.log('New language request, overriding previous load');
+        }
+
         this.currentLanguage = language;
-        
+
         try {
-            await this.loadTranslations(language);
+            // Store the promise to track completion
+            this.loadPromise = this.loadTranslations(language);
+            await this.loadPromise;
+
             this.updateHtmlLang(language);
             this.isLoaded = true;
-            console.log(`i18n initialized with language: ${language}`);
+            this.applyTranslations(); // Automatically update UI when language changes
+
+            console.log(`i18n language changed to: ${language}`);
+
+            // Dispatch a custom event for components that need to react to language changes
+            window.dispatchEvent(new CustomEvent('i18n:languageChanged', {
+                detail: { language, translations: this.translations }
+            }));
+
         } catch (error) {
-            console.error('Failed to initialize i18n:', error);
-            // Fallback to English if the requested language fails
+            console.error(`Failed to set language to ${language}:`, error);
+
+            // Fallback to English if the requested language fails and it's not already English
             if (language !== 'en') {
                 console.log('Falling back to English...');
-                await this.init('en');
+                return this.setLanguage('en');
             }
+
+            // If even English fails, throw the error
+            throw error;
+        } finally {
+            this.loadPromise = null;
         }
     }
 
     /**
      * Load translation file for the specified language
-     * @param {string} language - Language code
+     * @param {string} language - Language code, like 'en', 'sv', 'fr'
      * @returns {Promise<void>}
      */
     async loadTranslations(language) {
@@ -43,7 +82,7 @@ class I18n {
             // Determine the correct path based on current location
             const isInSubfolder = window.location.pathname.includes('/pages/');
             const localesPath = isInSubfolder ? '../locales' : './locales';
-            
+
             const response = await fetch(`${localesPath}/${language}.json`);
             if (!response.ok) {
                 throw new Error(`Failed to load ${language} translations: ${response.status}`);
@@ -110,15 +149,16 @@ class I18n {
 
     /**
      * Apply translations to elements with data-i18n attributes
+     * @param {HTMLElement} [container] - Optional container to scope the translation application
      */
-    applyTranslations() {
+    applyTranslations(container = document) {
         if (!this.isLoaded) {
             console.warn('i18n not loaded, cannot apply translations');
             return;
         }
 
         // Handle elements with data-i18n attribute for text content
-        const textElements = document.querySelectorAll('[data-i18n]');
+        const textElements = container.querySelectorAll('[data-i18n]');
         textElements.forEach(element => {
             const key = element.getAttribute('data-i18n');
             const translation = this.t(key);
@@ -128,7 +168,7 @@ class I18n {
         });
 
         // Handle elements with data-i18n-html attribute for innerHTML
-        const htmlElements = document.querySelectorAll('[data-i18n-html]');
+        const htmlElements = container.querySelectorAll('[data-i18n-html]');
         htmlElements.forEach(element => {
             const key = element.getAttribute('data-i18n-html');
             const translation = this.t(key);
@@ -138,7 +178,7 @@ class I18n {
         });
 
         // Handle elements with data-i18n-placeholder attribute for placeholders
-        const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+        const placeholderElements = container.querySelectorAll('[data-i18n-placeholder]');
         placeholderElements.forEach(element => {
             const key = element.getAttribute('data-i18n-placeholder');
             const translation = this.t(key);
@@ -147,8 +187,18 @@ class I18n {
             }
         });
 
+        // Handle elements with data-i18n-value attribute for input values
+        const valueElements = container.querySelectorAll('[data-i18n-value]');
+        valueElements.forEach(element => {
+            const key = element.getAttribute('data-i18n-value');
+            const translation = this.t(key);
+            if (translation !== key) {
+                element.value = translation;
+            }
+        });
+
         // Handle elements with data-i18n-title attribute for title/tooltip
-        const titleElements = document.querySelectorAll('[data-i18n-title]');
+        const titleElements = container.querySelectorAll('[data-i18n-title]');
         titleElements.forEach(element => {
             const key = element.getAttribute('data-i18n-title');
             const translation = this.t(key);
@@ -158,7 +208,7 @@ class I18n {
         });
 
         // Handle elements with data-i18n-aria-label attribute for aria-label
-        const ariaLabelElements = document.querySelectorAll('[data-i18n-aria-label]');
+        const ariaLabelElements = container.querySelectorAll('[data-i18n-aria-label]');
         ariaLabelElements.forEach(element => {
             const key = element.getAttribute('data-i18n-aria-label');
             const translation = this.t(key);
@@ -182,6 +232,17 @@ class I18n {
      */
     isReady() {
         return this.isLoaded;
+    }
+
+    /**
+     * Wait for i18n to be loaded
+     * @returns {Promise<void>}
+     */
+    async waitForReady() {
+        if (this.isLoaded) return;
+        if (this.loadPromise) {
+            await this.loadPromise;
+        }
     }
 }
 
