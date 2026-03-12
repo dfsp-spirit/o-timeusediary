@@ -765,6 +765,14 @@ async function addNextTimeline() {
         return;
     }
 
+    // Clear selected activity before switching timelines to prevent user from placing primary activity on secondary timeline
+    window.selectedActivity = null;
+    // Also remove visual selection from any activity buttons
+    document.querySelectorAll('.activity-button.selected').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    console.log('Cleared selected activity before switching timeline to next timeline');
+
     // Get the next timeline key before incrementing
     const nextTimelineIndex = window.timelineManager.currentIndex + 1;
     const nextTimelineKey = window.timelineManager.keys[nextTimelineIndex];
@@ -948,6 +956,14 @@ async function goToPreviousTimeline() {
         }
         return;
     }
+
+    // Clear selected activity before switching timelines to prevent user from placing primary activity on secondary timeline
+    window.selectedActivity = null;
+    // Also remove visual selection from any activity buttons
+    document.querySelectorAll('.activity-button.selected').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    console.log('Cleared selected activity before going to previous timeline');
 
     // Get the previous timeline key
     const previousTimelineIndex = window.timelineManager.currentIndex - 1;
