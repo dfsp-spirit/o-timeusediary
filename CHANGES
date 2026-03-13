@@ -1,6 +1,22 @@
 o-timeusediary MPIAE Changes
 ============================
 
+Version 0.7.1 -- Bug fixes
+--------------------------
+* FIX: update button state after loading template activities, so that users can go to next day right away if conditons are met.
+* FIX: clear selected activity when switching timelines, to prevent user from placing a primary activity on secondary timeline
+* FIX: await backend study config, so that stuff like number of study days is properly taken from there, not from frontend default config
+* NEW: ensure backend activities are not overwritten with frontend default file
+* WIP: allow resetting language later than at init time of page
+* NEW: update usage instruction reminder banner to mention DEL key instead of d for delete
+* WIP: use default_language from backend study data in frontend
+* NEW: work on frontend minimal dev script
+* CHG: rename dev script
+* NEW: automatically copy proper frontend config for minimal setup in minimal frontend dev script
+* NEW: add Swedish locale for frontend
+
+
+
 Version 0.7.0 -- Restructure repo
 ---------------------------------
 * Move all source files to new src/ sub directory
