@@ -15,3 +15,5 @@ If a user has already filled out some data for a day, the data they entered will
 The app is built in pure JavaScript, without any frontend framework or build tool. There is a settings file `src/settings/tud_settings.json` that defines app-wide settings, e.g., the backend URL. The entire frontend is in the `src` directory. The `dev_tools` directory contains some tools for development.
 
 The frontend supports both a mobile and a desktop view, and there are two different rendering paths for the two in the code: in desktop view, the timelines are rendered horizontally, and in mobile view, the timelines are rendered vertically. The app automatically detects whether the user is on a mobile or desktop device based on screen width and renders the appropriate view.
+
+Note that this repo was forked from another project, but the code on our branch (mpiae_adapt) has been heavily modified, and we do not intend to merge it back to the original repo or the main branch, it has diverged too much. So you should consider mpiae_adapt as the branch that is typically called main or master.
