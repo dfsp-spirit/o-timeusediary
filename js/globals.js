@@ -19,6 +19,18 @@ export function updateIsMobile() {
     
     if (breakpointChanged) {
         isReloading = true;
+        // Save timeline state before reloading so it can be restored afterwards
+        if (window.timelineManager) {
+            try {
+                const state = {
+                    activities: window.timelineManager.activities,
+                    currentIndex: window.timelineManager.currentIndex
+                };
+                sessionStorage.setItem('timelineManagerState', JSON.stringify(state));
+            } catch (e) {
+                console.warn('Could not save timeline state to sessionStorage:', e);
+            }
+        }
         window.location.reload();
         return false; // Won't actually reach this point due to reload
     }

@@ -2150,6 +2150,145 @@ function initTimelineInteraction(timeline) {
     });
 }
 
+/**
+ * Converts a stored full datetime string ("YYYY-MM-DD HH:MM") back to absolute
+ * timeline minutes (240 = 04:00, up to 1680 = 04:00 next day).
+ */
+function getAbsoluteMinutes(fullDatetime) {
+    if (!fullDatetime) return 0;
+    const parts = fullDatetime.split(' ');
+    if (parts.length < 2) return 0;
+
+    const dateStr = parts[0];
+    const timeStr = parts[1];
+
+    const [h, m] = timeStr.split(':').map(Number);
+    let timeMinutes = h * 60 + m;
+
+    // Determine whether this date falls on "today" vs "yesterday".
+    // formatTimeDDMMYYYYHHMM stores times 00:00–03:59 on "today" and the
+    // rest on "yesterday".  Times on "today" are the next-day portion of the
+    // timeline, so we add 1440 to get absolute minutes above midnight.
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const storedDate = new Date(year, month - 1, day); // local midnight
+
+    if (storedDate >= todayMidnight) {
+        timeMinutes += 1440;
+    }
+
+    return timeMinutes;
+}
+
+/**
+ * Re-creates the visual activity blocks on the active timeline from saved
+ * activity data.  Called after a page reload triggered by a breakpoint change.
+ */
+function renderSavedActivityBlocks(timelineKey) {
+    const activities = window.timelineManager.activities[timelineKey] || [];
+    if (activities.length === 0) return;
+
+    const timeline = window.timelineManager.activeTimeline;
+    if (!timeline || timeline.id !== timelineKey) return;
+
+    const activitiesContainer = timeline.querySelector('.activities');
+    if (!activitiesContainer) return;
+
+    const isMobile = getIsMobile();
+    const MOBILE_BLOCK_WIDTH = 75;
+    const MOBILE_OFFSET = 25;
+
+    activities.forEach(activityData => {
+        const startMinutes = getAbsoluteMinutes(activityData.startTime);
+        const endMinutes = startMinutes + activityData.blockLength;
+
+        const formattedStartTime = formatTimeHHMM(startMinutes, false);
+        const formattedEndTime = formatTimeHHMM(endMinutes, true);
+
+        const block = document.createElement('div');
+        block.className = 'activity-block';
+        block.dataset.timelineKey = timelineKey;
+        block.dataset.id = activityData.id;
+        block.dataset.start = formattedStartTime;
+        block.dataset.end = formattedEndTime;
+        block.dataset.length = activityData.blockLength;
+        block.dataset.category = activityData.category;
+        block.dataset.count = activityData.count || 1;
+        block.dataset.mode = (activityData.count > 1) ? 'multiple-choice' : 'single-choice';
+        block.dataset.startMinutes = startMinutes;
+        block.dataset.endMinutes = endMinutes;
+
+        if (activityData.parentName && activityData.parentName !== activityData.activity) {
+            block.dataset.parentName = activityData.parentName;
+        }
+
+        block.style.backgroundColor = activityData.color || '#808080';
+
+        // Text content
+        const textDiv = document.createElement('div');
+        const length = activityData.blockLength;
+        const baseClass = length >= 60 ? 'activity-block-text-narrow wide resized' : 'activity-block-text-narrow';
+        textDiv.className = isMobile ? baseClass : (length >= 60 ? baseClass : 'activity-block-text-vertical');
+        textDiv.style.maxWidth = '90%';
+        textDiv.style.overflow = 'hidden';
+        textDiv.style.textOverflow = 'ellipsis';
+        textDiv.style.whiteSpace = 'nowrap';
+
+        if (activityData.count > 1) {
+            // Multiple-choice: split stored pipe-separated names onto separate lines
+            // Use DOM manipulation instead of innerHTML to avoid XSS.
+            activityData.activity.split(' | ').forEach((name, idx) => {
+                if (idx > 0) textDiv.appendChild(document.createElement('br'));
+                textDiv.appendChild(document.createTextNode(name.trim()));
+            });
+        } else if (activityData.parentName && activityData.parentName !== activityData.activity) {
+            textDiv.textContent = activityData.parentName;
+            block.setAttribute('title', `${activityData.parentName}: ${activityData.activity}`);
+        } else {
+            textDiv.textContent = activityData.activity;
+        }
+        block.appendChild(textDiv);
+
+        // Positioning
+        const startPositionPercent = minutesToPercentage(startMinutes);
+        const blockSizePercent = (activityData.blockLength / 1440) * 100;
+
+        if (isMobile) {
+            block.style.height = `${blockSizePercent}%`;
+            block.style.top = `${startPositionPercent}%`;
+            block.style.width = `${MOBILE_BLOCK_WIDTH}%`;
+            block.style.left = `${MOBILE_OFFSET}%`;
+            block.dataset.originalStart = formattedStartTime;
+            block.dataset.originalEnd = formattedEndTime;
+            block.dataset.originalLength = activityData.blockLength;
+            block.dataset.originalHeight = `${blockSizePercent}%`;
+            block.dataset.originalWidth = `${MOBILE_BLOCK_WIDTH}%`;
+            block.dataset.originalTop = `${startPositionPercent}%`;
+            block.dataset.originalLeft = `${MOBILE_OFFSET}%`;
+        } else {
+            block.style.width = `${blockSizePercent}%`;
+            block.style.left = `${startPositionPercent}%`;
+            block.style.height = '75%';
+            block.style.top = '25%';
+            block.dataset.originalStart = formattedStartTime;
+            block.dataset.originalEnd = formattedEndTime;
+            block.dataset.originalLength = activityData.blockLength;
+            block.dataset.originalHeight = '75%';
+            block.dataset.originalWidth = `${blockSizePercent}%`;
+            block.dataset.originalLeft = `${startPositionPercent}%`;
+            block.dataset.originalTop = '25%';
+        }
+
+        activitiesContainer.appendChild(block);
+
+        // Add time label
+        const timeLabel = createTimeLabel(block);
+        updateTimeLabel(timeLabel, formattedStartTime, formattedEndTime, block);
+    });
+}
+
 async function init() {
     try {
         // Reinitialize timelineManager with an empty study object
@@ -2216,6 +2355,40 @@ async function init() {
             window.timelineManager.activities[timelineKey] = [];
         });
 
+        // Restore saved activity data from a previous session (e.g. after a
+        // breakpoint-triggered reload).
+        //
+        // NOTE: script.js may be executed twice in the same page load because
+        // index.html loads it as "script.js?v=1.1" while ui.js imports it as
+        // "./script.js".  The browser treats these as different module URLs and
+        // runs the module code (including init()) once for each URL.  To survive
+        // this, we read the saved state early but do NOT remove it until the
+        // very end of init(), so both executions can restore from the same
+        // snapshot.
+        let savedStateStr = null;
+        let savedCurrentIndex = 0;
+        try {
+            savedStateStr = sessionStorage.getItem('timelineManagerState');
+            if (savedStateStr) {
+                const savedState = JSON.parse(savedStateStr);
+                if (savedState && savedState.activities) {
+                    Object.keys(savedState.activities).forEach(key => {
+                        if (window.timelineManager.activities[key] !== undefined) {
+                            window.timelineManager.activities[key] = savedState.activities[key];
+                        }
+                    });
+                }
+                if (typeof savedState.currentIndex === 'number' && savedState.currentIndex >= 0) {
+                    savedCurrentIndex = Math.min(
+                        savedState.currentIndex,
+                        window.timelineManager.keys.length - 1
+                    );
+                }
+            }
+        } catch (e) {
+            console.warn('Could not restore timeline state from sessionStorage:', e);
+        }
+
         // Create timelines wrapper if it doesn't exist
         const timelinesWrapper = document.querySelector('.timelines-wrapper');
         if (!timelinesWrapper) {
@@ -2225,6 +2398,21 @@ async function init() {
         // Initialize first timeline using addNextTimeline
         window.timelineManager.currentIndex = -1; // Start at -1 so first addNextTimeline() sets to 0
         await addNextTimeline();
+        renderSavedActivityBlocks(window.timelineManager.keys[0]);
+
+        // Navigate forward to restore the previously active timeline
+        for (let i = 1; i <= savedCurrentIndex; i++) {
+            await addNextTimeline();
+            renderSavedActivityBlocks(window.timelineManager.keys[i]);
+        }
+
+        // Clear the persisted state now that restoration is complete.
+        // Doing this at the end (rather than at the top) ensures that both
+        // init() executions (caused by the module-URL mismatch described above)
+        // can each read and apply the saved snapshot before it is discarded.
+        if (savedStateStr) {
+            sessionStorage.removeItem('timelineManagerState');
+        }
         
         // Update gradient bar layout
         updateGradientBarLayout();
