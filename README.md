@@ -4,6 +4,8 @@ A web-based tool for collecting and visualizing daily activities in a timeline f
 
 ## Note on this forked version
 
+THIS REPO IS ARCHIVED, AND SHOULD NOT BE USED ANYMORE. WE MOVED THE FRONTEND CODE TO THE /frontend/ SUB DIR OF OUR BACKEND REPO.
+
 This fork is an adaptation of the tool to our needs at MPIAE/Karolinska, see branch 'mpiae_adapt'.
 
 We adapted many things to support a custom backend running on our own servers, mainly fetching everything the frontend uses via a RESTful API from the backend, and sending data there. We took care to still keep the frontend functional (for testing purposes) if there is no backend server. It will use a default study configuration that comes with the frontend then.
