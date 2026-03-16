@@ -6,6 +6,8 @@ A web-based tool for collecting and visualizing daily activities in a timeline f
 
 This fork is an adaptation of the tool to our needs at MPIAE/Karolinska, see branch 'mpiae_adapt'.
 
+THIS REPO IS ARCHIVED, AND SHOULD NOT BE USED ANYMORE. WE MOVED THE FRONTEND CODE TO THE /frontend/ SUB DIR OF OUR BACKEND REPO.
+
 ## 🚀 Quick Start
 
 - **[Live Demo](https://dfsp-spirit.github.io/o-timeusediary/index.html)** - Try the application
